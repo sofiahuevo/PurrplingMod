@@ -16,6 +16,7 @@ namespace PurrplingMod
         public Point abbyLastPositionTile;
         public Point targetPositionTile;
         public int standingTimeout = 100;
+        public FollowController followController;
 
         /*********
         ** Public methods
@@ -24,6 +25,8 @@ namespace PurrplingMod
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            this.followController = new FollowController();
+
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Player.Warped += this.Player_Warped;
             helper.Events.GameLoop.DayStarted += this.GameLoop_DayStarted;
@@ -45,38 +48,7 @@ namespace PurrplingMod
             if (player.currentLocation is MineShaft)
                 return;
 
-            Point f = player.getTileLocationPoint();
-            Point c = abigail.getTileLocationPoint();
-            Point fc = player.GetBoundingBox().Center;
-            Point cc = abigail.GetBoundingBox().Center;
-
-            
-
-            if (this.isFar(f, c, 7))
-                abigail.speed = (int)player.getMovementSpeed();
-
-            if (!abigail.isMoving())
-                if (!this.isFar(f, c, 3))
-                    return;
-                else
-                {
-                    if (this.standingTimeout <= 0)
-                    {
-                        abigail.Halt();
-                        abigail.addedSpeed = 2;
-                        this.comeTo(abigail, f);
-                        this.standingTimeout = 100;
-                    }
-                    else
-                        this.standingTimeout--;
-                }
-            else
-                standingTimeout = 100;
-
-            if (!this.isFar(fc, cc, 64))
-                abigail.Halt();
-            else if (abigail.controller == null)
-                this.follow(abigail, f);
+            this.followController.Update(Game1.currentGameTime);
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
@@ -84,6 +56,7 @@ namespace PurrplingMod
             GameLocation location = Game1.player.currentLocation;
             Farmer player = Game1.player;
             this.myLastLocationTile = player.getTileLocationPoint();
+            this.followController.leader = player;
             this.spawnAbigailHere(location, player.getTileLocationPoint());
         }
 
@@ -101,6 +74,7 @@ namespace PurrplingMod
                 abigail.setTilePosition(locationTilePoint);
                 abigail.setNewDialogue("Meow");
                 this.abbyLastPositionTile = abigail.getTileLocationPoint();
+                this.followController.follower = abigail;
             }
         }
 
@@ -242,6 +216,7 @@ namespace PurrplingMod
             if (e.NewLocation is MineShaft)
                 return;
 
+            //this.followController.leader = e.Player;
             this.spawnAbigailHere(e.NewLocation, e.Player.getTileLocationPoint());
         }
 
