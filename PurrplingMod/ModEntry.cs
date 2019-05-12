@@ -39,16 +39,8 @@ namespace PurrplingMod
             if (!Context.IsWorldReady)
                 return;
 
-            NPC abigail = Game1.getCharacterFromName("Abigail");
-            Farmer player = Game1.player;
-
-            if (abigail == null || player == null)
-                return;
-
-            if (player.currentLocation is MineShaft)
-                return;
-
             this.followController.Update(Game1.currentGameTime);
+            this.Monitor.Log($"Followed path nodes: {this.followController.pathToFollow.Count} Followed point: {this.followController.currentFollowedPoint} Last Check: {this.followController.leaderLastTileCheckPoint} Leader: {this.followController.leader.getTileLocationPoint()} Follower: {this.followController.follower.getTileLocationPoint()}");
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)

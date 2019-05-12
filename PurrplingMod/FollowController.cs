@@ -17,17 +17,23 @@ namespace PurrplingMod
         public int followingLostTime = 0;
         public Stack<Point> pathToFollow;
         public Point currentFollowedPoint;
+        public Point leaderLastTileCheckPoint;
+
+        public FollowController()
+        {
+            this.pathToFollow = new Stack<Point>();
+        }
 
         public void Update(GameTime time)
         {
             if (this.follower == null || this.leader == null)
                 return;
 
-            if (this.leader.currentLocation is MineShaft)
-                return;
-
             if (this.leader.currentLocation != this.follower.currentLocation || this.FollowerLeaderIsTooFar())
+            {
                 FollowController.WarpTo(this.follower, this.leader.currentLocation, this.leader.getTileLocationPoint());
+                this.currentFollowedPoint = this.leaderLastTileCheckPoint = this.leader.getTileLocationPoint();
+            }
 
             this.UpdateFollowing(time, this.follower, this.leader);
         }
@@ -49,35 +55,64 @@ namespace PurrplingMod
                 if (Helper.Distance(leaderTilePoint, followerTilePoint) < 3)
                     return;
                 if (this.followingLostTime++ >= FollowController.FOLLOWING_LOST_TIMEOUT)
+                {
                     this.ResolveLostFollow();
+                    return;
+                }
             }
 
-            if (Helper.Distance(leaderBoxCenter, followerBoxCenter) < 64)
+            if (leaderTilePoint.X != this.leaderLastTileCheckPoint.X && leaderTilePoint.Y != this.leaderLastTileCheckPoint.Y)
+            {
+                this.AddPathPoint(leaderTilePoint);
+                this.leaderLastTileCheckPoint = leaderTilePoint;
+            }
+
+            if (Helper.Distance(leaderBoxCenter, followerBoxCenter) < 80)
+            {
                 follower.Halt();
-            else if (follower.controller == null)
-                FollowController.FollowTile(follower, leaderTilePoint, time);
+                this.pathToFollow.Clear();
+                this.currentFollowedPoint = leaderTilePoint;
+                return;
+            }
+
+            if (this.pathToFollow.Count > 5 && Helper.Distance(leaderTilePoint, followerTilePoint) > 7)
+            {
+                this.ResolveLostFollow();
+                return;
+            }
+
+            if (follower.controller == null)
+                this.FollowPath(time);
         }
 
-        protected void ResolveLostFollow()
+        private void ResolveLostFollow()
         {
             Point endTilePoint = this.leader.getTileLocationPoint();
 
             this.follower.Halt();
             this.follower.addedSpeed = 2;
+            this.pathToFollow.Clear();
+            this.currentFollowedPoint = endTilePoint;
             if (!FollowController.ComeTo(this.follower, endTilePoint))
                 FollowController.WarpTo(this.follower, endTilePoint);
             this.followingLostTime = 0;
         }
 
-        protected void FollowPath()
+        private void FollowPath(GameTime time)
         {
-            Point endTilePoint = this.leader.getTileLocationPoint();
+            if (this.pathToFollow.Count == 0)
+                this.currentFollowedPoint = this.leader.getTileLocationPoint();
+            else if (this.currentFollowedPoint == this.follower.getTileLocationPoint())
+                this.currentFollowedPoint = this.pathToFollow.Pop();
 
-            if (this.pathToFollow == null)
-            {
-                this.pathToFollow = new Stack<Point>();
-                this.pathToFollow.Push(endTilePoint);
-            }
+            FollowController.FollowTile(this.follower, this.currentFollowedPoint, time);
+        }
+
+        private void AddPathPoint(Point p)
+        {
+            if (this.pathToFollow.Count == 0)
+                this.currentFollowedPoint = p;
+            this.pathToFollow.Push(p);
         }
 
         private bool FollowerLeaderIsTooFar()
