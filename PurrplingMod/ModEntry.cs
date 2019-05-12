@@ -15,6 +15,7 @@ namespace PurrplingMod
         public Point myLastLocationTile;
         public Point abbyLastPositionTile;
         public Point targetPositionTile;
+        public int standingTimeout = 100;
 
         /*********
         ** Public methods
@@ -44,44 +45,38 @@ namespace PurrplingMod
             if (player.currentLocation is MineShaft)
                 return;
 
-            bool playerIsFar = this.isFar(player.currentLocation, abigail.currentLocation, player.getTileLocationPoint(), abigail.getTileLocationPoint());
-            bool targetIsFar = this.isFar(player.currentLocation, abigail.currentLocation, player.getTileLocationPoint(), this.targetPositionTile);
+            Point f = player.getTileLocationPoint();
+            Point c = abigail.getTileLocationPoint();
+            Point fc = player.GetBoundingBox().Center;
+            Point cc = abigail.GetBoundingBox().Center;
 
-            if (abigail.controller == null && (playerIsFar || targetIsFar))
-                // No planned path and player or target is far => find new path and got it
-                this.comeToMe(player.currentLocation, player, abigail);
+            
 
-            if (player.getTileLocationPoint() != this.myLastLocationTile || targetIsFar)
-            {
-                if (targetIsFar)
-                    this.comeToMe(player.currentLocation, player, abigail); // Player position changed, change target
-                this.haltWhenPlayerIsNear(abigail, player.currentLocation, abigail.currentLocation, player.getTileLocationPoint(), abigail.getTileLocationPoint());
-                //this.Monitor.Log($"Current position tile: {player.getTileLocationPoint()} Last: {this.myLastLocationTile} Face: {player.getFacingDirection()} Location: {player.currentLocation.Name}");
-                this.myLastLocationTile = player.getTileLocationPoint();
-            }
+            if (this.isFar(f, c, 7))
+                abigail.speed = (int)player.getMovementSpeed();
 
-            if (abigail.currentLocation != player.currentLocation)
-                // Player and Abby game location is mismatch => warp Abby to player
-                this.spawnAbigailHere(player.currentLocation, player.getTileLocationPoint());
+            if (!abigail.isMoving())
+                if (!this.isFar(f, c, 3))
+                    return;
+                else
+                {
+                    if (this.standingTimeout <= 0)
+                    {
+                        abigail.Halt();
+                        abigail.addedSpeed = 2;
+                        this.comeTo(abigail, f);
+                        this.standingTimeout = 100;
+                    }
+                    else
+                        this.standingTimeout--;
+                }
+            else
+                standingTimeout = 100;
 
-            if (abigail.getTileLocationPoint() != this.abbyLastPositionTile)
-            {
-                this.Monitor.Log($"Abby position: {abigail.getTileLocationPoint()} Location: {abigail.currentLocation.Name}");
-                this.abbyLastPositionTile = abigail.getTileLocationPoint();
-            }
-
-            Point abbyPos = abigail.getTileLocationPoint();
-            Point playerPos = player.getTileLocationPoint();
-            float distance = Utility.distance(abbyPos.X, playerPos.X, abbyPos.Y, playerPos.Y);
-
-            if (distance > 7)
-                abigail.Speed = abigail.speed = 4;
-            else if (distance > 14)
-                abigail.Speed = abigail.speed = 8;
-            else if (distance > 20)
-                abigail.Speed = abigail.speed = 12;
-            else if (distance > 28)
-                abigail.setTilePosition(player.getTileLocationPoint());
+            if (!this.isFar(fc, cc, 64))
+                abigail.Halt();
+            else if (abigail.controller == null)
+                this.follow(abigail, f);
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
@@ -125,12 +120,9 @@ namespace PurrplingMod
             return points;
         }
 
-        private bool isFar(GameLocation playerGameLocation, GameLocation npcGameLocation, Point playerLocationTile, Point npcLocationTile, float distance = 3)
+        private bool isFar(Point p1, Point p2, float distanceThreshold)
         {
-            if (playerGameLocation != npcGameLocation)
-                return true;
-
-            return Utility.distance(playerLocationTile.X, npcLocationTile.X, playerLocationTile.Y, npcLocationTile.Y) > distance;
+            return Utility.distance(p1.X, p2.X, p1.Y, p2.Y) > distanceThreshold;
         }
 
         private List<Tuple<Point, float>> getNearPointsWithDistance(List<Point> nearPoints, Point startTilePoint)
@@ -191,30 +183,37 @@ namespace PurrplingMod
             return null;
         }
 
-        private void haltWhenPlayerIsNear(NPC n, GameLocation playerGameLocation, GameLocation npcGameLocation, Point playerTilePosition, Point npcTilePosition)
+        private void follow(NPC npc, Point endPointTile)
         {
-            if (n.controller == null)
-                return;
-            if (n.controller.pathToEndPoint == null || this.isFar(playerGameLocation, npcGameLocation, playerTilePosition, npcTilePosition))
-                return;
+            Point startPointTile = npc.getTileLocationPoint();
 
-            n.controller = null;
-            n.Halt();
-            this.Monitor.Log("Is near to player, halt");
+            bool left = endPointTile.X < startPointTile.X;
+            bool right = endPointTile.X > startPointTile.X;
+            bool up = endPointTile.Y < startPointTile.Y;
+            bool down = endPointTile.Y > startPointTile.Y;
+
+            if (left)
+                npc.SetMovingOnlyLeft();
+            if (right)
+                npc.SetMovingOnlyRight();
+            if (up)
+                npc.SetMovingOnlyUp();
+            if (down)
+                npc.SetMovingOnlyDown();
+
+            npc.willDestroyObjectsUnderfoot = false;
+            npc.MovePosition(Game1.currentGameTime, Game1.viewport, npc.currentLocation);
+            this.Monitor.Log($"left {left}; right: {right}; up: {up}; down: {down}; moving: {npc.isMoving()} destroy: {npc.willDestroyObjectsUnderfoot} timeout: {this.standingTimeout}");
         }
 
-        private void comeToMe(GameLocation location, Farmer player, NPC n)
+        private void comeTo(NPC n, Point endPointTile)
         {
-            Point playerTilePosition = player.getTileLocationPoint();
             Point npcTilePosition = n.getTileLocationPoint();
             Stack<Point> nearPoints;
 
-            if (!this.isFar(player.currentLocation, n.currentLocation, playerTilePosition, npcTilePosition))
-                return;
-
             nearPoints = new Stack<Point>(
                 this.sortPointsByNearest(
-                    this.getNearPoints(player.getTileLocationPoint(), 1), 
+                    this.getNearPoints(endPointTile, 1), 
                     npcTilePosition
                 )
             );
@@ -224,30 +223,18 @@ namespace PurrplingMod
                 Point target = nearPoints.Pop();
                 n.temporaryController = null;
                 n.Halt();
-                n.controller = new PathFindController(n, location, target, 0);
+                n.controller = new PathFindController(n, n.currentLocation, target, 0);
                 if (n.controller.pathToEndPoint == null)
                 {
-                    n.controller.pathToEndPoint = this.FindPath(npcTilePosition, nearPoints, location, n);
+                    n.controller.pathToEndPoint = this.FindPath(npcTilePosition, nearPoints, n.currentLocation, n);
                 } else
                 {
                     this.targetPositionTile = target;
                 }
-            } else
-            {
-                n.Halt();
-                n.controller.pathToEndPoint = this.FindPath(npcTilePosition, nearPoints, location, n);
-                this.Monitor.Log("Target missmatch, path reconstructed!");
             }
 
-            /*if (player.isMoving())
-            {
-                this.Monitor.Log("Halt and try to refind path");
-                n.Halt();
-                n.controller.pathToEndPoint = this.FindPath(npcTilePosition, nearPoints, location, n);   
-            }*/
-            n.Speed = n.speed = 2;
             int nodesCount = n.controller.pathToEndPoint != null ? n.controller.pathToEndPoint.Count : 0;
-            this.Monitor.Log($"Target: {this.targetPositionTile} Player: {playerTilePosition} NPCT: {npcTilePosition} Path: {nodesCount}");
+            this.Monitor.Log($"Target: {this.targetPositionTile} NPCT: {npcTilePosition} Path: {nodesCount}");
         }
 
         private void Player_Warped(object sender, WarpedEventArgs e)
