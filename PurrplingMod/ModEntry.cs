@@ -40,7 +40,6 @@ namespace PurrplingMod
                 return;
 
             this.followController.Update(Game1.currentGameTime);
-            this.Monitor.Log($"Followed path nodes: {this.followController.pathToFollow.Count} Followed point: {this.followController.currentFollowedPoint} Last Check: {this.followController.leaderLastTileCheckPoint} Leader: {this.followController.leader.getTileLocationPoint()} Follower: {this.followController.follower.getTileLocationPoint()}");
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
