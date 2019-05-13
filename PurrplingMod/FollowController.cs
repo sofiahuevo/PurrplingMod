@@ -11,23 +11,23 @@ namespace PurrplingMod
 {
     public class FollowController
     {
-        public const int FOLLOWING_LOST_TIMEOUT = 10;
-        public const float MATCH_LEADER_SPEED_DISTANCE = 7;
+        public const int FOLLOWING_LOST_TIMEOUT = 50;
+        public const float SPEEDUP_DISTANCE_THRESHOLD = 7;
         public const float MOVE_THRESHOLD_DISTANCE = 3;
         public const float PROXIMITY_THRESHOLD = 80;
-        public const float LOST_DISTANCE = 14;
+        public const float LOST_DISTANCE = 16;
         public const float OUT_OF_RANGE_DISTANCE = 64;
-        public const int PATH_MAX_NODE_COUNT = 4;
+        public const int PATH_MAX_NODE_COUNT = 28;
         public Character leader;
         public NPC follower;
         public int followingLostTime = 0;
-        public Stack<Point> pathToFollow;
+        public Queue<Point> pathToFollow;
         public Point currentFollowedPoint;
         public Point leaderLastTileCheckPoint;
 
         public FollowController()
         {
-            this.pathToFollow = new Stack<Point>();
+            this.pathToFollow = new Queue<Point>();
         }
 
         public void Update(GameTime time)
@@ -53,8 +53,11 @@ namespace PurrplingMod
             Point leaderBoxCenter = leader.GetBoundingBox().Center;
             Point followerBoxCenter = follower.GetBoundingBox().Center;
 
-            if (Helper.Distance(leaderTilePoint, followerTilePoint) > MATCH_LEADER_SPEED_DISTANCE)
+            if (this.follower.speed != this.leader.speed)
                 this.follower.speed = this.leader.speed;
+
+            if (Helper.Distance(leaderTilePoint, followerTilePoint) > SPEEDUP_DISTANCE_THRESHOLD)
+                this.follower.addedSpeed = 2;
 
             if (follower.isMoving())
                 this.followingLostTime = 0; // Follower move? Reset standing time
@@ -62,6 +65,7 @@ namespace PurrplingMod
             {
                 if (Helper.Distance(leaderTilePoint, followerTilePoint) < MOVE_THRESHOLD_DISTANCE)
                     return;
+
                 if (this.followingLostTime++ >= FOLLOWING_LOST_TIMEOUT)
                 {
                     this.ResolveLostFollow();
@@ -69,7 +73,7 @@ namespace PurrplingMod
                 }
             }
 
-            if (leaderTilePoint.X != this.leaderLastTileCheckPoint.X && leaderTilePoint.Y != this.leaderLastTileCheckPoint.Y)
+            if (leaderTilePoint != this.leaderLastTileCheckPoint)
             {
                 this.AddPathPoint(leaderTilePoint);
             }
@@ -84,7 +88,7 @@ namespace PurrplingMod
 
             if (this.pathToFollow.Count > PATH_MAX_NODE_COUNT || Helper.Distance(leaderTilePoint, followerTilePoint) > LOST_DISTANCE)
             {
-                this.ResolveLostFollow();
+                this.ResolveLostFollow(true);
                 return;
             }
 
@@ -92,14 +96,14 @@ namespace PurrplingMod
                 this.FollowPath(time);
         }
 
-        private void ResolveLostFollow()
+        private void ResolveLostFollow(bool emoteWhenPathIsFound = false)
         {
             Point endTilePoint = this.leader.getTileLocationPoint();
 
-            this.follower.addedSpeed = 2;
+            this.follower.addedSpeed = 4;
             this.pathToFollow.Clear();
             this.currentFollowedPoint = endTilePoint;
-            if (!FollowController.ComeTo(this.follower, endTilePoint))
+            if (!FollowController.ComeTo(this.follower, endTilePoint, emoteWhenPathIsFound))
                 FollowController.WarpTo(this.follower, endTilePoint);
             this.followingLostTime = 0;
         }
@@ -112,7 +116,7 @@ namespace PurrplingMod
                 return;
             }
             else if (this.currentFollowedPoint == this.follower.getTileLocationPoint())
-                this.currentFollowedPoint = this.pathToFollow.Pop();
+                this.currentFollowedPoint = this.pathToFollow.Dequeue();
 
             FollowController.FollowTile(this.follower, this.currentFollowedPoint, time);
         }
@@ -121,7 +125,7 @@ namespace PurrplingMod
         {
             if (this.pathToFollow.Count == 0)
                 this.currentFollowedPoint = p;
-            this.pathToFollow.Push(p);
+            this.pathToFollow.Enqueue(p);
             this.leaderLastTileCheckPoint = p;
         }
 
@@ -147,30 +151,32 @@ namespace PurrplingMod
             follower.MovePosition(time, Game1.viewport, follower.currentLocation);
         }
 
-        public static bool ComeTo(NPC follower, Point endPointTile)
+        public static bool ComeTo(NPC follower, Point endPointTile, bool emoteWhenPathIsFound = false)
         {
             Point npcTilePosition = follower.getTileLocationPoint();
-            Stack<Point> nearPoints;
-
-            nearPoints = new Stack<Point>(
-                Helper.SortPointsByNearest(
-                    Helper.NearPoints(endPointTile, 1), npcTilePosition
-                )
-            );
+            bool pathFound = false;
 
             if (follower.controller == null)
             {
                 follower.Halt();
                 follower.temporaryController = null;
+                follower.willDestroyObjectsUnderfoot = false;
 
-                Stack<Point> path = FollowController.FindFirstPath(npcTilePosition, nearPoints, follower.currentLocation, follower);
+                Stack<Point> path = FollowController.FindPath(npcTilePosition, endPointTile, follower.currentLocation, follower);
                 follower.controller = new PathFindController(path, follower, follower.currentLocation);
 
                 if (follower.controller.pathToEndPoint == null)
-                    return false;
+                    follower.doEmote(8);
+                else
+                {
+                    if (emoteWhenPathIsFound)
+                        follower.doEmote(40);
+                    pathFound = true;
+                }
             }
 
-            return true;
+            follower.updateEmote(Game1.currentGameTime);
+            return pathFound;
         }
 
         public static void WarpTo(NPC follower, Point tilePosition)
@@ -194,10 +200,15 @@ namespace PurrplingMod
             location.addCharacter(follower);
         }
 
-        public static Stack<Point> FindFirstPath(Point startTilePoint, Stack<Point> nearPointsStack, GameLocation location, NPC n, int limit = 100)
+        public static Stack<Point> FindPath(Point startTilePoint, Point endPointTile, GameLocation location, NPC n, int limit = 100)
         {
             Stack<Point> path;
             PathFindController.isAtEnd endFunction = new PathFindController.isAtEnd(PathFindController.isAtEndPoint);
+            Stack<Point> nearPointsStack = new Stack<Point>(
+                Helper.SortPointsByNearest(
+                    Helper.NearPoints(endPointTile, 1), startTilePoint
+                )
+            );
 
             while (nearPointsStack.Count > 0)
             {
