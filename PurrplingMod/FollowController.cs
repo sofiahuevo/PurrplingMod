@@ -180,11 +180,11 @@ namespace PurrplingMod
                 follower.controller = new PathFindController(path, follower, follower.currentLocation);
 
                 if (follower.controller.pathToEndPoint == null)
-                    follower.doEmote(8);
+                    follower.doEmote(8); // Three dots emote
                 else
                 {
                     if (emoteWhenPathIsFound)
-                        follower.doEmote(40);
+                        follower.doEmote(40); // Question mark emote
                     pathFound = true;
                 }
             }
