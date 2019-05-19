@@ -62,8 +62,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DialogueDriver.cs" />
     <Compile Include="FollowController.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="IUpdateable.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -17,6 +17,7 @@ namespace PurrplingMod
         public Point targetPositionTile;
         public int standingTimeout = 100;
         public FollowController followController;
+        public DialogueDriver dialogueDriver;
 
         /*********
         ** Public methods
@@ -26,12 +27,32 @@ namespace PurrplingMod
         public override void Entry(IModHelper helper)
         {
             this.followController = new FollowController();
+            this.dialogueDriver = new DialogueDriver(helper);
+
+            this.dialogueDriver.DialogueChanged += this.DialogueDriver_DialogueChanged;
+            this.dialogueDriver.DialogueEnded += this.DialogueDriver_DialogueEnded;
+            this.dialogueDriver.SpeakerChanged += this.DialogueDriver_SpeakerChanged;
 
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Player.Warped += this.Player_Warped;
             helper.Events.GameLoop.DayStarted += this.GameLoop_DayStarted;
-            helper.Events.GameLoop.UpdateTicking += GameLoop_UpdateTicking;
+            helper.Events.GameLoop.UpdateTicking += this.GameLoop_UpdateTicking;
 
+        }
+
+        private void DialogueDriver_SpeakerChanged(object sender, SpeakerChangedArgs e)
+        {
+            this.Monitor.Log($"Speaker changed from {e.PreviousSpeaker?.Name} to {e.CurrentSpeaker?.Name}");
+        }
+
+        private void DialogueDriver_DialogueEnded(object sender, DialogueEndedArgs e)
+        {
+            this.Monitor.Log($"Dialogue with {e.PreviousDialogue.speaker.Name} ended");
+        }
+
+        private void DialogueDriver_DialogueChanged(object sender, DialogueChangedArgs e)
+        {
+            this.Monitor.Log($"Current dialogue - {e.CurrentDialogue.speaker.Name} says: '{e.CurrentDialogue.getCurrentDialogue()}'");
         }
 
         private void GameLoop_UpdateTicking(object sender, UpdateTickingEventArgs e)
@@ -63,7 +84,8 @@ namespace PurrplingMod
                 abigail.currentLocation = location;
                 location.addCharacter(abigail);
                 abigail.setTilePosition(locationTilePoint);
-                abigail.setNewDialogue("Meow");
+                abigail.setNewDialogue("Meow", true);
+                abigail.setNewDialogue("Kekekeke", true);
                 this.abbyLastPositionTile = abigail.getTileLocationPoint();
                 this.followController.follower = abigail;
             }

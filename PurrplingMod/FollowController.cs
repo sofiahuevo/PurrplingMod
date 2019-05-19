@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 
 namespace PurrplingMod
 {
-    public class FollowController
+    public class FollowController : IUpdateable
     {
         public const int FOLLOWING_LOST_TIMEOUT = 25;
         public const float SPEEDUP_DISTANCE_THRESHOLD = 7;
@@ -114,7 +114,7 @@ namespace PurrplingMod
                 this.follower.isCharging = true;
                 return;
             }
-
+            
             this.follower.addedSpeed = 4;
             this.follower.isCharging = false;
             this.pathToFollow.Clear();
@@ -129,8 +129,6 @@ namespace PurrplingMod
             if (this.pathToFollow.Count == 0)
             {
                 // Step path is empty? Nothing to following
-                // Take current leader's position to next step path follow cycle (TODO: review if it's needed.)
-                this.AddPathPoint(this.leader.getTileLocationPoint());
                 return;
             }
             else if (this.currentFollowedPoint == this.follower.getTileLocationPoint()) 
