@@ -11,7 +11,7 @@ namespace PurrplingMod
 {
     public class FollowController
     {
-        public const int FOLLOWING_LOST_TIMEOUT = 50;
+        public const int FOLLOWING_LOST_TIMEOUT = 25;
         public const float SPEEDUP_DISTANCE_THRESHOLD = 7;
         public const float MOVE_THRESHOLD_DISTANCE = 3;
         public const float PROXIMITY_THRESHOLD = 80;
@@ -96,7 +96,7 @@ namespace PurrplingMod
             if (this.pathToFollow.Count > PATH_MAX_NODE_COUNT || Helper.Distance(leaderTilePoint, followerTilePoint) > LOST_DISTANCE)
             {
                 // Step path is too long or lost leader? Try to find direct path to follower or warp on
-                this.ResolveLostFollow(true);
+                this.ResolveLostFollow(forceFindPath: true, emoteWhenPathIsFound: true);
                 return;
             }
 
@@ -104,11 +104,19 @@ namespace PurrplingMod
                 this.FollowPath(time); // Follow leader's step path if follower has'nt direct path
         }
 
-        private void ResolveLostFollow(bool emoteWhenPathIsFound = false)
+        private void ResolveLostFollow(bool forceFindPath = false, bool emoteWhenPathIsFound = false)
         {
             Point endTilePoint = this.leader.getTileLocationPoint();
 
+            if (!this.follower.isCharging && !forceFindPath)
+            {
+                this.followingLostTime = 0;
+                this.follower.isCharging = true;
+                return;
+            }
+
             this.follower.addedSpeed = 4;
+            this.follower.isCharging = false;
             this.pathToFollow.Clear();
             this.currentFollowedPoint = endTilePoint;
             if (!FollowController.ComeTo(this.follower, endTilePoint, emoteWhenPathIsFound))
