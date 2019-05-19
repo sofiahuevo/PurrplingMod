@@ -150,15 +150,17 @@ namespace PurrplingMod
 
         public static void FollowTile(NPC follower, Point endPointTile, GameTime time)
         {
-            Point startPointTile = follower.getTileLocationPoint();
+            Rectangle rectangle = new Rectangle(endPointTile.X * 64, endPointTile.Y * 64, 64, 64);
+            rectangle.Inflate(-2, 0);
+            Rectangle boundingBox = follower.GetBoundingBox();
 
-            if (endPointTile.X < startPointTile.X)
+            if (boundingBox.Right > rectangle.Right && boundingBox.Left > rectangle.Left)
                 follower.SetMovingOnlyLeft();
-            if (endPointTile.X > startPointTile.X)
+            else if (boundingBox.Left < rectangle.Left && boundingBox.Right < rectangle.Right)
                 follower.SetMovingOnlyRight();
-            if (endPointTile.Y < startPointTile.Y)
+            else if (boundingBox.Bottom >= rectangle.Bottom - 2)
                 follower.SetMovingOnlyUp();
-            if (endPointTile.Y > startPointTile.Y)
+            else if (boundingBox.Top <= rectangle.Top)
                 follower.SetMovingOnlyDown();
 
             follower.willDestroyObjectsUnderfoot = false; // Nothing destroy and not moving across walls and solid objects
@@ -176,15 +178,15 @@ namespace PurrplingMod
                 follower.temporaryController = null;
                 follower.willDestroyObjectsUnderfoot = false;
 
-                Stack<Point> path = FollowController.FindPath(npcTilePosition, endPointTile, follower.currentLocation, follower);
+                Stack<Point> path = FollowController.FindPath(npcTilePosition, endPointTile, follower.currentLocation, follower, PATH_MAX_NODE_COUNT);
                 follower.controller = new PathFindController(path, follower, follower.currentLocation);
 
                 if (follower.controller.pathToEndPoint == null)
-                    follower.doEmote(8); // Three dots emote
+                    follower.doEmote(8); // Question mark emote
                 else
                 {
                     if (emoteWhenPathIsFound)
-                        follower.doEmote(40); // Question mark emote
+                        follower.doEmote(40); // Three dots emote
                     pathFound = true;
                 }
             }
