@@ -10,6 +10,6 @@ namespace PurrplingMod
 {
     internal interface IUpdateable
     {
-        void Update(GameTime time);
+        void Update(UpdateTickingEventArgs e);
     }
 }

@@ -52,7 +52,7 @@ namespace PurrplingMod
 
         private void DialogueDriver_DialogueChanged(object sender, DialogueChangedArgs e)
         {
-            this.Monitor.Log($"Current dialogue - {e.CurrentDialogue.speaker.Name} says: '{e.CurrentDialogue.getCurrentDialogue()}'");
+            this.Monitor.Log($"Current dialogue - {e.CurrentDialogue?.speaker.Name} says: '{e.CurrentDialogue?.getCurrentDialogue()}'");
         }
 
         private void GameLoop_UpdateTicking(object sender, UpdateTickingEventArgs e)
@@ -60,7 +60,7 @@ namespace PurrplingMod
             if (!Context.IsWorldReady)
                 return;
 
-            this.followController.Update(Game1.currentGameTime);
+            this.followController.Update(e);
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
