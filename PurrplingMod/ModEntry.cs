@@ -26,18 +26,35 @@ namespace PurrplingMod
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            this.followController = new FollowController();
+            //this.followController = new FollowController();
             this.dialogueDriver = new DialogueDriver(helper);
 
             this.dialogueDriver.DialogueChanged += this.DialogueDriver_DialogueChanged;
             this.dialogueDriver.DialogueEnded += this.DialogueDriver_DialogueEnded;
             this.dialogueDriver.SpeakerChanged += this.DialogueDriver_SpeakerChanged;
+            this.dialogueDriver.DialogueRequested += this.DialogueDriver_DialogueRequested;
 
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Player.Warped += this.Player_Warped;
             helper.Events.GameLoop.DayStarted += this.GameLoop_DayStarted;
             helper.Events.GameLoop.UpdateTicking += this.GameLoop_UpdateTicking;
 
+        }
+
+        private void DialogueDriver_DialogueRequested(object sender, DialogueRequestArgs e)
+        {
+            if (e.WithWhom.CurrentDialogue.Count > 0)
+                return;
+
+            GameLocation location = e.Initiator.currentLocation;
+            location.createQuestionDialogue($"Ask {e.WithWhom?.displayName} to follow?", location.createYesNoResponses(), (_, answer) => {
+                if (answer == "Yes")
+                {
+                    e.WithWhom.Halt();
+                    e.WithWhom.facePlayer(e.Initiator);
+                    this.dialogueDriver.DrawDialogue(e.WithWhom, "Adventure with me?#$b#Yes please!$h");
+                }
+                this.Monitor.Log($"Farmer asked for follow: {answer}");
+            }, null);
         }
 
         private void DialogueDriver_SpeakerChanged(object sender, SpeakerChangedArgs e)
@@ -60,7 +77,7 @@ namespace PurrplingMod
             if (!Context.IsWorldReady)
                 return;
 
-            this.followController.Update(e);
+            //this.followController.Update(e);
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
@@ -68,8 +85,8 @@ namespace PurrplingMod
             GameLocation location = Game1.player.currentLocation;
             Farmer player = Game1.player;
             this.myLastLocationTile = player.getTileLocationPoint();
-            this.followController.leader = player;
-            this.spawnAbigailHere(location, player.getTileLocationPoint());
+            //this.followController.leader = player;
+            //this.spawnAbigailHere(location, player.getTileLocationPoint());
         }
 
         private void spawnAbigailHere(GameLocation location, Point locationTilePoint)
@@ -87,7 +104,7 @@ namespace PurrplingMod
                 abigail.setNewDialogue("Meow", true);
                 abigail.setNewDialogue("Kekekeke", true);
                 this.abbyLastPositionTile = abigail.getTileLocationPoint();
-                this.followController.follower = abigail;
+                //this.followController.follower = abigail;
             }
         }
 
@@ -98,23 +115,6 @@ namespace PurrplingMod
 
             //this.followController.leader = e.Player;
             //this.spawnAbigailHere(e.NewLocation, e.Player.getTileLocationPoint());
-        }
-
-
-        /*********
-        ** Private methods
-        *********/
-        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event data.</param>
-        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
-        {
-            // ignore if player hasn't loaded a save yet
-            if (!Context.IsWorldReady)
-                return;
-
-            // print button presses to the console window
-            // this.Monitor.Log($"{Game1.player.Name} pressed {e.Button}.");
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using StardewValley;
 
@@ -10,6 +8,26 @@ namespace PurrplingMod
 {
     public static class Helper
     {
+        public static bool IsNPCAtTile(GameLocation location, Vector2 tile, NPC whichNPC = null)
+        {
+            NPC npc = location.isCharacterAtTile(tile);
+
+            if (whichNPC != null && npc != null)
+            {
+                return whichNPC.Name == npc.Name;
+            }
+
+            return npc != null;
+        }
+
+        public static bool SpouseHasBeenKissedToday(NPC spouse)
+        {
+            return (bool)spouse
+                .GetType()
+                .GetField("hasBeenKissedToday",
+                          BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spouse);
+        }
+
         public static List<Point> NearPoints(Point p, int distance)
         {
             List<Point> points = new List<Point>();
