@@ -26,7 +26,7 @@ namespace PurrplingMod
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            //this.followController = new FollowController();
+            this.followController = new FollowController();
             this.dialogueDriver = new DialogueDriver(helper);
 
             this.dialogueDriver.DialogueChanged += this.DialogueDriver_DialogueChanged;
@@ -52,6 +52,7 @@ namespace PurrplingMod
                     e.WithWhom.Halt();
                     e.WithWhom.facePlayer(e.Initiator);
                     this.dialogueDriver.DrawDialogue(e.WithWhom, "Adventure with me?#$b#Yes please!$h");
+                    this.followController.follower = e.WithWhom;
                 }
                 this.Monitor.Log($"Farmer asked for follow: {answer}");
             }, null);
@@ -77,7 +78,7 @@ namespace PurrplingMod
             if (!Context.IsWorldReady)
                 return;
 
-            //this.followController.Update(e);
+            this.followController.Update(e);
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
@@ -85,7 +86,7 @@ namespace PurrplingMod
             GameLocation location = Game1.player.currentLocation;
             Farmer player = Game1.player;
             this.myLastLocationTile = player.getTileLocationPoint();
-            //this.followController.leader = player;
+            this.followController.leader = player;
             //this.spawnAbigailHere(location, player.getTileLocationPoint());
         }
 

@@ -81,8 +81,8 @@ namespace PurrplingMod
 
             farmerBox.Inflate(64, 64);
 
-            if (giftableObjectInHands)
-                return;
+            if (giftableObjectInHands || e.Button.IsUseToolButton() && farmer.CurrentTool != null)
+                return; // Don't request dialog when giftable item is in farmer's hands or using tool
 
             foreach (NPC npc in farmer.currentLocation.characters) {
                 Rectangle npcBox = npc.GetBoundingBox();
@@ -90,8 +90,6 @@ namespace PurrplingMod
                 bool isNpcAtCursorTile = Helper.IsNPCAtTile(farmer.currentLocation, e.Cursor.Tile, npc)
                                          || Helper.IsNPCAtTile(farmer.currentLocation, e.Cursor.Tile + new Vector2(0f, 1f), npc)
                                          || Helper.IsNPCAtTile(farmer.currentLocation, e.Cursor.GrabTile, npc);
-
-                
 
                 if (actionButtonPressed && farmerBox.Intersects(npcBox) && isNpcAtCursorTile)
                 {
