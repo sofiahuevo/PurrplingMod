@@ -46,9 +46,21 @@ namespace PurrplingMod
             this.Monitor.Log($"Initalized {this.PossibleCompanions.Count} companions.", LogLevel.Info);
         }
 
+        private void UninitializeCompanions()
+        {
+            foreach (KeyValuePair<string, CompanionStateMachine> companionKv in this.PossibleCompanions)
+            {
+                companionKv.Value.Dispose();
+                this.Monitor.Log($"{companionKv.Key} disposed!");
+            }
+
+            this.PossibleCompanions.Clear();
+            this.Monitor.Log("Companions uninitialized", LogLevel.Info);
+        }
+
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)
         {
-            throw new NotImplementedException();
+            this.UninitializeCompanions();   
         }
 
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)

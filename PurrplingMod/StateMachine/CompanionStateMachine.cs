@@ -19,40 +19,62 @@ namespace PurrplingMod.StateMachine
         }
         public CompanionManager Manager { get; private set; }
         public NPC Companion { get; private set; }
-        public Dictionary<StateName, ICompanionState> States { get; private set; }
-        private StateName currentStatePtr;
+        public Dictionary<int, ICompanionState> States { get; private set; }
+        private ICompanionState currentState;
         public CompanionStateMachine(CompanionManager manager, NPC companion)
         {
             this.Manager = manager;
             this.Companion = companion;
-            this.States = new Dictionary<StateName, ICompanionState>()
+            this.States = new Dictionary<int, ICompanionState>()
             {
-                [StateName.RESET] = new ResetState(this),
+                [(int)StateName.RESET] = new ResetState(this),
+                [(int)StateName.AVAILABLE] = new AvailableState(this),
             };
             this.ResetStateMachine();
         }
 
-        public bool ChangeState(StateName stateName)
+        public string Name
         {
-            if (!this.States.TryGetValue(this.currentStatePtr, out ICompanionState currentState) || !this.States.TryGetValue(stateName, out ICompanionState newState))
-                return false;
-
-            if (!currentState.CanTransitionTo(newState))
-                return false;
-
-            currentState.Exit();
-            newState.Entry();
-            this.currentStatePtr = stateName;
-
-            return true;
+            get
+            {
+                return this.Companion.Name;
+            }
         }
 
-        private void ResetStateMachine()
+        private void ChangeState(int state)
         {
-            if (this.States.TryGetValue(this.currentStatePtr, out ICompanionState oldState))
-                oldState.Exit();
-            this.currentStatePtr = StateName.RESET;
-            this.States[this.currentStatePtr].Entry();
+            if (!this.States.TryGetValue(state, out ICompanionState newState))
+                throw new Exception($"Unknown state: {state}");
+
+            if (this.currentState != null)
+            {
+                this.currentState.Exit();
+            }
+
+            newState.Entry();
+            this.currentState = newState;
+        }
+
+        public void NewDaySetup()
+        {
+            this.ChangeState((int)StateName.AVAILABLE);
+        }
+
+        public void ResetStateMachine()
+        {
+            this.ChangeState((int)StateName.RESET);
+        }
+
+        public void Dispose()
+        {
+            if (this.currentState != null)
+                this.currentState.Exit();
+
+            this.States.Clear();
+            this.States = null;
+            this.currentState = null;
+            this.Companion = null;
+            this.Manager = null; 
         }
     }
 }

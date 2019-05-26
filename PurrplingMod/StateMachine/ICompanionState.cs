@@ -10,6 +10,5 @@ namespace PurrplingMod.StateMachine
     {
         void Entry();
         void Exit();
-        bool CanTransitionTo(ICompanionState newState);
     }
 }
