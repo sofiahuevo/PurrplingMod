@@ -47,9 +47,21 @@ namespace PurrplingMod.StateMachine.State
                 {
                     e.WithWhom.Halt();
                     e.WithWhom.facePlayer(e.Initiator);
-                    this.StateMachine.Manager.DialogueDriver.DrawDialogue(e.WithWhom, "Adventure with me?#$b#Yes please!$h");
+                    this.ResolveAsk(e.WithWhom, e.Initiator);
                 }
             }, null);
+        }
+
+        private void ResolveAsk(NPC n, Farmer leader)
+        {
+            DialogueDriver driver = this.StateMachine.Manager.DialogueDriver;
+
+            if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 5)
+                driver.DrawDialogue(n, "Eh...$u#$b#I think it's not best idea right now. Sorry.$s");
+            else if (Game1.timeOfDay > 2200 && !Helper.IsSpouseMarriedToFarmer(n, leader))
+                driver.DrawDialogue(n, "Sorry, It's to late for adventure today. Maybe tomorrow$s");
+            else
+                driver.DrawDialogue(n, "Adventure with me?#$b#Yes please!$h");
         }
 
         public override void Exit()

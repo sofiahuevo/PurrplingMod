@@ -10,11 +10,24 @@ namespace PurrplingMod
     public class CompanionManager
     {
         public IModHelper ModHelper { get; private set; }
+
         public IMonitor Monitor { get; private set; }
+
         public DialogueDriver DialogueDriver { get; private set; }
+
         public HintDriver HintDriver { get; private set; }
+
         public Dictionary<string, CompanionStateMachine> PossibleCompanions { get; private set; }
-        public Farmer Leader { get; set; }
+
+        public Farmer Leader {
+            get
+            {
+                if (Context.IsWorldReady)
+                    return Game1.player;
+                return null;
+            }
+        }
+
         public CompanionManager(IModHelper helper, IMonitor monitor)
         {
             helper.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
@@ -61,12 +74,10 @@ namespace PurrplingMod
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)
         {
             this.UninitializeCompanions();
-            this.Leader = null;
         }
 
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
-            this.Leader = Game1.player;
             this.InitializeCompanions();
         }
     }

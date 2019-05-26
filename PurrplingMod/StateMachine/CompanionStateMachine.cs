@@ -46,6 +46,9 @@ namespace PurrplingMod.StateMachine
             if (!this.States.TryGetValue(state, out ICompanionState newState))
                 throw new Exception($"Unknown state: {state}");
 
+            if (this.currentState == newState)
+                return;
+
             if (this.currentState != null)
             {
                 this.currentState.Exit();
