@@ -8,9 +8,9 @@ using StardewValley.Locations;
 using StardewModdingAPI.Events;
 using Microsoft.Xna.Framework;
 
-namespace PurrplingMod
+namespace PurrplingMod.Controller
 {
-    public class FollowController : IUpdateable
+    public class FollowController : Internal.IUpdateable
     {
         public const int FOLLOWING_LOST_TIMEOUT = 15;
         public const float SPEEDUP_DISTANCE_THRESHOLD = 7;
