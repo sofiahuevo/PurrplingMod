@@ -16,14 +16,23 @@ namespace PurrplingMod.Manager
             this.assets = assets;
         }
 
-        public string GetDialogueString(string companionName, string key)
+        public bool GetDialogueString(string companionName, string key, out string text)
         {
             Dictionary<string, string> dialogues = this.assets[companionName].dialogues;
 
-            if (dialogues.TryGetValue(key, out string dialogueString))
-                return dialogueString;
+            if (dialogues.TryGetValue(key, out string dialogueString)) {
+                text = dialogueString;
+                return true;
+            }
 
-            return companionName + "." + key;
+            text = companionName + "." + key;
+            return false;
+        }
+
+        public string GetDialogueString(string companionName, string key)
+        {
+            this.GetDialogueString(companionName, key, out string text);
+            return text;
         }
         public class ContentAssets
         {
