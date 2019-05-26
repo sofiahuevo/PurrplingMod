@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PurrplingMod.Driver;
 using StardewValley;
 
 namespace PurrplingMod.StateMachine.State
@@ -17,8 +18,17 @@ namespace PurrplingMod.StateMachine.State
         {
             this.StateMachine.Manager.DialogueDriver.DialogueRequested += this.DialogueDriver_DialogueRequested;
             this.StateMachine.Manager.ModHelper.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
+            this.StateMachine.Manager.HintDriver.CheckHint += this.HintDriver_CheckHint;
 
             this.StateMachine.Manager.Monitor.Log($"{this.StateMachine.Companion.Name} is now available to recruit!");
+        }
+
+        private void HintDriver_CheckHint(object sender, Driver.CheckHintArgs e)
+        {
+            if (e.Npc?.Name == this.StateMachine.Companion.Name && Helper.CanRequestDialog(this.Leader, e.Npc))
+            {
+                this.StateMachine.Manager.HintDriver.ShowHint = Driver.HintDriver.Hint.DIALOGUE;
+            }
         }
 
         private void GameLoop_DayEnding(object sender, StardewModdingAPI.Events.DayEndingEventArgs e)

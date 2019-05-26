@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using PurrplingMod.StateMachine;
 using StardewValley;
 using StardewModdingAPI;
@@ -15,7 +12,9 @@ namespace PurrplingMod
         public IModHelper ModHelper { get; private set; }
         public IMonitor Monitor { get; private set; }
         public DialogueDriver DialogueDriver { get; private set; }
+        public HintDriver HintDriver { get; private set; }
         public Dictionary<string, CompanionStateMachine> PossibleCompanions { get; private set; }
+        public Farmer Leader { get; set; }
         public CompanionManager(IModHelper helper, IMonitor monitor)
         {
             helper.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
@@ -24,6 +23,7 @@ namespace PurrplingMod
             this.ModHelper = helper;
             this.Monitor = monitor;
             this.DialogueDriver = new DialogueDriver(helper);
+            this.HintDriver = new HintDriver(helper);
             this.PossibleCompanions = new Dictionary<string, CompanionStateMachine>();
         }
 
@@ -60,11 +60,13 @@ namespace PurrplingMod
 
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)
         {
-            this.UninitializeCompanions();   
+            this.UninitializeCompanions();
+            this.Leader = null;
         }
 
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
+            this.Leader = Game1.player;
             this.InitializeCompanions();
         }
     }

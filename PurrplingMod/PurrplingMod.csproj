@@ -65,6 +65,7 @@
     <Compile Include="CompanionManager.cs" />
     <Compile Include="Driver\DialogueDriver.cs" />
     <Compile Include="Controller\FollowController.cs" />
+    <Compile Include="Driver\HintDriver.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Internal\IUpdateable.cs" />
     <Compile Include="ModEntry.cs" />

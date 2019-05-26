@@ -28,6 +28,22 @@ namespace PurrplingMod
                           BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spouse);
         }
 
+        public static bool CanRequestDialog(Farmer farmer, NPC npc)
+        {
+            // Can't request dialogue if giftable object is in farmer's hands
+            bool forbidden = farmer.ActiveObject != null && farmer.ActiveObject.canBeGivenAsGift();
+            NPC spouse = farmer.getSpouse();
+
+            if (!forbidden && spouse != null && spouse.Name == npc.Name)
+            {
+                // Kiss married spouse first if she/he facing kissable
+                bool flag = spouse.isMarried() && farmer.isMarried() && !SpouseHasBeenKissedToday(spouse);
+                forbidden = flag && npc.FacingDirection == 3 || flag && npc.FacingDirection == 1;
+            }
+
+            return !forbidden;
+        }
+
         public static List<Point> NearPoints(Point p, int distance)
         {
             List<Point> points = new List<Point>();
