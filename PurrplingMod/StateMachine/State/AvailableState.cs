@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PurrplingMod.Driver;
+using PurrplingMod.Manager;
 using StardewValley;
 
 namespace PurrplingMod.StateMachine.State
@@ -55,13 +56,16 @@ namespace PurrplingMod.StateMachine.State
         private void ResolveAsk(NPC n, Farmer leader)
         {
             DialogueDriver driver = this.StateMachine.Manager.DialogueDriver;
+            ContentManager contentManager = this.StateMachine.Manager.ContentManager;
 
-            if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 5)
-                driver.DrawDialogue(n, "Eh...$u#$b#I think it's not best idea right now. Sorry.$s");
+            if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 4)
+                driver.DrawDialogue(n, contentManager.GetDialogueString(n.Name, "companionRejected"));
             else if (Game1.timeOfDay > 2200 && !Helper.IsSpouseMarriedToFarmer(n, leader))
-                driver.DrawDialogue(n, "Sorry, It's to late for adventure today. Maybe tomorrow$s");
+                driver.DrawDialogue(n, contentManager.GetDialogueString(n.Name, "companionRejectedNight"));
             else
-                driver.DrawDialogue(n, "Adventure with me?#$b#Yes please!$h");
+            {
+                driver.DrawDialogue(n, contentManager.GetDialogueString(n.Name, "companionAccepted"));
+            }
         }
 
         public override void Exit()

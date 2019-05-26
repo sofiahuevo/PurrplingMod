@@ -62,12 +62,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompanionManager.cs" />
+    <Compile Include="Manager\CompanionManager.cs" />
     <Compile Include="Driver\DialogueDriver.cs" />
     <Compile Include="Controller\FollowController.cs" />
     <Compile Include="Driver\HintDriver.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Internal\IUpdateable.cs" />
+    <Compile Include="Manager\ContentManager.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateMachine\CompanionStateMachine.cs" />
@@ -76,6 +77,45 @@
     <Compile Include="StateMachine\State\ResetState.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\CompanionDispositions.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Abigail.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Alex.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Elliott.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Emily.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Haley.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Harvey.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Leah.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Maru.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Penny.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Sam.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Sebastian.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Dialogue\Shane.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="manifest.json" />
     <None Include="packages.config" />
   </ItemGroup>

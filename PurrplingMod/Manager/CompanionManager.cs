@@ -5,7 +5,7 @@ using StardewValley;
 using StardewModdingAPI;
 using PurrplingMod.Driver;
 
-namespace PurrplingMod
+namespace PurrplingMod.Manager
 {
     public class CompanionManager
     {
@@ -18,6 +18,8 @@ namespace PurrplingMod
         public HintDriver HintDriver { get; private set; }
 
         public Dictionary<string, CompanionStateMachine> PossibleCompanions { get; private set; }
+
+        public ContentManager ContentManager { get; set; }
 
         public Farmer Leader {
             get

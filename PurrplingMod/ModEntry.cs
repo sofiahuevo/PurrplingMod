@@ -6,6 +6,7 @@ using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Locations;
 using System.Collections.Generic;
+using PurrplingMod.Manager;
 
 namespace PurrplingMod
 {
@@ -17,25 +18,27 @@ namespace PurrplingMod
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            this.companionManager = new CompanionManager(helper, this.Monitor);
+            List<string> dispositions = helper.Content.Load<List<string>>("assets/CompanionDispositions.json");
+            Dictionary<string, ContentManager.ContentAssets> assets = new Dictionary<string, ContentManager.ContentAssets>();
+
+            foreach (string disposition in dispositions)
+            {
+                assets.Add(disposition, this.LoadContentAssets(disposition));
+            }
+
+            this.companionManager = new CompanionManager(helper, this.Monitor)
+            {
+                ContentManager = new ContentManager(assets)
+            };
         }
 
-        /*private void DialogueDriver_DialogueRequested(object sender, DialogueRequestArgs e)
+        private ContentManager.ContentAssets LoadContentAssets(string disposition)
         {
-            if (e.WithWhom.CurrentDialogue.Count > 0)
-                return;
-
-            GameLocation location = e.Initiator.currentLocation;
-            location.createQuestionDialogue($"Ask {e.WithWhom?.displayName} to follow?", location.createYesNoResponses(), (_, answer) => {
-                if (answer == "Yes")
-                {
-                    e.WithWhom.Halt();
-                    e.WithWhom.facePlayer(e.Initiator);
-                    this.dialogueDriver.DrawDialogue(e.WithWhom, "Adventure with me?#$b#Yes please!$h");
-                    this.followController.follower = e.WithWhom;
-                }
-                this.Monitor.Log($"Farmer asked for follow: {answer}");
-            }, null);
-        }*/
+            this.Monitor.Log($"Loading content assets for {disposition}", LogLevel.Info);
+            return new ContentManager.ContentAssets()
+            {
+                dialogues = this.Helper.Content.Load<Dictionary<string, string>>($"assets/Dialogue/{disposition}.json"),
+            };
+        }
     }
 }
