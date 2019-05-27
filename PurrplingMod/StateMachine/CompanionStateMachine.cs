@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PurrplingMod.Loader;
 using PurrplingMod.Manager;
 using PurrplingMod.StateMachine.State;
 using StardewValley;
@@ -18,16 +19,16 @@ namespace PurrplingMod.StateMachine
             RECRUITED,
             UNAVAILABLE,
         }
-        public CompanionManager Manager { get; private set; }
+        public CompanionManager CompanionManager { get; private set; }
         public NPC Companion { get; private set; }
         internal DialogueManager DialogueManager { get; private set; }
         public Dictionary<int, ICompanionState> States { get; private set; }
-        private ContentManager.ContentAssets assets;
+        private ContentLoader.ContentAssets assets;
         private ICompanionState currentState;
 
-        public CompanionStateMachine(CompanionManager manager, NPC companion, ContentManager.ContentAssets assets)
+        public CompanionStateMachine(CompanionManager manager, NPC companion, ContentLoader.ContentAssets assets)
         {
-            this.Manager = manager;
+            this.CompanionManager = manager;
             this.Companion = companion;
             this.DialogueManager = new DialogueManager(companion);
             this.States = new Dictionary<int, ICompanionState>()
@@ -84,7 +85,7 @@ namespace PurrplingMod.StateMachine
             this.States = null;
             this.currentState = null;
             this.Companion = null;
-            this.Manager = null; 
+            this.CompanionManager = null; 
         }
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -16,10 +13,10 @@ namespace PurrplingMod.Driver
         public event EventHandler<SpeakerChangedArgs> SpeakerChanged;
         public event EventHandler<DialogueRequestArgs> DialogueRequested;
 
-        public DialogueDriver(IModHelper helper)
+        public DialogueDriver()
         {
-            helper.Events.GameLoop.UpdateTicking += this.Update;
-            helper.Events.Input.ButtonPressed += this.HandleAction;
+            PurrplingMod.Events.GameLoop.UpdateTicking += this.Update;
+            PurrplingMod.Events.Input.ButtonPressed += this.HandleAction;
         }
 
         public Dialogue CurrentDialogue { get; private set; }
@@ -62,7 +59,7 @@ namespace PurrplingMod.Driver
         private void HandleAction(object sender, ButtonPressedEventArgs e)
         {
             // ignore if player hasn't loaded a save yet or player can't move
-            if (!Context.IsWorldReady || !Context.CanPlayerMove)
+            if (!Context.IsWorldReady || !Context.IsPlayerFree)
                 return;
 
             Farmer farmer = Game1.player;

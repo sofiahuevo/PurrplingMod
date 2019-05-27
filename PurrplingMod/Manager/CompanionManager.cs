@@ -4,22 +4,15 @@ using PurrplingMod.StateMachine;
 using StardewValley;
 using StardewModdingAPI;
 using PurrplingMod.Driver;
+using PurrplingMod.Loader;
 
 namespace PurrplingMod.Manager
 {
     public class CompanionManager
     {
-        public IModHelper ModHelper { get; private set; }
-
-        public IMonitor Monitor { get; private set; }
-
-        public DialogueDriver DialogueDriver { get; private set; }
-
-        public HintDriver HintDriver { get; private set; }
-
         public Dictionary<string, CompanionStateMachine> PossibleCompanions { get; private set; }
 
-        public Dictionary<string, ContentManager.ContentAssets> AssetsRegistry { get; set; }
+        public Dictionary<string, ContentLoader.ContentAssets> AssetsRegistry { get; }
 
         public Farmer Leader {
             get
@@ -30,16 +23,13 @@ namespace PurrplingMod.Manager
             }
         }
 
-        public CompanionManager(IModHelper helper, IMonitor monitor)
+        public CompanionManager(Dictionary<string, ContentLoader.ContentAssets> assetsRegistry)
         {
-            helper.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
-            helper.Events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;
+            PurrplingMod.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
+            PurrplingMod.Events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;
 
-            this.ModHelper = helper;
-            this.Monitor = monitor;
-            this.DialogueDriver = new DialogueDriver(helper);
-            this.HintDriver = new HintDriver(helper);
             this.PossibleCompanions = new Dictionary<string, CompanionStateMachine>();
+            this.AssetsRegistry = assetsRegistry;
         }
 
         private void InitializeCompanions()
@@ -47,13 +37,14 @@ namespace PurrplingMod.Manager
             foreach (string npcName in this.AssetsRegistry.Keys)
             {
                 NPC companion = Game1.getCharacterFromName(npcName, true);
+
                 if (companion == null)
                     throw new Exception($"Can't find NPC with name '{npcName}'");
 
                 this.PossibleCompanions.Add(npcName, new CompanionStateMachine(this, companion, this.AssetsRegistry[npcName]));
             }
 
-            this.Monitor.Log($"Initalized {this.PossibleCompanions.Count} companions.", LogLevel.Info);
+            PurrplingMod.Mon.Log($"Initalized {this.PossibleCompanions.Count} companions.", LogLevel.Info);
         }
 
         private void UninitializeCompanions()
@@ -61,11 +52,11 @@ namespace PurrplingMod.Manager
             foreach (KeyValuePair<string, CompanionStateMachine> companionKv in this.PossibleCompanions)
             {
                 companionKv.Value.Dispose();
-                this.Monitor.Log($"{companionKv.Key} disposed!");
+                PurrplingMod.Mon.Log($"{companionKv.Key} disposed!");
             }
 
             this.PossibleCompanions.Clear();
-            this.Monitor.Log("Companions uninitialized", LogLevel.Info);
+            PurrplingMod.Mon.Log("Companions uninitialized", LogLevel.Info);
         }
 
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)

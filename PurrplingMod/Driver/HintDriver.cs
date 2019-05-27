@@ -19,10 +19,10 @@ namespace PurrplingMod.Driver
 
         public Hint ShowHint { get; set; }
         public ICursorPosition CursorPosition { get; private set; }
-        public HintDriver(IModHelper helper)
+        public HintDriver()
         {
-            helper.Events.Input.CursorMoved += this.Input_CursorMoved;
-            helper.Events.GameLoop.UpdateTicking += this.Update;
+            PurrplingMod.Events.Input.CursorMoved += this.Input_CursorMoved;
+            PurrplingMod.Events.GameLoop.UpdateTicking += this.Update;
         }
 
         public void ResetHint()

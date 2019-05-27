@@ -15,7 +15,7 @@ namespace PurrplingMod.StateMachine
         {
             get
             {
-                return this.StateMachine.Manager?.Leader;
+                return this.StateMachine.CompanionManager?.Leader;
             }
         }
         public CompanionState(CompanionStateMachine stateMachine)

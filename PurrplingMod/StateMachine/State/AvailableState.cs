@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PurrplingMod.Driver;
-using PurrplingMod.Manager;
+﻿using PurrplingMod.Manager;
 using StardewValley;
 
 namespace PurrplingMod.StateMachine.State
@@ -17,18 +11,18 @@ namespace PurrplingMod.StateMachine.State
 
         public override void Entry()
         {
-            this.StateMachine.Manager.DialogueDriver.DialogueRequested += this.DialogueDriver_DialogueRequested;
-            this.StateMachine.Manager.ModHelper.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
-            this.StateMachine.Manager.HintDriver.CheckHint += this.HintDriver_CheckHint;
+            PurrplingMod.DialogueDriver.DialogueRequested += this.DialogueDriver_DialogueRequested;
+            PurrplingMod.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
+            PurrplingMod.HintDriver.CheckHint += this.HintDriver_CheckHint;
 
-            this.StateMachine.Manager.Monitor.Log($"{this.StateMachine.Companion.Name} is now available to recruit!");
+            PurrplingMod.Mon.Log($"{this.StateMachine.Companion.Name} is now available to recruit!");
         }
 
         private void HintDriver_CheckHint(object sender, Driver.CheckHintArgs e)
         {
             if (e.Npc?.Name == this.StateMachine.Companion.Name && Helper.CanRequestDialog(this.Leader, e.Npc))
             {
-                this.StateMachine.Manager.HintDriver.ShowHint = Driver.HintDriver.Hint.DIALOGUE;
+                PurrplingMod.HintDriver.ShowHint = Driver.HintDriver.Hint.DIALOGUE;
             }
         }
 
@@ -55,23 +49,22 @@ namespace PurrplingMod.StateMachine.State
 
         private void ResolveAsk(NPC n, Farmer leader)
         {
-            DialogueDriver driver = this.StateMachine.Manager.DialogueDriver;
             DialogueManager dialogueManager = this.StateMachine.DialogueManager;
 
             if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 4)
-                driver.DrawDialogue(n, dialogueManager.GetDialogueString("companionRejected"));
+                PurrplingMod.DialogueDriver.DrawDialogue(n, dialogueManager.GetDialogueString("companionRejected"));
             else if (Game1.timeOfDay > 2200 && !Helper.IsSpouseMarriedToFarmer(n, leader))
-                driver.DrawDialogue(n, dialogueManager.GetDialogueString("companionRejectedNight"));
+                PurrplingMod.DialogueDriver.DrawDialogue(n, dialogueManager.GetDialogueString("companionRejectedNight"));
             else
             {
-                driver.DrawDialogue(n, dialogueManager.GetDialogueString("companionAccepted"));
+                PurrplingMod.DialogueDriver.DrawDialogue(n, dialogueManager.GetDialogueString("companionAccepted"));
             }
         }
 
         public override void Exit()
         {
-            this.StateMachine.Manager.DialogueDriver.DialogueRequested -= this.DialogueDriver_DialogueRequested;
-            this.StateMachine.Manager.ModHelper.Events.GameLoop.DayEnding -= this.GameLoop_DayEnding;
+            PurrplingMod.DialogueDriver.DialogueRequested -= this.DialogueDriver_DialogueRequested;
+            PurrplingMod.Events.GameLoop.DayEnding -= this.GameLoop_DayEnding;
         }
     }
 }
