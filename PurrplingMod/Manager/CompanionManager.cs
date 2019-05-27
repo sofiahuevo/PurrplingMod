@@ -12,7 +12,7 @@ namespace PurrplingMod.Manager
     {
         public Dictionary<string, CompanionStateMachine> PossibleCompanions { get; private set; }
 
-        public Dictionary<string, ContentLoader.ContentAssets> AssetsRegistry { get; }
+        public Dictionary<string, ContentLoader.AssetsContent> AssetsRegistry { get; }
 
         public Farmer Leader {
             get
@@ -23,7 +23,7 @@ namespace PurrplingMod.Manager
             }
         }
 
-        public CompanionManager(Dictionary<string, ContentLoader.ContentAssets> assetsRegistry)
+        public CompanionManager(Dictionary<string, ContentLoader.AssetsContent> assetsRegistry)
         {
             PurrplingMod.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
             PurrplingMod.Events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;

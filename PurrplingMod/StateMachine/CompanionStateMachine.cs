@@ -23,10 +23,10 @@ namespace PurrplingMod.StateMachine
         public NPC Companion { get; private set; }
         internal DialogueManager DialogueManager { get; private set; }
         public Dictionary<int, ICompanionState> States { get; private set; }
-        private ContentLoader.ContentAssets assets;
+        private ContentLoader.AssetsContent assets;
         private ICompanionState currentState;
 
-        public CompanionStateMachine(CompanionManager manager, NPC companion, ContentLoader.ContentAssets assets)
+        public CompanionStateMachine(CompanionManager manager, NPC companion, ContentLoader.AssetsContent assets)
         {
             this.CompanionManager = manager;
             this.Companion = companion;
