@@ -69,6 +69,7 @@
     <Compile Include="Helper.cs" />
     <Compile Include="Internal\IUpdateable.cs" />
     <Compile Include="Manager\ContentManager.cs" />
+    <Compile Include="Manager\DialogueManager.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateMachine\CompanionStateMachine.cs" />

@@ -19,7 +19,7 @@ namespace PurrplingMod.Manager
 
         public Dictionary<string, CompanionStateMachine> PossibleCompanions { get; private set; }
 
-        public ContentManager ContentManager { get; set; }
+        public Dictionary<string, ContentManager.ContentAssets> AssetsRegistry { get; set; }
 
         public Farmer Leader {
             get
@@ -44,18 +44,13 @@ namespace PurrplingMod.Manager
 
         private void InitializeCompanions()
         {
-            string[] npcNames = {
-                "Abigail", "Maru", "Shane", "Leah", "Haley", "Emily",
-                "Penny", "Alex", "Sam", "Sebastian", "Elliott", "Harvey"
-            };
-
-            foreach (string npcName in npcNames)
+            foreach (string npcName in this.AssetsRegistry.Keys)
             {
                 NPC companion = Game1.getCharacterFromName(npcName, true);
                 if (companion == null)
                     throw new Exception($"Can't find NPC with name '{npcName}'");
 
-                this.PossibleCompanions.Add(npcName, new CompanionStateMachine(this, companion));
+                this.PossibleCompanions.Add(npcName, new CompanionStateMachine(this, companion, this.AssetsRegistry[npcName]));
             }
 
             this.Monitor.Log($"Initalized {this.PossibleCompanions.Count} companions.", LogLevel.Info);

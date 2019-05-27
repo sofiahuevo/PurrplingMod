@@ -56,15 +56,15 @@ namespace PurrplingMod.StateMachine.State
         private void ResolveAsk(NPC n, Farmer leader)
         {
             DialogueDriver driver = this.StateMachine.Manager.DialogueDriver;
-            ContentManager contentManager = this.StateMachine.Manager.ContentManager;
+            DialogueManager dialogueManager = this.StateMachine.DialogueManager;
 
             if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 4)
-                driver.DrawDialogue(n, contentManager.GetDialogueString(n.Name, "companionRejected"));
+                driver.DrawDialogue(n, dialogueManager.GetDialogueString("companionRejected"));
             else if (Game1.timeOfDay > 2200 && !Helper.IsSpouseMarriedToFarmer(n, leader))
-                driver.DrawDialogue(n, contentManager.GetDialogueString(n.Name, "companionRejectedNight"));
+                driver.DrawDialogue(n, dialogueManager.GetDialogueString("companionRejectedNight"));
             else
             {
-                driver.DrawDialogue(n, contentManager.GetDialogueString(n.Name, "companionAccepted"));
+                driver.DrawDialogue(n, dialogueManager.GetDialogueString("companionAccepted"));
             }
         }
 

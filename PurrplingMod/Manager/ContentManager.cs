@@ -9,31 +9,39 @@ namespace PurrplingMod.Manager
 {
     public class ContentManager
     {
-        private readonly Dictionary<string, ContentAssets> assets;
+        private readonly string dispositionsFile;
+        private readonly string assetsDir;
+        public Dictionary<string, ContentAssets> AssetsRegistry { get; }
+        private IModHelper ModHelper { get; }
+        private IMonitor Monitor { get; }
 
-        public ContentManager(Dictionary<string, ContentAssets> assets)
+        public ContentManager(IModHelper helper, IMonitor monitor, string assetsDir)
         {
-            this.assets = assets;
+            this.ModHelper = helper;
+            this.Monitor = monitor;
+            this.assetsDir = assetsDir;
+            this.AssetsRegistry = new Dictionary<string, ContentAssets>();
         }
 
-        public bool GetDialogueString(string companionName, string key, out string text)
+        public void Load(string dispositionsFile)
         {
-            Dictionary<string, string> dialogues = this.assets[companionName].dialogues;
+            
+            List<string> dispositions = this.ModHelper.Content.Load<List<string>>(this.assetsDir + "/" + dispositionsFile);
 
-            if (dialogues.TryGetValue(key, out string dialogueString)) {
-                text = dialogueString;
-                return true;
+            foreach (string disposition in dispositions)
+            {
+                ContentAssets assets = new ContentAssets();
+                this.LoadContentAssets(disposition, ref assets);
+                this.AssetsRegistry.Add(disposition, assets);
             }
-
-            text = companionName + "." + key;
-            return false;
         }
 
-        public string GetDialogueString(string companionName, string key)
+        private void LoadContentAssets(string disposition, ref ContentAssets assets)
         {
-            this.GetDialogueString(companionName, key, out string text);
-            return text;
+            this.Monitor.Log($"Loading content assets for {disposition}", LogLevel.Info);
+            assets.dialogues = this.ModHelper.Content.Load<Dictionary<string, string>>($"{this.assetsDir}/Dialogue/{disposition}.json");
         }
+
         public class ContentAssets
         {
             public Dictionary<string, string> dialogues;

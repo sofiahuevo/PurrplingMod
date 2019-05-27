@@ -14,31 +14,20 @@ namespace PurrplingMod
     public class ModEntry : Mod
     {
         private CompanionManager companionManager;
+        private ContentManager contentManager;
+
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            List<string> dispositions = helper.Content.Load<List<string>>("assets/CompanionDispositions.json");
-            Dictionary<string, ContentManager.ContentAssets> assets = new Dictionary<string, ContentManager.ContentAssets>();
+            this.contentManager = new ContentManager(helper, this.Monitor, "assets");
+            this.companionManager = new CompanionManager(helper, this.Monitor);
 
-            foreach (string disposition in dispositions)
-            {
-                assets.Add(disposition, this.LoadContentAssets(disposition));
-            }
+            this.contentManager.Load("CompanionDispositions.json");
 
-            this.companionManager = new CompanionManager(helper, this.Monitor)
-            {
-                ContentManager = new ContentManager(assets)
-            };
+            this.companionManager.AssetsRegistry = this.contentManager.AssetsRegistry;
         }
 
-        private ContentManager.ContentAssets LoadContentAssets(string disposition)
-        {
-            this.Monitor.Log($"Loading content assets for {disposition}", LogLevel.Info);
-            return new ContentManager.ContentAssets()
-            {
-                dialogues = this.Helper.Content.Load<Dictionary<string, string>>($"assets/Dialogue/{disposition}.json"),
-            };
-        }
+        
     }
 }

@@ -20,17 +20,22 @@ namespace PurrplingMod.StateMachine
         }
         public CompanionManager Manager { get; private set; }
         public NPC Companion { get; private set; }
+        internal DialogueManager DialogueManager { get; private set; }
         public Dictionary<int, ICompanionState> States { get; private set; }
+        private ContentManager.ContentAssets assets;
         private ICompanionState currentState;
-        public CompanionStateMachine(CompanionManager manager, NPC companion)
+
+        public CompanionStateMachine(CompanionManager manager, NPC companion, ContentManager.ContentAssets assets)
         {
             this.Manager = manager;
             this.Companion = companion;
+            this.DialogueManager = new DialogueManager(companion);
             this.States = new Dictionary<int, ICompanionState>()
             {
                 [(int)StateName.RESET] = new ResetState(this),
                 [(int)StateName.AVAILABLE] = new AvailableState(this),
             };
+            this.assets = assets;
             this.ResetStateMachine();
         }
 
@@ -61,6 +66,7 @@ namespace PurrplingMod.StateMachine
 
         public void NewDaySetup()
         {
+            this.DialogueManager.SetupDialogues(this.assets.dialogues);
             this.ChangeState((int)StateName.AVAILABLE);
         }
 
