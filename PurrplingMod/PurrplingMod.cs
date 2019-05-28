@@ -26,11 +26,11 @@ namespace PurrplingMod
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            // Propagate game events and Monitor to static fields
+            // Propagate game events and Monitor to static fields (must be set first!)
             PurrplingMod.Events = helper.Events;
             PurrplingMod.Mon = this.Monitor;
 
-            // Initalize drivers (as static fields)
+            // Initalize and propagate drivers. They accessing to PurrplingMod static fields
             PurrplingMod.DialogueDriver = new DialogueDriver();
             PurrplingMod.HintDriver = new HintDriver();
 
