@@ -10,6 +10,7 @@ using PurrplingMod.Manager;
 using PurrplingMod.Loader;
 using PurrplingMod.Driver;
 
+/// <summary> Mod entry and static service container
 namespace PurrplingMod
 {
     /// <summary>The mod entry point.</summary>
@@ -21,19 +22,22 @@ namespace PurrplingMod
         public static IMonitor Mon { get; private set; }
         public static IModEvents Events { get; private set; }
 
-        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <summary>The mod entry point, called after the mod is first loaded. Initalizes services</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            // Propagate game events and Monitor to static fields
             PurrplingMod.Events = helper.Events;
             PurrplingMod.Mon = this.Monitor;
 
-            DialogueDriver = new DialogueDriver();
-            HintDriver = new HintDriver();
+            // Initalize drivers (as static fields)
+            PurrplingMod.DialogueDriver = new DialogueDriver();
+            PurrplingMod.HintDriver = new HintDriver();
 
             ContentLoader loader = new ContentLoader(helper.Content, "assets");
             loader.Load("CompanionDispositions.json");
 
+            // Companion manager subscribe game events automatically (accessing to PurrplingMod static fields)
             this.companionManager = new CompanionManager(loader.ContentAssetsMap);
         }
     }
