@@ -16,25 +16,39 @@ namespace PurrplingMod
     public class PurrplingMod : Mod
     {
         private CompanionManager companionManager;
-        public static DialogueDriver DialogueDriver { get; private set; }
-        public static HintDriver HintDriver { get; private set; }
-        public static IMonitor Mon { get; private set; }
-        public static IModEvents Events { get; private set; }
+        private DialogueDriver DialogueDriver { get; set; }
+        private HintDriver HintDriver { get; set; }
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            PurrplingMod.Events = helper.Events;
-            PurrplingMod.Mon = this.Monitor;
+            helper.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
+            helper.Events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;
+            helper.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
 
-            DialogueDriver = new DialogueDriver();
-            HintDriver = new HintDriver();
+            this.DialogueDriver = new DialogueDriver(helper.Events);
+            this.HintDriver = new HintDriver(helper.Events);
 
-            ContentLoader loader = new ContentLoader(helper.Content, "assets");
+            ContentLoader loader = new ContentLoader(helper.Content, "assets", this.Monitor);
             loader.Load("CompanionDispositions.json");
 
-            this.companionManager = new CompanionManager(loader.ContentAssetsMap);
+            this.companionManager = new CompanionManager(loader.ContentAssetsMap, this.DialogueDriver, this.HintDriver, helper.Events, this.Monitor);
+        }
+
+        private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)
+        {
+            this.companionManager.UninitializeCompanions();
+        }
+
+        private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
+        {
+            this.companionManager.InitializeCompanions();
         }
     }
 }

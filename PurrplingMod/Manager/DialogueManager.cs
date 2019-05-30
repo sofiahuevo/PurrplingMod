@@ -7,7 +7,14 @@ using System.Threading.Tasks;
 
 namespace PurrplingMod.Manager
 {
-    class DialogueManager
+    public interface IDialogueManager
+    {
+        string GetDialogueString(string key);
+        bool GetDialogueString(string key, out string text);
+        void SetupDialogues(Dictionary<string, string> dialogues);
+    }
+
+    internal class DialogueManager : IDialogueManager
     {
         private NPC companion;
 

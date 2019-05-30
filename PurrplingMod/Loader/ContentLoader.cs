@@ -1,22 +1,22 @@
 ﻿using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PurrplingMod.Loader
 {
     public class ContentLoader
     {
         private readonly string assetsDir;
+        private readonly IMonitor monitor;
+
         public Dictionary<string, AssetsContent> ContentAssetsMap { get; }
         private IContentHelper Helper { get; }
 
-        public ContentLoader(IContentHelper helper, string assetsDir)
+        public ContentLoader(IContentHelper helper, string assetsDir, IMonitor monitor)
         {
             this.Helper = helper;
             this.assetsDir = assetsDir;
+            this.monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
             this.ContentAssetsMap = new Dictionary<string, AssetsContent>();
         }
 
@@ -25,7 +25,7 @@ namespace PurrplingMod.Loader
            
             List<string> dispositions = this.Helper.Load<List<string>>(this.assetsDir + "/" + dispositionsFile);
 
-            PurrplingMod.Mon.Log("Loading content assets", LogLevel.Info);
+            this.monitor.Log("Loading content assets", LogLevel.Info);
 
             foreach (string disposition in dispositions)
             {
@@ -34,12 +34,12 @@ namespace PurrplingMod.Loader
                 this.ContentAssetsMap.Add(disposition, assets);
             }
 
-            PurrplingMod.Mon.Log("Content assets loaded", LogLevel.Info);
+            this.monitor.Log("Content assets loaded", LogLevel.Info);
         }
 
         private void LoadContentAssets(string disposition, ref AssetsContent assets)
         {
-            PurrplingMod.Mon.Log($"Loading content assets for {disposition}");
+            this.monitor.Log($"Loading content assets for {disposition}");
             assets.dialogues = this.Helper.Load<Dictionary<string, string>>($"{this.assetsDir}/Dialogue/{disposition}.json");
         }
 

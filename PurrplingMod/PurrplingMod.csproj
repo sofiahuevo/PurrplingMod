@@ -73,7 +73,6 @@
     <Compile Include="PurrplingMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateMachine\CompanionStateMachine.cs" />
-    <Compile Include="StateMachine\ICompanionState.cs" />
     <Compile Include="StateMachine\State\AvailableState.cs" />
     <Compile Include="StateMachine\State\ResetState.cs" />
   </ItemGroup>

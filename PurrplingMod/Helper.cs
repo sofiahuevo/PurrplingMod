@@ -37,8 +37,8 @@ namespace PurrplingMod
 
         public static bool CanRequestDialog(Farmer farmer, NPC npc)
         {
-            // Can't request dialogue if giftable object is in farmer's hands
-            bool forbidden = farmer.ActiveObject != null && farmer.ActiveObject.canBeGivenAsGift();
+            // Can't request dialogue if giftable object is in farmer's hands or npc has current dialogues
+            bool forbidden = (farmer.ActiveObject != null && farmer.ActiveObject.canBeGivenAsGift()) || npc.CurrentDialogue.Count > 0;
 
             if (!forbidden && IsSpouseMarriedToFarmer(npc, farmer))
             {

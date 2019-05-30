@@ -13,10 +13,10 @@ namespace PurrplingMod.Driver
         public event EventHandler<SpeakerChangedArgs> SpeakerChanged;
         public event EventHandler<DialogueRequestArgs> DialogueRequested;
 
-        public DialogueDriver()
+        public DialogueDriver(IModEvents events)
         {
-            PurrplingMod.Events.GameLoop.UpdateTicking += this.Update;
-            PurrplingMod.Events.Input.ButtonPressed += this.HandleAction;
+            events.GameLoop.UpdateTicking += this.Update;
+            events.Input.ButtonPressed += this.HandleAction;
         }
 
         public Dialogue CurrentDialogue { get; private set; }

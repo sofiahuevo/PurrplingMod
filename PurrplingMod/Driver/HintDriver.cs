@@ -17,17 +17,22 @@ namespace PurrplingMod.Driver
 
         public event EventHandler<CheckHintArgs> CheckHint;
 
-        public Hint ShowHint { get; set; }
+        private Hint showHint;
         public ICursorPosition CursorPosition { get; private set; }
-        public HintDriver()
+        public HintDriver(IModEvents events)
         {
-            PurrplingMod.Events.Input.CursorMoved += this.Input_CursorMoved;
-            PurrplingMod.Events.GameLoop.UpdateTicking += this.Update;
+            events.Input.CursorMoved += this.Input_CursorMoved;
+            events.GameLoop.UpdateTicking += this.Update;
         }
 
         public void ResetHint()
         {
-            this.ShowHint = Hint.NONE;
+            this.showHint = Hint.NONE;
+        }
+
+        public void ShowHint(Hint hint)
+        {
+            this.showHint = hint;
         }
 
         private void Input_CursorMoved(object sender, CursorMovedEventArgs e)
@@ -46,7 +51,10 @@ namespace PurrplingMod.Driver
                 // Try next Y position if no NPC fetched
                 n = location.isCharacterAtTile(cursorTile + new Vector2(0f, 1f));
                 if (n == null)
+                {
                     this.ResetHint();
+                    return;
+                }
             }
 
             this.OnCheckHint(n);
@@ -58,7 +66,7 @@ namespace PurrplingMod.Driver
             if (!Context.IsWorldReady)
                 return;
 
-            switch (this.ShowHint)
+            switch (this.showHint)
             {
                 case Hint.DIALOGUE:
                     Game1.mouseCursor = 4;
@@ -71,7 +79,7 @@ namespace PurrplingMod.Driver
                     break;
             }
 
-            if (this.ShowHint != Hint.NONE)
+            if (this.showHint != Hint.NONE)
             {
                 Vector2 tileLocation = this.CursorPosition.Tile;
                 Game1.mouseCursorTransparency = !Utility.tileWithinRadiusOfPlayer((int)tileLocation.X, (int)tileLocation.Y, 1, Game1.player) ? 0.5f : 1f;

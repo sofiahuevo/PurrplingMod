@@ -1,4 +1,6 @@
-﻿using StardewValley;
+﻿using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,20 +9,24 @@ using System.Threading.Tasks;
 
 namespace PurrplingMod.StateMachine
 {
-    public abstract class CompanionState: ICompanionState
+    public interface ICompanionState
     {
-        public CompanionStateMachine StateMachine { get; private set; }
+        ICompanionStateMachine StateMachine { get; }
 
-        public Farmer Leader
-        {
-            get
-            {
-                return this.StateMachine.CompanionManager?.Leader;
-            }
-        }
-        public CompanionState(CompanionStateMachine stateMachine)
+        void Entry();
+        void Exit();
+    }
+
+    internal abstract class CompanionState : ICompanionState
+    {
+        public ICompanionStateMachine StateMachine { get; private set; }
+        protected IModEvents Events { get; }
+        protected IMonitor Monitor { get; }
+
+        public CompanionState(CompanionStateMachine stateMachine, IModEvents events)
         {
             this.StateMachine = stateMachine ?? throw new Exception("State Machine must be set!");
+            this.Events = events;
         }
 
         public abstract void Entry();
