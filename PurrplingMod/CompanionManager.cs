@@ -69,6 +69,15 @@ namespace PurrplingMod
             }
         }
 
+        internal void CompanionRecuited(string companionName)
+        {
+            foreach (var csmKv in this.PossibleCompanions)
+            {
+                if (csmKv.Value.Name != companionName)
+                    csmKv.Value.MakeUnavailable();
+            }
+        }
+
         public void ResetStateMachines()
         {
             foreach (var companionKv in this.PossibleCompanions)

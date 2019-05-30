@@ -36,6 +36,8 @@ namespace PurrplingMod.StateMachine
             {
                 [StateFlag.RESET] = new ResetState(this, events),
                 [StateFlag.AVAILABLE] = new AvailableState(this, events),
+                [StateFlag.RECRUITED] = new RecruitedState(this, events),
+                [StateFlag.UNAVAILABLE] = new UnavailableState(this, events),
             };
             this.assets = assets;
             this.Monitor = monitor;
@@ -70,12 +72,28 @@ namespace PurrplingMod.StateMachine
         public void NewDaySetup()
         {
             DialogueHelper.SetupDialogues(this.Companion, this.assets.dialogues);
+            this.MakeAvailable();
+        }
+
+        public void MakeAvailable()
+        {
             this.ChangeState(StateFlag.AVAILABLE);
+        }
+
+        public void MakeUnavailable()
+        {
+            this.ChangeState(StateFlag.UNAVAILABLE);
         }
 
         public void ResetStateMachine()
         {
-            this.ChangeState((int)StateFlag.RESET);
+            this.ChangeState(StateFlag.RESET);
+        }
+
+        public void Recruit()
+        {
+            this.ChangeState(StateFlag.RECRUITED);
+            this.CompanionManager.CompanionRecuited(this.Companion.Name);
         }
 
         public void Dispose()

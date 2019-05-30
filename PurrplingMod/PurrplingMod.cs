@@ -32,7 +32,7 @@ namespace PurrplingMod
 
         private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
         {
-            throw new NotImplementedException();
+            this.companionManager.ResetStateMachines();
         }
 
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)

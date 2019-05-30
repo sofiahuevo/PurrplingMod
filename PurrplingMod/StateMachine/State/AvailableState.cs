@@ -34,11 +34,15 @@ namespace PurrplingMod.StateMachine.State
         {
             if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 4)
                 Game1.drawDialogue(n, DialogueHelper.GetDialogueString(n, "companionRejected"));
-            else if (Game1.timeOfDay > 2200 && !Helper.IsSpouseMarriedToFarmer(n, leader))
+            else if (Game1.timeOfDay >= 2200 && !Helper.IsSpouseMarriedToFarmer(n, leader))
+            {
                 Game1.drawDialogue(n, DialogueHelper.GetDialogueString(n, "companionRejectedNight"));
+                this.StateMachine.MakeUnavailable();
+            }
             else
             {
                 Game1.drawDialogue(n, DialogueHelper.GetDialogueString(n, "companionAccepted"));
+                this.StateMachine.Recruit();
             }
         }
 

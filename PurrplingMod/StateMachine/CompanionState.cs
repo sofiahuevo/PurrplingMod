@@ -19,7 +19,6 @@ namespace PurrplingMod.StateMachine
     {
         public CompanionStateMachine StateMachine { get; private set; }
         protected IModEvents Events { get; }
-        protected IMonitor Monitor { get; }
 
         public CompanionState(CompanionStateMachine stateMachine, IModEvents events)
         {
