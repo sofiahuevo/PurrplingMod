@@ -1,4 +1,4 @@
-﻿using PurrplingMod.Manager;
+﻿using PurrplingMod.Utils;
 using StardewModdingAPI.Events;
 using StardewValley;
 
@@ -18,8 +18,8 @@ namespace PurrplingMod.StateMachine.State
 
         private void StateMachine_ResolvingDialogueRequest(object sender, System.EventArgs e)
         {
-            Farmer leader = this.StateMachine.CompanionManager.Leader;
-            GameLocation location = this.StateMachine.CompanionManager.Leader.currentLocation;
+            Farmer leader = this.StateMachine.CompanionManager.Farmer;
+            GameLocation location = this.StateMachine.CompanionManager.Farmer.currentLocation;
             location.createQuestionDialogue($"Ask {this.StateMachine.Companion.displayName} to follow?", location.createYesNoResponses(), (_, answer) => {
                 if (answer == "Yes")
                 {
@@ -32,15 +32,13 @@ namespace PurrplingMod.StateMachine.State
 
         private void ResolveAsk(NPC n, Farmer leader)
         {
-            IDialogueManager dialogueManager = this.StateMachine.DialogueManager;
-
             if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 4)
-                Game1.drawDialogue(n, dialogueManager.GetDialogueString("companionRejected"));
+                Game1.drawDialogue(n, DialogueHelper.GetDialogueString(n, "companionRejected"));
             else if (Game1.timeOfDay > 2200 && !Helper.IsSpouseMarriedToFarmer(n, leader))
-                Game1.drawDialogue(n, dialogueManager.GetDialogueString("companionRejectedNight"));
+                Game1.drawDialogue(n, DialogueHelper.GetDialogueString(n, "companionRejectedNight"));
             else
             {
-                Game1.drawDialogue(n, dialogueManager.GetDialogueString("companionAccepted"));
+                Game1.drawDialogue(n, DialogueHelper.GetDialogueString(n, "companionAccepted"));
             }
         }
 

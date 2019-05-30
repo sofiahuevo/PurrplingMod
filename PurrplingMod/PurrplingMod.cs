@@ -1,12 +1,6 @@
 ﻿using System;
-using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
-using StardewValley;
-using StardewValley.Locations;
-using System.Collections.Generic;
-using PurrplingMod.Manager;
 using PurrplingMod.Loader;
 using PurrplingMod.Driver;
 

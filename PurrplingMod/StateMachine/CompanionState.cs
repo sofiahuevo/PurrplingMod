@@ -11,15 +11,13 @@ namespace PurrplingMod.StateMachine
 {
     public interface ICompanionState
     {
-        ICompanionStateMachine StateMachine { get; }
-
         void Entry();
         void Exit();
     }
 
     internal abstract class CompanionState : ICompanionState
     {
-        public ICompanionStateMachine StateMachine { get; private set; }
+        public CompanionStateMachine StateMachine { get; private set; }
         protected IModEvents Events { get; }
         protected IMonitor Monitor { get; }
 

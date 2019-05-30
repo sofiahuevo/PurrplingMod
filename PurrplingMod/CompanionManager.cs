@@ -6,33 +6,20 @@ using StardewModdingAPI;
 using PurrplingMod.Driver;
 using PurrplingMod.Loader;
 using StardewModdingAPI.Events;
+using PurrplingMod.Utils;
 
-namespace PurrplingMod.Manager
+namespace PurrplingMod
 {
-    public interface ICompanionManager
-    {
-        Dictionary<string, ContentLoader.AssetsContent> AssetsRegistry { get; }
-        Farmer Leader { get; }
-        Dictionary<string, ICompanionStateMachine> PossibleCompanions { get; }
-
-        void InitializeCompanions();
-        void ResetStateMachines();
-        void UninitializeCompanions();
-    }
-
-    internal class CompanionManager : ICompanionManager
+    internal class CompanionManager
     {
         private readonly DialogueDriver dialogueDriver;
         private readonly HintDriver hintDriver;
         private readonly IMonitor monitor;
         private readonly IModEvents events;
-        private Dictionary<string, ContentLoader.AssetsContent> contentAssetsMap;
+        private Dictionary<string, CompanionStateMachine> PossibleCompanions { get; set; }
+        private Dictionary<string, ContentLoader.AssetsContent> AssetsRegistry { get; }
 
-        public Dictionary<string, ICompanionStateMachine> PossibleCompanions { get; private set; }
-
-        public Dictionary<string, ContentLoader.AssetsContent> AssetsRegistry { get; }
-
-        public Farmer Leader
+        public Farmer Farmer
         {
             get
             {
@@ -52,7 +39,7 @@ namespace PurrplingMod.Manager
             this.hintDriver = hintDriver ?? throw new ArgumentNullException(nameof(hintDriver));
             this.monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
             this.events = events;
-            this.PossibleCompanions = new Dictionary<string, ICompanionStateMachine>();
+            this.PossibleCompanions = new Dictionary<string, CompanionStateMachine>();
             this.AssetsRegistry = assetsRegistry;
 
             this.dialogueDriver.DialogueRequested += this.DialogueDriver_DialogueRequested;
@@ -64,11 +51,11 @@ namespace PurrplingMod.Manager
             if (e.Npc == null)
                 return;
 
-            if (this.PossibleCompanions.TryGetValue(e.Npc.Name, out ICompanionStateMachine csm)
+            if (this.PossibleCompanions.TryGetValue(e.Npc.Name, out CompanionStateMachine csm)
                 && csm.Name == e.Npc?.Name
                 && csm.canDialogueRequestResolve()
                 && e.Npc.CurrentDialogue.Count == 0
-                && Helper.CanRequestDialog(this.Leader, e.Npc))
+                && Helper.CanRequestDialog(this.Farmer, e.Npc))
             {
                 this.hintDriver.ShowHint(HintDriver.Hint.DIALOGUE);
             }
@@ -76,7 +63,7 @@ namespace PurrplingMod.Manager
 
         private void DialogueDriver_DialogueRequested(object sender, DialogueRequestArgs e)
         {
-            if (this.PossibleCompanions.TryGetValue(e.WithWhom.Name, out ICompanionStateMachine csm) && csm.Name == e.WithWhom.Name)
+            if (this.PossibleCompanions.TryGetValue(e.WithWhom.Name, out CompanionStateMachine csm) && csm.Name == e.WithWhom.Name)
             {
                 csm.ResolveDialogueRequest();
             }

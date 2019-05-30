@@ -4,9 +4,9 @@ using System.Reflection;
 using Microsoft.Xna.Framework;
 using StardewValley;
 
-namespace PurrplingMod
+namespace PurrplingMod.Utils
 {
-    public static class Helper
+    internal static class Helper
     {
         public static bool IsNPCAtTile(GameLocation location, Vector2 tile, NPC whichNPC = null)
         {
