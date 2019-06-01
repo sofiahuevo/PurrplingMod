@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PurrplingMod.Internal;
 using PurrplingMod.Loader;
 using PurrplingMod.StateMachine.State;
 using PurrplingMod.Utils;
@@ -26,8 +27,6 @@ namespace PurrplingMod.StateMachine
         private ContentLoader.AssetsContent assets;
         private ICompanionState currentState;
 
-        public event EventHandler ResolvingDialogueRequest;
-
         public CompanionStateMachine(CompanionManager manager, NPC companion, ContentLoader.AssetsContent assets, IModEvents events, IMonitor monitor = null)
         {
             this.CompanionManager = manager;
@@ -52,10 +51,14 @@ namespace PurrplingMod.StateMachine
             }
         }
 
-        private void ChangeState(StateFlag state)
+        public StateFlag CurrentStateFlag { get; private set; }
+        public Dictionary<int, SchedulePathDescription> BackedupSchedule { get; internal set; }
+        public bool RecruitedToday { get; private set; }
+
+        private void ChangeState(StateFlag stateFlag)
         {
-            if (!this.States.TryGetValue(state, out ICompanionState newState))
-                throw new Exception($"Unknown state: {state}");
+            if (!this.States.TryGetValue(stateFlag, out ICompanionState newState))
+                throw new InvalidStateException($"Unknown state: {stateFlag}");
 
             if (this.currentState == newState)
                 return;
@@ -67,11 +70,17 @@ namespace PurrplingMod.StateMachine
 
             newState.Entry();
             this.currentState = newState;
+            this.Monitor.Log($"{this.Name} changed state: {this.CurrentStateFlag.ToString()} -> {stateFlag.ToString()}");
+            this.CurrentStateFlag = stateFlag;
         }
 
         public void NewDaySetup()
         {
+            if (this.CurrentStateFlag != StateFlag.RESET)
+                throw new InvalidStateException($"State machine {this.Name} must be in reset state!");
+
             DialogueHelper.SetupDialogues(this.Companion, this.assets.dialogues);
+            this.RecruitedToday = false;
             this.MakeAvailable();
         }
 
@@ -90,8 +99,20 @@ namespace PurrplingMod.StateMachine
             this.ChangeState(StateFlag.RESET);
         }
 
+        internal void Dismiss()
+        {
+            this.ResetStateMachine();
+            (this.currentState as ResetState).ReintegrateCompanionNPC();
+            this.BackedupSchedule = null;
+            this.ChangeState(StateFlag.UNAVAILABLE);
+            this.CompanionManager.CompanionDissmised();
+        }
+
         public void Recruit()
         {
+            this.BackedupSchedule = this.Companion.Schedule;
+            this.RecruitedToday = true;
+
             this.ChangeState(StateFlag.RECRUITED);
             this.CompanionManager.CompanionRecuited(this.Companion.Name);
         }
@@ -110,12 +131,22 @@ namespace PurrplingMod.StateMachine
 
         public void ResolveDialogueRequest()
         {
-            this.ResolvingDialogueRequest?.Invoke(this, new EventArgs());
+            if (!this.CanDialogueRequestResolve())
+                return;
+
+            (this.currentState as IRequestedDialogueCreator).CreateRequestedDialogue();
         }
 
-        public bool canDialogueRequestResolve()
+        public bool CanDialogueRequestResolve()
         {
-            return this.ResolvingDialogueRequest != null;
+            return this.currentState is IRequestedDialogueCreator dcreator && dcreator.CanCreateDialogue;
+        }
+    }
+
+    class InvalidStateException : Exception
+    {
+        public InvalidStateException(string message) : base(message)
+        {
         }
     }
 }

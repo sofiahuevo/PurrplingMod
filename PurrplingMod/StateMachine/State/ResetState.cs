@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
+using StardewValley;
+using StardewValley.Locations;
 
 namespace PurrplingMod.StateMachine.State
 {
@@ -13,20 +16,46 @@ namespace PurrplingMod.StateMachine.State
         {
         }
 
-        public override void Entry()
+        public void ReintegrateCompanionNPC()
         {
-            this.Events.GameLoop.DayStarted += this.GameLoop_DayStarted;
-            this.StateMachine.Monitor.Log($"Reset {this.StateMachine.Name}");
+            NPC companion = this.StateMachine.Companion;
+
+            Game1.fadeBlack();
+
+            companion.controller = null;
+            companion.Schedule = this.StateMachine.BackedupSchedule;
+            companion.followSchedule = true;
+            companion.farmerPassesThrough = false;
+
+            this.DelayedWarp(companion, companion.DefaultMap, companion.DefaultPosition, 500, new Action(this.CompanionCleanUp));
         }
 
-        private void GameLoop_DayStarted(object sender, StardewModdingAPI.Events.DayStartedEventArgs e)
+        private void CompanionCleanUp()
         {
-            this.StateMachine.NewDaySetup();
+            NPC companion = this.StateMachine.Companion;
+            Farmer farmer = this.StateMachine.CompanionManager.Farmer;
+
+            if (farmer.spouse.Equals(companion.Name))
+            {
+                companion.setTilePosition((companion.currentLocation as FarmHouse).getKitchenStandingSpot());
+            }
+
+            companion.checkSchedule(Game1.timeOfDay);
         }
 
-        public override void Exit()
+        private async void DelayedWarp(NPC companion, string location, Vector2 tileLocation, int milliseconds, Action afterWarpAction)
         {
-            this.Events.GameLoop.DayStarted -= this.GameLoop_DayStarted;
+            await Task.Run(() => this.Timer(milliseconds));
+            if (companion.currentLocation != null)
+                Game1.warpCharacter(companion, location, tileLocation);
+            afterWarpAction.Invoke();
+        }
+
+        private int Timer(int milliseconds)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            while (watch.ElapsedMilliseconds < milliseconds) ;
+            return 0;
         }
     }
 }

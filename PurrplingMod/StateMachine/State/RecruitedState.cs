@@ -4,13 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PurrplingMod.Controller;
+using PurrplingMod.Internal;
+using PurrplingMod.Utils;
 using StardewModdingAPI.Events;
+using StardewValley;
 
 namespace PurrplingMod.StateMachine.State
 {
-    internal class RecruitedState : CompanionState
+    internal class RecruitedState : CompanionState, IRequestedDialogueCreator
     {
         private FollowController followController;
+
+        public bool CanCreateDialogue { get; private set; }
 
         public RecruitedState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events)
         {
@@ -28,7 +33,7 @@ namespace PurrplingMod.StateMachine.State
             this.StateMachine.Companion.controller = null;
 
             this.Events.GameLoop.UpdateTicking += this.GameLoop_UpdateTicking;
-            this.StateMachine.Monitor.Log($"{this.StateMachine.Name} is now RECRUITED!");
+            this.CanCreateDialogue = true;
         }
 
         private void GameLoop_UpdateTicking(object sender, UpdateTickingEventArgs e)
@@ -40,9 +45,42 @@ namespace PurrplingMod.StateMachine.State
 
         public override void Exit()
         {
+            this.CanCreateDialogue = false;
             this.Events.GameLoop.UpdateTicking -= this.GameLoop_UpdateTicking;
 
             this.followController = null;
+        }
+
+        public void CreateRequestedDialogue()
+        {
+            Farmer leader = this.StateMachine.CompanionManager.Farmer;
+            GameLocation location = this.StateMachine.CompanionManager.Farmer.currentLocation;
+            Response[] responses =
+            {
+                new Response("bag", "Can I use your bag?"),
+                new Response("dismiss", "You are free today. Thank you for support, bye"),
+                new Response("nothing", "(Nothing)"),
+            };
+
+            location.createQuestionDialogue($"What you do want?", responses, (_, answer) => {
+                if (answer != "nothing")
+                {
+                    this.StateMachine.Companion.Halt();
+                    this.StateMachine.Companion.facePlayer(leader);
+                    this.ResolveAsk(this.StateMachine.Companion, leader, answer);
+                }
+            }, this.StateMachine.Companion);
+        }
+
+        private void ResolveAsk(NPC companion, Farmer leader, string action)
+        {
+            switch (action)
+            {
+                case "dismiss":
+                    Game1.drawDialogue(companion, DialogueHelper.GetDialogueString(companion, "dismiss"));
+                    this.StateMachine.Dismiss();
+                    break;
+            }
         }
     }
 }

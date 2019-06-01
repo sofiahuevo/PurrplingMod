@@ -1,33 +1,24 @@
 ﻿using PurrplingMod.Utils;
+using PurrplingMod.Internal;
 using StardewModdingAPI.Events;
 using StardewValley;
 
 namespace PurrplingMod.StateMachine.State
 {
-    internal class AvailableState : CompanionState
+    internal class AvailableState : CompanionState, IRequestedDialogueCreator
     {
-        public AvailableState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events)
-        {
-        }
+        public bool CanCreateDialogue { get; private set; }
+
+        public AvailableState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events) {}
 
         public override void Entry()
         {
-            this.StateMachine.ResolvingDialogueRequest += this.StateMachine_ResolvingDialogueRequest;
-            this.StateMachine.Monitor.Log($"{this.StateMachine.Name} is now available to recruit!");
+            this.CanCreateDialogue = true;
         }
 
-        private void StateMachine_ResolvingDialogueRequest(object sender, System.EventArgs e)
+        public override void Exit()
         {
-            Farmer leader = this.StateMachine.CompanionManager.Farmer;
-            GameLocation location = this.StateMachine.CompanionManager.Farmer.currentLocation;
-            location.createQuestionDialogue($"Ask {this.StateMachine.Companion.displayName} to follow?", location.createYesNoResponses(), (_, answer) => {
-                if (answer == "Yes")
-                {
-                    this.StateMachine.Companion.Halt();
-                    this.StateMachine.Companion.facePlayer(leader);
-                    this.ResolveAsk(this.StateMachine.Companion, leader);
-                }
-            }, null);
+            this.CanCreateDialogue = false;
         }
 
         private void ResolveAsk(NPC n, Farmer leader)
@@ -46,9 +37,18 @@ namespace PurrplingMod.StateMachine.State
             }
         }
 
-        public override void Exit()
+        public void CreateRequestedDialogue()
         {
-            this.StateMachine.ResolvingDialogueRequest -= this.StateMachine_ResolvingDialogueRequest;
+            Farmer leader = this.StateMachine.CompanionManager.Farmer;
+            GameLocation location = this.StateMachine.CompanionManager.Farmer.currentLocation;
+            location.createQuestionDialogue($"Ask {this.StateMachine.Companion.displayName} to follow?", location.createYesNoResponses(), (_, answer) => {
+                if (answer == "Yes")
+                {
+                    this.StateMachine.Companion.Halt();
+                    this.StateMachine.Companion.facePlayer(leader);
+                    this.ResolveAsk(this.StateMachine.Companion, leader);
+                }
+            }, null);
         }
     }
 }

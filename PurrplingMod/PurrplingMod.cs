@@ -20,6 +20,7 @@ namespace PurrplingMod
             helper.Events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
             helper.Events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;
             helper.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
+            helper.Events.GameLoop.DayStarted += this.GameLoop_DayStarted;
 
             this.DialogueDriver = new DialogueDriver(helper.Events);
             this.HintDriver = new HintDriver(helper.Events);
@@ -28,6 +29,11 @@ namespace PurrplingMod
             loader.Load("CompanionDispositions.json");
 
             this.companionManager = new CompanionManager(loader.ContentAssetsMap, this.DialogueDriver, this.HintDriver, helper.Events, this.Monitor);
+        }
+
+        private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
+        {
+            this.companionManager.NewDaySetup();
         }
 
         private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)

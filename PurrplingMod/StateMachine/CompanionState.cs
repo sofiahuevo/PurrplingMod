@@ -26,7 +26,7 @@ namespace PurrplingMod.StateMachine
             this.Events = events;
         }
 
-        public abstract void Entry();
-        public abstract void Exit();
+        public virtual void Entry() {}
+        public virtual void Exit() {}
     }
 }

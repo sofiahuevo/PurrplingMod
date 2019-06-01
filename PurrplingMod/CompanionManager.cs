@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using PurrplingMod.StateMachine;
 using StardewValley;
 using StardewModdingAPI;
@@ -53,7 +54,7 @@ namespace PurrplingMod
 
             if (this.PossibleCompanions.TryGetValue(e.Npc.Name, out CompanionStateMachine csm)
                 && csm.Name == e.Npc?.Name
-                && csm.canDialogueRequestResolve()
+                && csm.CanDialogueRequestResolve()
                 && e.Npc.CurrentDialogue.Count == 0
                 && Helper.CanRequestDialog(this.Farmer, e.Npc))
             {
@@ -82,6 +83,29 @@ namespace PurrplingMod
         {
             foreach (var companionKv in this.PossibleCompanions)
                 companionKv.Value.ResetStateMachine();
+        }
+
+        public void NewDaySetup()
+        {
+            try
+            {
+                foreach (var companionKv in this.PossibleCompanions)
+                    companionKv.Value.NewDaySetup();
+            }
+            catch (InvalidStateException e)
+            {
+                this.monitor.Log($"Error while trying to setup new day: {e.Message}");
+                this.monitor.ExitGameImmediately(e.Message);
+            }
+        }
+
+        internal void CompanionDissmised()
+        {
+            foreach (var csmKv in this.PossibleCompanions)
+            {
+                if (!csmKv.Value.RecruitedToday)
+                    csmKv.Value.MakeAvailable();
+            }
         }
 
         public void InitializeCompanions()
