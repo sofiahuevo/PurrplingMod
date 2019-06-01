@@ -99,13 +99,13 @@ namespace PurrplingMod.StateMachine
             this.ChangeState(StateFlag.RESET);
         }
 
-        internal void Dismiss()
+        internal void Dismiss(bool keepUnavailableOthers = false)
         {
             this.ResetStateMachine();
             (this.currentState as ResetState).ReintegrateCompanionNPC();
             this.BackedupSchedule = null;
             this.ChangeState(StateFlag.UNAVAILABLE);
-            this.CompanionManager.CompanionDissmised();
+            this.CompanionManager.CompanionDissmised(keepUnavailableOthers);
         }
 
         public void Recruit()

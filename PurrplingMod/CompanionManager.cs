@@ -16,7 +16,6 @@ namespace PurrplingMod
         private readonly DialogueDriver dialogueDriver;
         private readonly HintDriver hintDriver;
         private readonly IMonitor monitor;
-        private readonly IModEvents events;
         private Dictionary<string, CompanionStateMachine> PossibleCompanions { get; set; }
         private Dictionary<string, ContentLoader.AssetsContent> AssetsRegistry { get; }
 
@@ -33,13 +32,11 @@ namespace PurrplingMod
         public CompanionManager(Dictionary<string, ContentLoader.AssetsContent> assetsRegistry,
                                 DialogueDriver dialogueDriver,
                                 HintDriver hintDriver,
-                                IModEvents events,
                                 IMonitor monitor)
         {
             this.dialogueDriver = dialogueDriver ?? throw new ArgumentNullException(nameof(dialogueDriver));
             this.hintDriver = hintDriver ?? throw new ArgumentNullException(nameof(hintDriver));
             this.monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
-            this.events = events;
             this.PossibleCompanions = new Dictionary<string, CompanionStateMachine>();
             this.AssetsRegistry = assetsRegistry;
 
@@ -99,16 +96,18 @@ namespace PurrplingMod
             }
         }
 
-        internal void CompanionDissmised()
+        internal void CompanionDissmised(bool keepUnavailable = false)
         {
             foreach (var csmKv in this.PossibleCompanions)
             {
-                if (!csmKv.Value.RecruitedToday)
+                if (keepUnavailable)
+                    csmKv.Value.MakeUnavailable();
+                else if (!csmKv.Value.RecruitedToday)
                     csmKv.Value.MakeAvailable();
             }
         }
 
-        public void InitializeCompanions()
+        public void InitializeCompanions(IModEvents gameEvents)
         {
             foreach (string npcName in this.AssetsRegistry.Keys)
             {
@@ -117,7 +116,7 @@ namespace PurrplingMod
                 if (companion == null)
                     throw new Exception($"Can't find NPC with name '{npcName}'");
 
-                this.PossibleCompanions.Add(npcName, new CompanionStateMachine(this, companion, this.AssetsRegistry[npcName], this.events, this.monitor));
+                this.PossibleCompanions.Add(npcName, new CompanionStateMachine(this, companion, this.AssetsRegistry[npcName], gameEvents, this.monitor));
             }
 
             this.monitor.Log($"Initalized {this.PossibleCompanions.Count} companions.", LogLevel.Info);

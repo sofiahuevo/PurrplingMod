@@ -28,7 +28,7 @@ namespace PurrplingMod
             ContentLoader loader = new ContentLoader(helper.Content, "assets", this.Monitor);
             loader.Load("CompanionDispositions.json");
 
-            this.companionManager = new CompanionManager(loader.ContentAssetsMap, this.DialogueDriver, this.HintDriver, helper.Events, this.Monitor);
+            this.companionManager = new CompanionManager(loader.ContentAssetsMap, this.DialogueDriver, this.HintDriver, this.Monitor);
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
@@ -48,7 +48,7 @@ namespace PurrplingMod
 
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
-            this.companionManager.InitializeCompanions();
+            this.companionManager.InitializeCompanions(this.Helper.Events);
         }
     }
 }

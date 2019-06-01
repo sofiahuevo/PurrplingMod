@@ -33,7 +33,18 @@ namespace PurrplingMod.StateMachine.State
             this.StateMachine.Companion.controller = null;
 
             this.Events.GameLoop.UpdateTicking += this.GameLoop_UpdateTicking;
+            this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
             this.CanCreateDialogue = true;
+        }
+
+        private void GameLoop_TimeChanged(object sender, TimeChangedEventArgs e)
+        {
+            if (e.NewTime >= 2200)
+            {
+                NPC companion = this.StateMachine.Companion;
+                Game1.drawDialogue(companion, DialogueHelper.GetDialogueString(companion, "companionDismissAuto"));
+                this.StateMachine.Dismiss(true);
+            }
         }
 
         private void GameLoop_UpdateTicking(object sender, UpdateTickingEventArgs e)
@@ -47,6 +58,7 @@ namespace PurrplingMod.StateMachine.State
         {
             this.CanCreateDialogue = false;
             this.Events.GameLoop.UpdateTicking -= this.GameLoop_UpdateTicking;
+            this.Events.GameLoop.TimeChanged -= this.GameLoop_TimeChanged;
 
             this.followController = null;
         }
@@ -77,7 +89,7 @@ namespace PurrplingMod.StateMachine.State
             switch (action)
             {
                 case "dismiss":
-                    Game1.drawDialogue(companion, DialogueHelper.GetDialogueString(companion, "dismiss"));
+                    Game1.drawDialogue(companion, DialogueHelper.GetDialogueString(companion, "companionDismiss"));
                     this.StateMachine.Dismiss();
                     break;
             }
