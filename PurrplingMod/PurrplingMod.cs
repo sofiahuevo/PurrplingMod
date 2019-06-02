@@ -33,7 +33,7 @@ namespace PurrplingMod
 
         private void GameLoop_GameLaunched(object sender, GameLaunchedEventArgs e)
         {
-            /* Preload assets */
+            /* Preload assets to cache */
             this.Monitor.Log("Preloading assets...", LogLevel.Info);
 
             string[] dispositions = this.contentLoader.Load<string[]>("CompanionDispositions");
@@ -42,6 +42,8 @@ namespace PurrplingMod
             {
                 this.contentLoader.Load<Dictionary<string, string>>($"Dialogue/{npcName}");
             }
+
+            this.Monitor.Log("Assets preloaded!", LogLevel.Info);
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)

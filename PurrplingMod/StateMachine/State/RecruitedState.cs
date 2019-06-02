@@ -40,6 +40,8 @@ namespace PurrplingMod.StateMachine.State
                 NPC companion = this.StateMachine.Companion;
                 Dialogue dismissalDialogue = new Dialogue(DialogueHelper.GetDialogueString(companion, "companionDismissAuto"), companion);
                 this.dismissalDialogue = dismissalDialogue;
+                this.StateMachine.Companion.doEmote(24);
+                this.StateMachine.Companion.updateEmote(Game1.currentGameTime);
                 DialogueHelper.DrawDialogue(dismissalDialogue);
             }
         }
