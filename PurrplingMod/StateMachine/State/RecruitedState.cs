@@ -4,6 +4,7 @@ using PurrplingMod.Utils;
 using StardewModdingAPI.Events;
 using StardewValley;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PurrplingMod.StateMachine.State
 {
@@ -11,12 +12,11 @@ namespace PurrplingMod.StateMachine.State
     {
         private FollowController followController;
         private Dialogue dismissalDialogue;
+        private Dialogue currentLocationDialogue;
 
         public bool CanCreateDialogue { get; private set; }
 
-        public RecruitedState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events)
-        {
-        }
+        public RecruitedState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events) {}
 
         public override void Entry()
         {
@@ -35,6 +35,7 @@ namespace PurrplingMod.StateMachine.State
             this.Events.Player.Warped += this.Player_Warped;
 
             this.CanCreateDialogue = true;
+            this.StateMachine.Companion.setNewDialogue(DialogueHelper.GetDialogueString(this.StateMachine.Companion, "companionAfterRecruit"));
         }
 
         public override void Exit()
@@ -84,7 +85,42 @@ namespace PurrplingMod.StateMachine.State
                 // Show above head bubble text for location
                 if (DialogueHelper.GetBubbleString(bubbles, companion, e.NewLocation, out string bubble))
                     companion.showTextAboveHead(bubble, preTimer: 250);
+
+                // Push new location dialogue
+                this.TryPushLocationDialogue(e.NewLocation);
             }
+        }
+
+        private bool TryPushLocationDialogue(GameLocation location)
+        {
+            NPC companion = this.StateMachine.Companion;
+            Dialogue newDialogue = DialogueHelper.GenerateDialogueByLocation(companion, location, "companion");
+            Stack<Dialogue> temp = new Stack<Dialogue>(this.StateMachine.Companion.CurrentDialogue.Count);
+
+            if (newDialogue == null && this.currentLocationDialogue == null)
+                return false;
+
+            // Remove old location dialogue
+            while (this.StateMachine.Companion.CurrentDialogue.Count > 0)
+            {
+                Dialogue d = this.StateMachine.Companion.CurrentDialogue.Pop();
+
+                if (!d.Equals(this.currentLocationDialogue))
+                    temp.Push(d);
+            }
+
+            while (temp.Count > 0)
+                this.StateMachine.Companion.CurrentDialogue.Push(temp.Pop());
+
+            this.currentLocationDialogue = newDialogue;
+
+            if (newDialogue != null)
+            {
+                this.StateMachine.Companion.CurrentDialogue.Push(newDialogue); // Push new location dialogue
+                return true;
+            }
+
+            return false;
         }
 
         public void CreateRequestedDialogue()

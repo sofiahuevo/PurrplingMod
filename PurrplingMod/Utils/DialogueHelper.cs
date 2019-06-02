@@ -62,6 +62,14 @@ namespace PurrplingMod.Utils
             return false;
         }
 
+        public static Dialogue GenerateDialogueByLocation(NPC n, GameLocation l, string key)
+        {
+            if (GetDialogueStringByLocation(n, key, l, out string text))
+                return new Dialogue(text, n);
+
+            return null;
+        }
+
         public static void SetupCompanionDialogues(NPC n, Dictionary<string, string> dialogues)
         {
             foreach (var pair in dialogues)

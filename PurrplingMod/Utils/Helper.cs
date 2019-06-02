@@ -30,7 +30,8 @@ namespace PurrplingMod.Utils
 
         public static bool IsSpouseMarriedToFarmer(NPC spouse, Farmer farmer)
         {
-            return farmer.spouse.Equals(spouse.Name)
+            return farmer.spouse != null
+                   && farmer.spouse.Equals(spouse.Name)
                    && farmer.isMarried()
                    && spouse.isMarried()
                    && spouse.getSpouse()?.spouse == spouse.Name;
