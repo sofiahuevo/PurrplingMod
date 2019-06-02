@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PurrplingMod.Internal
+namespace PurrplingMod.StateMachine.StateFeatures
 {
     interface IRequestedDialogueCreator
     {

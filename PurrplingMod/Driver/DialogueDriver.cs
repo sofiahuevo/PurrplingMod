@@ -10,7 +10,6 @@ namespace PurrplingMod.Driver
     public class DialogueDriver
     {
         public event EventHandler<DialogueChangedArgs> DialogueChanged;
-        public event EventHandler<DialogueEndedArgs> DialogueEnded;
         public event EventHandler<SpeakerChangedArgs> SpeakerChanged;
         public event EventHandler<DialogueRequestArgs> DialogueRequested;
 
@@ -94,28 +93,20 @@ namespace PurrplingMod.Driver
                 if (Game1.currentSpeaker != null)
                     this.OnSpeakerChange(this.CurrentSpeaker, Game1.currentSpeaker);
                 this.CurrentSpeaker = Game1.currentSpeaker;
-
-                if (this.CurrentSpeaker == null)
-                {
-                    // Dialogue ended
-                    this.OnEndDialogue(this.CurrentDialogue);
-                    this.CurrentDialogue = null;
-                    return;
-                }
             }
 
-            if (this.CurrentSpeaker == null)
+            if (this.CurrentSpeaker == null && this.CurrentDialogue == null)
                 return; // Nobody speaking, no dialogue can be changed
 
             Dialogue dialogue = null;
 
-            if (this.CurrentSpeaker.CurrentDialogue?.Count > 0)
+            if (this.CurrentSpeaker?.CurrentDialogue?.Count > 0)
                 dialogue = this.CurrentSpeaker.CurrentDialogue.Peek();
 
             // Check if dialogue is changed
             if (this.CurrentDialogue != dialogue)
             {
-                this.OnChangeDialogue(this.CurrentDialogue, dialogue, this.CurrentSpeaker.CurrentDialogue?.Count == 1);
+                this.OnChangeDialogue(this.CurrentDialogue, dialogue, this.CurrentSpeaker?.CurrentDialogue?.Count <= 1);
                 this.CurrentDialogue = dialogue;
             }
         }
@@ -133,19 +124,6 @@ namespace PurrplingMod.Driver
             };
 
             this.DialogueChanged(this, args);
-        }
-
-        private void OnEndDialogue(Dialogue previousDialogue)
-        {
-            if (this.DialogueEnded == null)
-                return;
-
-            DialogueEndedArgs args = new DialogueEndedArgs
-            {
-                PreviousDialogue = previousDialogue
-            };
-
-            this.DialogueEnded(this, args);
         }
 
         private void OnSpeakerChange(NPC previousSpeaker, NPC currentSpeaker)
@@ -168,11 +146,6 @@ namespace PurrplingMod.Driver
         public Dialogue CurrentDialogue { get; set; }
         public Dialogue PreviousDialogue { get; set; }
         public bool IsLastDialogue { get; set; }
-    }
-
-    public class DialogueEndedArgs : EventArgs
-    {
-        public Dialogue PreviousDialogue { get; set; }
     }
 
     public class SpeakerChangedArgs : EventArgs

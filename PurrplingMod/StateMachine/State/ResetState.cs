@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using PurrplingMod.StateMachine.StateFeatures;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -10,7 +8,7 @@ using StardewValley.Locations;
 
 namespace PurrplingMod.StateMachine.State
 {
-    internal class ResetState : CompanionState
+    internal class ResetState : CompanionState, ICompanionIntegrator
     {
         public ResetState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events)
         {

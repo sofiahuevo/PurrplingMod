@@ -32,7 +32,7 @@ namespace PurrplingMod.Controller
             this.pathToFollow = new Queue<Point>();
         }
 
-        public void Update(UpdateTickingEventArgs e)
+        public void Update(UpdateTickedEventArgs e)
         {
             if (this.follower == null || this.leader == null)
                 return;
@@ -52,7 +52,7 @@ namespace PurrplingMod.Controller
             this.UpdateFollowing(e, this.follower, this.leader);
         }
 
-        protected void UpdateFollowing(UpdateTickingEventArgs e, NPC follower, Character leader)
+        protected void UpdateFollowing(UpdateTickedEventArgs e, NPC follower, Character leader)
         {
             Point leaderTilePoint = leader.getTileLocationPoint();
             Point followerTilePoint = follower.getTileLocationPoint();

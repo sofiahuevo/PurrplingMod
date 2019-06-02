@@ -30,5 +30,13 @@ namespace PurrplingMod.Utils
             foreach (var pair in dialogues)
                 n.Dialogue[pair.Key] = pair.Value;
         }
+
+        public static void DrawDialogue(Dialogue dialogue)
+        {
+            NPC speaker = dialogue.speaker;
+
+            speaker.CurrentDialogue.Push(dialogue);
+            Game1.drawDialogue(speaker);
+        }
     }
 }

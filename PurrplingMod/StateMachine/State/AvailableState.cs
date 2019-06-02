@@ -1,12 +1,15 @@
 ﻿using PurrplingMod.Utils;
-using PurrplingMod.Internal;
+using PurrplingMod.StateMachine.StateFeatures;
 using StardewModdingAPI.Events;
 using StardewValley;
 
 namespace PurrplingMod.StateMachine.State
 {
-    internal class AvailableState : CompanionState, IRequestedDialogueCreator
+    internal class AvailableState : CompanionState, IRequestedDialogueCreator, IDialogueDetector
     {
+        private Dialogue acceptalDialogue;
+        private Dialogue rejectionDialogue;
+
         public bool CanCreateDialogue { get; private set; }
 
         public AvailableState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events) {}
@@ -19,21 +22,27 @@ namespace PurrplingMod.StateMachine.State
         public override void Exit()
         {
             this.CanCreateDialogue = false;
+            this.acceptalDialogue = null;
+            this.rejectionDialogue = null;
         }
 
-        private void ResolveAsk(NPC n, Farmer leader)
+        private void ReactOnAsk(NPC n, Farmer leader)
         {
-            if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 4)
-                Game1.drawDialogue(n, DialogueHelper.GetDialogueString(n, "companionRejected"));
-            else if (Game1.timeOfDay >= 2200 && !Helper.IsSpouseMarriedToFarmer(n, leader))
+            if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 4 || Game1.timeOfDay >= 2200)
             {
-                Game1.drawDialogue(n, DialogueHelper.GetDialogueString(n, "companionRejectedNight"));
-                this.StateMachine.MakeUnavailable();
+                Dialogue rejectionDialogue = new Dialogue(
+                    DialogueHelper.GetDialogueString(
+                        n, Game1.timeOfDay >= 2200 ? "companionRejectedNight" : "companionRejected"), n);
+
+                this.rejectionDialogue = rejectionDialogue;
+                DialogueHelper.DrawDialogue(rejectionDialogue);
             }
             else
             {
-                Game1.drawDialogue(n, DialogueHelper.GetDialogueString(n, "companionAccepted"));
-                this.StateMachine.Recruit();
+                Dialogue acceptalDialogue = new Dialogue(DialogueHelper.GetDialogueString(n, "companionAccepted"), n);
+
+                this.acceptalDialogue = acceptalDialogue;
+                DialogueHelper.DrawDialogue(acceptalDialogue);
             }
         }
 
@@ -46,9 +55,21 @@ namespace PurrplingMod.StateMachine.State
                 {
                     this.StateMachine.Companion.Halt();
                     this.StateMachine.Companion.facePlayer(leader);
-                    this.ResolveAsk(this.StateMachine.Companion, leader);
+                    this.ReactOnAsk(this.StateMachine.Companion, leader);
                 }
             }, null);
+        }
+
+        public void OnDialogueSpeaked(Dialogue speakedDialogue)
+        {
+            if (speakedDialogue == this.acceptalDialogue)
+            {
+                this.StateMachine.Recruit();
+            }
+            else if (speakedDialogue == this.rejectionDialogue)
+            {
+                this.StateMachine.MakeUnavailable();
+            }
         }
     }
 }

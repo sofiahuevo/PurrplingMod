@@ -10,6 +10,6 @@ namespace PurrplingMod.Internal
 {
     internal interface IUpdateable
     {
-        void Update(UpdateTickingEventArgs e);
+        void Update(UpdateTickedEventArgs e);
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using PurrplingMod.Internal;
 using PurrplingMod.Loader;
 using PurrplingMod.StateMachine.State;
+using PurrplingMod.StateMachine.StateFeatures;
 using PurrplingMod.Utils;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -74,6 +74,16 @@ namespace PurrplingMod.StateMachine
             this.CurrentStateFlag = stateFlag;
         }
 
+        public void DialogueSpeaked(Dialogue speakedDialogue)
+        {
+            IDialogueDetector detector = this.currentState as IDialogueDetector;
+
+            if (detector != null)
+            {
+                detector.OnDialogueSpeaked(speakedDialogue);
+            }
+        }
+
         public void NewDaySetup()
         {
             if (this.CurrentStateFlag != StateFlag.RESET)
@@ -102,7 +112,10 @@ namespace PurrplingMod.StateMachine
         internal void Dismiss(bool keepUnavailableOthers = false)
         {
             this.ResetStateMachine();
-            (this.currentState as ResetState).ReintegrateCompanionNPC();
+
+            if (this.currentState is ICompanionIntegrator integrator)
+                integrator.ReintegrateCompanionNPC();
+
             this.BackedupSchedule = null;
             this.ChangeState(StateFlag.UNAVAILABLE);
             this.CompanionManager.CompanionDissmised(keepUnavailableOthers);

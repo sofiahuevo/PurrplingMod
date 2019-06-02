@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PurrplingMod.StateMachine.StateFeatures;
 using PurrplingMod.Controller;
-using PurrplingMod.Internal;
 using PurrplingMod.Utils;
 using StardewModdingAPI.Events;
 using StardewValley;
 
 namespace PurrplingMod.StateMachine.State
 {
-    internal class RecruitedState : CompanionState, IRequestedDialogueCreator
+    internal class RecruitedState : CompanionState, IRequestedDialogueCreator, IDialogueDetector
     {
         private FollowController followController;
+        private Dialogue dismissalDialogue;
 
         public bool CanCreateDialogue { get; private set; }
 
@@ -32,7 +28,7 @@ namespace PurrplingMod.StateMachine.State
             this.StateMachine.Companion.temporaryController = null;
             this.StateMachine.Companion.controller = null;
 
-            this.Events.GameLoop.UpdateTicking += this.GameLoop_UpdateTicking;
+            this.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicking;
             this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
             this.CanCreateDialogue = true;
         }
@@ -42,12 +38,13 @@ namespace PurrplingMod.StateMachine.State
             if (e.NewTime >= 2200)
             {
                 NPC companion = this.StateMachine.Companion;
-                Game1.drawDialogue(companion, DialogueHelper.GetDialogueString(companion, "companionDismissAuto"));
-                this.StateMachine.Dismiss(true);
+                Dialogue dismissalDialogue = new Dialogue(DialogueHelper.GetDialogueString(companion, "companionDismissAuto"), companion);
+                this.dismissalDialogue = dismissalDialogue;
+                DialogueHelper.DrawDialogue(dismissalDialogue);
             }
         }
 
-        private void GameLoop_UpdateTicking(object sender, UpdateTickingEventArgs e)
+        private void GameLoop_UpdateTicking(object sender, UpdateTickedEventArgs e)
         {
             this.StateMachine.Companion.movementPause = 0;
 
@@ -57,10 +54,11 @@ namespace PurrplingMod.StateMachine.State
         public override void Exit()
         {
             this.CanCreateDialogue = false;
-            this.Events.GameLoop.UpdateTicking -= this.GameLoop_UpdateTicking;
+            this.Events.GameLoop.UpdateTicked -= this.GameLoop_UpdateTicking;
             this.Events.GameLoop.TimeChanged -= this.GameLoop_TimeChanged;
 
             this.followController = null;
+            this.dismissalDialogue = null;
         }
 
         public void CreateRequestedDialogue()
@@ -89,9 +87,19 @@ namespace PurrplingMod.StateMachine.State
             switch (action)
             {
                 case "dismiss":
-                    Game1.drawDialogue(companion, DialogueHelper.GetDialogueString(companion, "companionDismiss"));
-                    this.StateMachine.Dismiss();
+                    Dialogue dismissalDialogue = new Dialogue(DialogueHelper.GetDialogueString(companion, "companionDismiss"), companion);
+                    this.dismissalDialogue = dismissalDialogue;
+                    DialogueHelper.DrawDialogue(dismissalDialogue);
                     break;
+            }
+        }
+
+        public void OnDialogueSpeaked(Dialogue speakedDialogue)
+        {
+            if (speakedDialogue == this.dismissalDialogue)
+            {
+                // After companion speaked a dismissal dialogue dismiss (unrecruit) companion who speaked that
+                this.StateMachine.Dismiss(Game1.timeOfDay >= 2200);
             }
         }
     }

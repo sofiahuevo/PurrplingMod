@@ -41,7 +41,21 @@ namespace PurrplingMod
             this.AssetsRegistry = assetsRegistry;
 
             this.dialogueDriver.DialogueRequested += this.DialogueDriver_DialogueRequested;
+            this.dialogueDriver.DialogueChanged += this.DialogueDriver_DialogueChanged;
             this.hintDriver.CheckHint += this.HintDriver_CheckHint;
+        }
+
+        private void DialogueDriver_DialogueChanged(object sender, DialogueChangedArgs e)
+        {
+            NPC n = e.PreviousDialogue?.speaker;
+
+            if (e.PreviousDialogue == null || n == null)
+                return;
+
+            if (this.PossibleCompanions.TryGetValue(n.Name, out CompanionStateMachine csm))
+            {
+                csm.DialogueSpeaked(e.PreviousDialogue);
+            }
         }
 
         private void HintDriver_CheckHint(object sender, CheckHintArgs e)
