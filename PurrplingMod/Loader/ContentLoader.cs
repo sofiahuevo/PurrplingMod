@@ -50,6 +50,11 @@ namespace PurrplingMod.Loader
             }
         }
 
+        public Dictionary<string, string> LoadStrings(string stringsAssetName)
+        {
+            return this.Load<Dictionary<string, string>>(stringsAssetName);
+        }
+
         public void InvalidateCache()
         {
             foreach (string assetName in this.assetsMap.Keys)

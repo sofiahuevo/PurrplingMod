@@ -3,6 +3,7 @@ using PurrplingMod.Controller;
 using PurrplingMod.Utils;
 using StardewModdingAPI.Events;
 using StardewValley;
+using System.Collections.Generic;
 
 namespace PurrplingMod.StateMachine.State
 {
@@ -25,6 +26,7 @@ namespace PurrplingMod.StateMachine.State
 
             this.StateMachine.Companion.faceTowardFarmerTimer = 0;
             this.StateMachine.Companion.movementPause = 0;
+            this.StateMachine.Companion.followSchedule = false;
             this.StateMachine.Companion.temporaryController = null;
             this.StateMachine.Companion.controller = null;
 
@@ -72,12 +74,16 @@ namespace PurrplingMod.StateMachine.State
             if (e.OldLocation != e.NewLocation)
             {
                 NPC companion = this.StateMachine.Companion;
+                Farmer farmer = this.StateMachine.CompanionManager.Farmer;
+                Dictionary<string, string> bubbles = this.StateMachine.ContentLoader.LoadStrings("SpeechBubbles");
 
+                // Warp companion to farmer if it's needed
                 if (companion.currentLocation != e.NewLocation)
-                    Game1.warpCharacter(companion, e.NewLocation, this.StateMachine.CompanionManager.Farmer.Position);
+                    Game1.warpCharacter(companion, e.NewLocation, farmer.Position);
 
-                if (DialogueHelper.GetDialogueStringByLocation(companion, "entry", e.NewLocation, out string flashMessage))
-                    companion.showTextAboveHead(flashMessage, preTimer: 250);
+                // Show above head bubble text for location
+                if (DialogueHelper.GetBubbleString(bubbles, companion, e.NewLocation, out string bubble))
+                    companion.showTextAboveHead(bubble, preTimer: 250);
             }
         }
 
