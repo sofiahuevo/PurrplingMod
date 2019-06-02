@@ -7,6 +7,8 @@ namespace PurrplingMod.Loader
         bool CanLoad(string assetName);
         T Load<T>(string assetName);
         Dictionary<string, string> LoadStrings(string stringsAssetName);
+        string LoadString(string path);
+        string LoadString(string path, params object[] substitutions);
         void InvalidateCache();
     }
 }

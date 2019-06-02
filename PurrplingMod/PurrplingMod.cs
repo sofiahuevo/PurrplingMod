@@ -38,7 +38,8 @@ namespace PurrplingMod
 
             string[] dispositions = this.contentLoader.Load<string[]>("CompanionDispositions");
 
-            this.contentLoader.LoadStrings("SpeechBubbles");
+            this.contentLoader.LoadStrings("Strings/Strings");
+            this.contentLoader.LoadStrings("Strings/SpeechBubbles");
 
             foreach (string npcName in dispositions)
             {

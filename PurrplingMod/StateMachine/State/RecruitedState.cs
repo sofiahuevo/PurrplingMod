@@ -75,7 +75,7 @@ namespace PurrplingMod.StateMachine.State
             {
                 NPC companion = this.StateMachine.Companion;
                 Farmer farmer = this.StateMachine.CompanionManager.Farmer;
-                Dictionary<string, string> bubbles = this.StateMachine.ContentLoader.LoadStrings("SpeechBubbles");
+                Dictionary<string, string> bubbles = this.StateMachine.ContentLoader.LoadStrings("Strings/SpeechBubbles");
 
                 // Warp companion to farmer if it's needed
                 if (companion.currentLocation != e.NewLocation)
@@ -91,14 +91,15 @@ namespace PurrplingMod.StateMachine.State
         {
             Farmer leader = this.StateMachine.CompanionManager.Farmer;
             GameLocation location = this.StateMachine.CompanionManager.Farmer.currentLocation;
+            string question = this.StateMachine.ContentLoader.LoadString("Strings/Strings:recruitedWant");
             Response[] responses =
             {
-                new Response("bag", "Can I use your bag?"),
-                new Response("dismiss", "You are free today. Thank you for support, bye"),
-                new Response("nothing", "(Nothing)"),
+                new Response("bag", this.StateMachine.ContentLoader.LoadString("Strings/Strings:recruitedWant.bag")),
+                new Response("dismiss", this.StateMachine.ContentLoader.LoadString("Strings/Strings:recruitedWant.dismiss")),
+                new Response("nothing", this.StateMachine.ContentLoader.LoadString("Strings/Strings:recruitedWant.nothing")),
             };
 
-            location.createQuestionDialogue($"What you do want?", responses, (_, answer) => {
+            location.createQuestionDialogue(question, responses, (_, answer) => {
                 if (answer != "nothing")
                 {
                     this.StateMachine.Companion.Halt();

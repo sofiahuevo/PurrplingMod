@@ -39,7 +39,7 @@ namespace PurrplingMod.Loader
                 T newAsset = this.Helper.Load<T>($"{this.assetsDir}/{assetName}.json");
 
                 this.assetsMap.Add(assetName, (object)newAsset);
-                this.monitor.Log($"Loaded asset {assetName}", LogLevel.Info);
+                this.monitor.Log($"Loaded asset {assetName}");
 
                 return newAsset;
             }
@@ -53,6 +53,26 @@ namespace PurrplingMod.Loader
         public Dictionary<string, string> LoadStrings(string stringsAssetName)
         {
             return this.Load<Dictionary<string, string>>(stringsAssetName);
+        }
+
+        public string LoadString(string path)
+        {
+            string[] parsedPath = path.Split(':');
+
+            if (parsedPath.Length != 2)
+                throw new ArgumentException($"Unable to parse string path: {path}");
+
+            if (this.LoadStrings(parsedPath[0]).TryGetValue(parsedPath[1], out string str))
+                return str;
+
+            return path;
+        }
+
+        public string LoadString(string path, params object[] substitutions)
+        {
+            string str = this.LoadString(path);
+
+            return string.Format(str, substitutions);
         }
 
         public void InvalidateCache()

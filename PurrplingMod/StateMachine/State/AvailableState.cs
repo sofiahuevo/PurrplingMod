@@ -26,7 +26,7 @@ namespace PurrplingMod.StateMachine.State
             this.rejectionDialogue = null;
         }
 
-        private void ReactOnAsk(NPC n, Farmer leader)
+        private void ReactOnAnswer(NPC n, Farmer leader)
         {
             if (leader.getFriendshipHeartLevelForNPC(n.Name) <= 4 || Game1.timeOfDay >= 2200)
             {
@@ -49,13 +49,17 @@ namespace PurrplingMod.StateMachine.State
         public void CreateRequestedDialogue()
         {
             Farmer leader = this.StateMachine.CompanionManager.Farmer;
+            NPC companion = this.StateMachine.Companion;
             GameLocation location = this.StateMachine.CompanionManager.Farmer.currentLocation;
-            location.createQuestionDialogue($"Ask {this.StateMachine.Companion.displayName} to follow?", location.createYesNoResponses(), (_, answer) => {
+            string question = this.StateMachine.ContentLoader.LoadString("Strings/Strings:askToFollow", companion.displayName);
+
+            location.createQuestionDialogue(question, location.createYesNoResponses(), (_, answer) =>
+            {
                 if (answer == "Yes")
                 {
                     this.StateMachine.Companion.Halt();
                     this.StateMachine.Companion.facePlayer(leader);
-                    this.ReactOnAsk(this.StateMachine.Companion, leader);
+                    this.ReactOnAnswer(this.StateMachine.Companion, leader);
                 }
             }, null);
         }
