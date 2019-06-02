@@ -3,6 +3,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using PurrplingMod.Loader;
 using PurrplingMod.Driver;
+using System.Collections.Generic;
 
 namespace PurrplingMod
 {
@@ -10,6 +11,7 @@ namespace PurrplingMod
     public class PurrplingMod : Mod
     {
         private CompanionManager companionManager;
+        private ContentLoader contentLoader;
         private DialogueDriver DialogueDriver { get; set; }
         private HintDriver HintDriver { get; set; }
 
@@ -21,14 +23,25 @@ namespace PurrplingMod
             helper.Events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;
             helper.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
             helper.Events.GameLoop.DayStarted += this.GameLoop_DayStarted;
+            helper.Events.GameLoop.GameLaunched += this.GameLoop_GameLaunched;
 
             this.DialogueDriver = new DialogueDriver(helper.Events);
             this.HintDriver = new HintDriver(helper.Events);
+            this.contentLoader = new ContentLoader(helper.Content, "assets", this.Monitor);
+            this.companionManager = new CompanionManager(this.DialogueDriver, this.HintDriver, this.Monitor);
+        }
 
-            ContentLoader loader = new ContentLoader(helper.Content, "assets", this.Monitor);
-            loader.Load("CompanionDispositions.json");
+        private void GameLoop_GameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            /* Preload assets */
+            this.Monitor.Log("Preloading assets...", LogLevel.Info);
 
-            this.companionManager = new CompanionManager(loader.ContentAssetsMap, this.DialogueDriver, this.HintDriver, this.Monitor);
+            string[] dispositions = this.contentLoader.Load<string[]>("CompanionDispositions");
+
+            foreach (string npcName in dispositions)
+            {
+                this.contentLoader.Load<Dictionary<string, string>>($"Dialogue/{npcName}");
+            }
         }
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
@@ -48,7 +61,7 @@ namespace PurrplingMod
 
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
-            this.companionManager.InitializeCompanions(this.Helper.Events);
+            this.companionManager.InitializeCompanions(this.contentLoader, this.Helper.Events);
         }
     }
 }

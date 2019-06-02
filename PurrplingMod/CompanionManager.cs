@@ -18,8 +18,7 @@ namespace PurrplingMod
         private readonly DialogueDriver dialogueDriver;
         private readonly HintDriver hintDriver;
         private readonly IMonitor monitor;
-        private Dictionary<string, CompanionStateMachine> PossibleCompanions { get; set; }
-        private Dictionary<string, ContentLoader.AssetsContent> AssetsRegistry { get; }
+        private Dictionary<string, CompanionStateMachine> PossibleCompanions { get; }
 
         public Farmer Farmer
         {
@@ -31,16 +30,12 @@ namespace PurrplingMod
             }
         }
 
-        public CompanionManager(Dictionary<string, ContentLoader.AssetsContent> assetsRegistry,
-                                DialogueDriver dialogueDriver,
-                                HintDriver hintDriver,
-                                IMonitor monitor)
+        public CompanionManager(DialogueDriver dialogueDriver, HintDriver hintDriver, IMonitor monitor)
         {
             this.dialogueDriver = dialogueDriver ?? throw new ArgumentNullException(nameof(dialogueDriver));
             this.hintDriver = hintDriver ?? throw new ArgumentNullException(nameof(hintDriver));
             this.monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
             this.PossibleCompanions = new Dictionary<string, CompanionStateMachine>();
-            this.AssetsRegistry = assetsRegistry;
 
             this.dialogueDriver.DialogueRequested += this.DialogueDriver_DialogueRequested;
             this.dialogueDriver.DialogueChanged += this.DialogueDriver_DialogueChanged;
@@ -123,17 +118,19 @@ namespace PurrplingMod
             }
         }
 
-        public void InitializeCompanions(IModEvents gameEvents)
+        public void InitializeCompanions(IContentLoader loader, IModEvents gameEvents)
         {
-            foreach (string npcName in this.AssetsRegistry.Keys)
+            string[] dispositions = loader.Load<string[]>("CompanionDispositions");
+
+            foreach (string npcName in dispositions)
             {
                 NPC companion = Game1.getCharacterFromName(npcName, true);
 
                 if (companion == null)
                     throw new Exception($"Can't find NPC with name '{npcName}'");
 
-                CompanionStateMachine csm = new CompanionStateMachine(this, companion, this.AssetsRegistry[npcName], this.monitor);
-                Dictionary<StateFlag, ICompanionState> states = new Dictionary<StateFlag, ICompanionState>()
+                CompanionStateMachine csm = new CompanionStateMachine(this, companion, loader, this.monitor);
+                Dictionary<StateFlag, ICompanionState> stateHandlers = new Dictionary<StateFlag, ICompanionState>()
                 {
                     [StateFlag.RESET] = new ResetState(csm, gameEvents),
                     [StateFlag.AVAILABLE] = new AvailableState(csm, gameEvents),
@@ -141,7 +138,7 @@ namespace PurrplingMod
                     [StateFlag.UNAVAILABLE] = new UnavailableState(csm, gameEvents),
                 };
 
-                csm.Setup(states);
+                csm.Setup(stateHandlers);
                 this.PossibleCompanions.Add(npcName, csm);
             }
 

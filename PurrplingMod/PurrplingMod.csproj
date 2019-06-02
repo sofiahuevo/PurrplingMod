@@ -66,6 +66,7 @@
     <Compile Include="Driver\DialogueDriver.cs" />
     <Compile Include="Controller\FollowController.cs" />
     <Compile Include="Driver\HintDriver.cs" />
+    <Compile Include="Loader\IContentLoader.cs" />
     <Compile Include="StateMachine\StateFeatures\IRequestedDialogueCreator.cs" />
     <Compile Include="StateMachine\StateFeatures\IDialogueDetector.cs" />
     <Compile Include="StateMachine\StateFeatures\ICompanionIntegrator.cs" />

@@ -1,51 +1,53 @@
-﻿using StardewModdingAPI;
+﻿using Microsoft.Xna.Framework.Content;
+using StardewModdingAPI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace PurrplingMod.Loader
 {
-    public class ContentLoader
+    public class ContentLoader : IContentLoader
     {
         private readonly string assetsDir;
         private readonly IMonitor monitor;
+        private readonly Dictionary<string, object> assetsMap;
 
-        public Dictionary<string, AssetsContent> ContentAssetsMap { get; }
         private IContentHelper Helper { get; }
 
         public ContentLoader(IContentHelper helper, string assetsDir, IMonitor monitor)
         {
             this.Helper = helper;
             this.assetsDir = assetsDir;
+            this.assetsMap = new Dictionary<string, object>();
             this.monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
-            this.ContentAssetsMap = new Dictionary<string, AssetsContent>();
         }
 
-        public void Load(string dispositionsFile)
+        public bool CanLoad(string assetName)
         {
-           
-            List<string> dispositions = this.Helper.Load<List<string>>(this.assetsDir + "/" + dispositionsFile);
+            string path = $"{this.assetsDir}/{assetName}.json";
 
-            this.monitor.Log("Loading content assets", LogLevel.Info);
+            return File.Exists(path.Replace('/', Path.PathSeparator).Replace('\\', Path.PathSeparator));
+        }
 
-            foreach (string disposition in dispositions)
+        public T Load<T>(string assetName)
+        {
+            if (this.assetsMap.TryGetValue(assetName, out object asset))
+                return (T)asset;
+
+            try
             {
-                AssetsContent assets = new AssetsContent();
-                this.LoadContentAssets(disposition, ref assets);
-                this.ContentAssetsMap.Add(disposition, assets);
+                T newAsset = this.Helper.Load<T>($"{this.assetsDir}/{assetName}.json");
+
+                this.assetsMap.Add(assetName, (object)newAsset);
+                this.monitor.Log($"Loaded asset {assetName}", LogLevel.Info);
+
+                return newAsset;
             }
-
-            this.monitor.Log("Content assets loaded", LogLevel.Info);
-        }
-
-        private void LoadContentAssets(string disposition, ref AssetsContent assets)
-        {
-            this.monitor.Log($"Loading content assets for {disposition}");
-            assets.dialogues = this.Helper.Load<Dictionary<string, string>>($"{this.assetsDir}/Dialogue/{disposition}.json");
-        }
-
-        public class AssetsContent
-        {
-            public Dictionary<string, string> dialogues;
+            catch (ContentLoadException e)
+            {
+                this.monitor.Log($"Cannot load asset {assetName}", LogLevel.Error);
+                throw e;
+            }
         }
     }
 }

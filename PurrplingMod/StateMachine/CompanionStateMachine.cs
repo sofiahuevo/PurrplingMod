@@ -22,16 +22,16 @@ namespace PurrplingMod.StateMachine
         }
         public CompanionManager CompanionManager { get; private set; }
         public NPC Companion { get; private set; }
+        public IContentLoader ContentLoader { get; private set; }
         public IMonitor Monitor { get; }
         public Dictionary<StateFlag, ICompanionState> States { get; private set; }
-        private ContentLoader.AssetsContent assets;
         private ICompanionState currentState;
 
-        public CompanionStateMachine(CompanionManager manager, NPC companion, ContentLoader.AssetsContent assets, IMonitor monitor = null)
+        public CompanionStateMachine(CompanionManager manager, NPC companion, IContentLoader loader, IMonitor monitor = null)
         {
             this.CompanionManager = manager;
             this.Companion = companion;
-            this.assets = assets;
+            this.ContentLoader = loader;
             this.Monitor = monitor;
         }
 
@@ -69,12 +69,12 @@ namespace PurrplingMod.StateMachine
             this.CurrentStateFlag = stateFlag;
         }
 
-        public void Setup(Dictionary<StateFlag, ICompanionState> states)
+        public void Setup(Dictionary<StateFlag, ICompanionState> stateHandlers)
         {
             if (this.States != null)
                 throw new InvalidOperationException("State machine is already set up!");
 
-            this.States = states;
+            this.States = stateHandlers;
             this.ResetStateMachine();
         }
 
@@ -93,7 +93,7 @@ namespace PurrplingMod.StateMachine
             if (this.CurrentStateFlag != StateFlag.RESET)
                 throw new InvalidStateException($"State machine {this.Name} must be in reset state!");
 
-            DialogueHelper.SetupDialogues(this.Companion, this.assets.dialogues);
+            DialogueHelper.SetupDialogues(this.Companion, this.ContentLoader.Load<Dictionary<string, string>>($"Dialogue/{this.Name}"));
             this.RecruitedToday = false;
             this.MakeAvailable();
         }
@@ -144,6 +144,7 @@ namespace PurrplingMod.StateMachine
             this.currentState = null;
             this.Companion = null;
             this.CompanionManager = null;
+            this.ContentLoader = null;
         }
 
         public void ResolveDialogueRequest()
