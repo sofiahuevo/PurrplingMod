@@ -89,6 +89,9 @@
     <None Include="assets\Dialogue\Abigail.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="assets\Dialogue\AbigailSpouse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="assets\Dialogue\Alex.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

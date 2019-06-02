@@ -49,5 +49,13 @@ namespace PurrplingMod.Loader
                 throw e;
             }
         }
+
+        public void InvalidateCache()
+        {
+            foreach (string assetName in this.assetsMap.Keys)
+                this.Helper.InvalidateCache($"{this.assetsDir}/{assetName}.json");
+
+            this.assetsMap.Clear();
+        }
     }
 }

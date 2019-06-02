@@ -94,6 +94,10 @@ namespace PurrplingMod.StateMachine
                 throw new InvalidStateException($"State machine {this.Name} must be in reset state!");
 
             DialogueHelper.SetupDialogues(this.Companion, this.ContentLoader.Load<Dictionary<string, string>>($"Dialogue/{this.Name}"));
+
+            if (Helper.IsSpouseMarriedToFarmer(this.Companion, this.CompanionManager.Farmer))
+                DialogueHelper.SetupDialogues(this.Companion, this.ContentLoader.Load<Dictionary<string, string>>($"Dialogue/{this.Name}Spouse"));
+
             this.RecruitedToday = false;
             this.MakeAvailable();
         }
