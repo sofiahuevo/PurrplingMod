@@ -28,9 +28,23 @@ namespace PurrplingMod.StateMachine.State
             this.StateMachine.Companion.temporaryController = null;
             this.StateMachine.Companion.controller = null;
 
-            this.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicking;
+            this.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
             this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
+            this.Events.Player.Warped += this.Player_Warped;
+
             this.CanCreateDialogue = true;
+        }
+
+        public override void Exit()
+        {
+            this.CanCreateDialogue = false;
+
+            this.Events.GameLoop.UpdateTicked -= this.GameLoop_UpdateTicked;
+            this.Events.GameLoop.TimeChanged -= this.GameLoop_TimeChanged;
+            this.Events.Player.Warped -= this.Player_Warped;
+
+            this.followController = null;
+            this.dismissalDialogue = null;
         }
 
         private void GameLoop_TimeChanged(object sender, TimeChangedEventArgs e)
@@ -46,21 +60,25 @@ namespace PurrplingMod.StateMachine.State
             }
         }
 
-        private void GameLoop_UpdateTicking(object sender, UpdateTickedEventArgs e)
+        private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
         {
             this.StateMachine.Companion.movementPause = 0;
 
             this.followController.Update(e);
         }
 
-        public override void Exit()
+        private void Player_Warped(object sender, WarpedEventArgs e)
         {
-            this.CanCreateDialogue = false;
-            this.Events.GameLoop.UpdateTicked -= this.GameLoop_UpdateTicking;
-            this.Events.GameLoop.TimeChanged -= this.GameLoop_TimeChanged;
+            if (e.OldLocation != e.NewLocation)
+            {
+                NPC companion = this.StateMachine.Companion;
 
-            this.followController = null;
-            this.dismissalDialogue = null;
+                if (companion.currentLocation != e.NewLocation)
+                    Game1.warpCharacter(companion, e.NewLocation, this.StateMachine.CompanionManager.Farmer.Position);
+
+                if (DialogueHelper.GetDialogueStringByLocation(companion, "entry", e.NewLocation, out string flashMessage))
+                    companion.showTextAboveHead(flashMessage, preTimer: 250);
+            }
         }
 
         public void CreateRequestedDialogue()
@@ -79,12 +97,12 @@ namespace PurrplingMod.StateMachine.State
                 {
                     this.StateMachine.Companion.Halt();
                     this.StateMachine.Companion.facePlayer(leader);
-                    this.ResolveAsk(this.StateMachine.Companion, leader, answer);
+                    this.ReactOnAsk(this.StateMachine.Companion, leader, answer);
                 }
             }, this.StateMachine.Companion);
         }
 
-        private void ResolveAsk(NPC companion, Farmer leader, string action)
+        private void ReactOnAsk(NPC companion, Farmer leader, string action)
         {
             switch (action)
             {

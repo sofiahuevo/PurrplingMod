@@ -25,6 +25,11 @@ namespace PurrplingMod.Utils
             return text;
         }
 
+        public static bool GetDialogueStringByLocation(NPC n, string key, GameLocation location, out string text)
+        {
+            return GetDialogueString(n, $"{key}_{location.Name}", out text);
+        }
+
         public static void SetupDialogues(NPC n, Dictionary<string, string> dialogues)
         {
             foreach (var pair in dialogues)
