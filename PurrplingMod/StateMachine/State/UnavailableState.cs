@@ -12,16 +12,5 @@ namespace PurrplingMod.StateMachine.State
         public UnavailableState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events)
         {
         }
-
-        public override void Entry()
-        {
-            this.StateMachine.Monitor.Log($"{this.StateMachine.Name} is now UNAVAILABLE!");
-            // pass
-        }
-
-        public override void Exit()
-        {
-            // pass
-        }
     }
 }

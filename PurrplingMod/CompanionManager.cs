@@ -8,6 +8,8 @@ using PurrplingMod.Driver;
 using PurrplingMod.Loader;
 using StardewModdingAPI.Events;
 using PurrplingMod.Utils;
+using PurrplingMod.StateMachine.State;
+using static PurrplingMod.StateMachine.CompanionStateMachine;
 
 namespace PurrplingMod
 {
@@ -130,7 +132,17 @@ namespace PurrplingMod
                 if (companion == null)
                     throw new Exception($"Can't find NPC with name '{npcName}'");
 
-                this.PossibleCompanions.Add(npcName, new CompanionStateMachine(this, companion, this.AssetsRegistry[npcName], gameEvents, this.monitor));
+                CompanionStateMachine csm = new CompanionStateMachine(this, companion, this.AssetsRegistry[npcName], this.monitor);
+                Dictionary<StateFlag, ICompanionState> states = new Dictionary<StateFlag, ICompanionState>()
+                {
+                    [StateFlag.RESET] = new ResetState(csm, gameEvents),
+                    [StateFlag.AVAILABLE] = new AvailableState(csm, gameEvents),
+                    [StateFlag.RECRUITED] = new RecruitedState(csm, gameEvents),
+                    [StateFlag.UNAVAILABLE] = new UnavailableState(csm, gameEvents),
+                };
+
+                csm.Setup(states);
+                this.PossibleCompanions.Add(npcName, csm);
             }
 
             this.monitor.Log($"Initalized {this.PossibleCompanions.Count} companions.", LogLevel.Info);

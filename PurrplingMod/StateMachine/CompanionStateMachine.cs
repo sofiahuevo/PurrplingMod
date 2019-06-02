@@ -27,20 +27,12 @@ namespace PurrplingMod.StateMachine
         private ContentLoader.AssetsContent assets;
         private ICompanionState currentState;
 
-        public CompanionStateMachine(CompanionManager manager, NPC companion, ContentLoader.AssetsContent assets, IModEvents events, IMonitor monitor = null)
+        public CompanionStateMachine(CompanionManager manager, NPC companion, ContentLoader.AssetsContent assets, IMonitor monitor = null)
         {
             this.CompanionManager = manager;
             this.Companion = companion;
-            this.States = new Dictionary<StateFlag, ICompanionState>()
-            {
-                [StateFlag.RESET] = new ResetState(this, events),
-                [StateFlag.AVAILABLE] = new AvailableState(this, events),
-                [StateFlag.RECRUITED] = new RecruitedState(this, events),
-                [StateFlag.UNAVAILABLE] = new UnavailableState(this, events),
-            };
             this.assets = assets;
             this.Monitor = monitor;
-            this.ResetStateMachine();
         }
 
         public string Name
@@ -57,8 +49,11 @@ namespace PurrplingMod.StateMachine
 
         private void ChangeState(StateFlag stateFlag)
         {
+            if (this.States == null)
+                throw new InvalidStateException("State machine is not ready! Call setup first.");
+
             if (!this.States.TryGetValue(stateFlag, out ICompanionState newState))
-                throw new InvalidStateException($"Unknown state: {stateFlag}");
+                throw new InvalidStateException($"Invalid state {stateFlag.ToString()}. Is state machine correctly set up?");
 
             if (this.currentState == newState)
                 return;
@@ -72,6 +67,15 @@ namespace PurrplingMod.StateMachine
             this.currentState = newState;
             this.Monitor.Log($"{this.Name} changed state: {this.CurrentStateFlag.ToString()} -> {stateFlag.ToString()}");
             this.CurrentStateFlag = stateFlag;
+        }
+
+        public void Setup(Dictionary<StateFlag, ICompanionState> states)
+        {
+            if (this.States != null)
+                throw new InvalidOperationException("State machine is already set up!");
+
+            this.States = states;
+            this.ResetStateMachine();
         }
 
         public void DialogueSpeaked(Dialogue speakedDialogue)
