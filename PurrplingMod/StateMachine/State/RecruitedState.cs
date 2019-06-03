@@ -34,8 +34,9 @@ namespace PurrplingMod.StateMachine.State
             this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
             this.Events.Player.Warped += this.Player_Warped;
 
+            if (DialogueHelper.GetVariousDialogueString(this.StateMachine.Companion, "companionRecruited", out string dialogueText))
+                this.StateMachine.Companion.setNewDialogue(dialogueText);
             this.CanCreateDialogue = true;
-            this.StateMachine.Companion.setNewDialogue(DialogueHelper.GetDialogueString(this.StateMachine.Companion, "companionAfterRecruit"));
         }
 
         public override void Exit()
@@ -94,7 +95,7 @@ namespace PurrplingMod.StateMachine.State
         private bool TryPushLocationDialogue(GameLocation location)
         {
             NPC companion = this.StateMachine.Companion;
-            Dialogue newDialogue = DialogueHelper.GenerateDialogueByLocation(companion, location, "companion");
+            Dialogue newDialogue = DialogueHelper.GenerateDialogue(companion, location, "companion");
             Stack<Dialogue> temp = new Stack<Dialogue>(this.StateMachine.Companion.CurrentDialogue.Count);
 
             if (newDialogue == null && this.currentLocationDialogue == null)

@@ -1,4 +1,5 @@
-﻿using StardewValley;
+﻿using StardewModdingAPI.Utilities;
+using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,17 +8,17 @@ namespace PurrplingMod.Utils
 {
     internal static class DialogueHelper
     {
-        private static bool FetchDialogueString(Dictionary<string, string> dialogues, string key, out string text)
+        private static bool GetDialogueString(Dictionary<string, string> dialogues, string key, out string text)
         {
             var keys = from _key in dialogues.Keys
-                       where _key.StartsWith(key)
+                       where _key.StartsWith(key + "$")
                        select _key;
 
             if (keys.Count() > 0)
             {
                 int i = Game1.random.Next(keys.Count() + 1);
 
-                if (i > 0 && dialogues.TryGetValue($"{key}{i}", out text))
+                if (i > 0 && dialogues.TryGetValue($"{key}${i}", out text))
                     return true;
             }
 
@@ -31,7 +32,7 @@ namespace PurrplingMod.Utils
 
         public static bool GetDialogueString(NPC n, string key, out string text)
         {
-            if (FetchDialogueString(n.Dialogue, key, out text))
+            if (GetDialogueString(n.Dialogue, key, out text))
                 return true;
 
             text = $"{n.Name}.{text}";
@@ -45,14 +46,70 @@ namespace PurrplingMod.Utils
             return text;
         }
 
-        public static bool GetDialogueStringByLocation(NPC n, string key, GameLocation location, out string text)
+        private static bool FindLikeDialogueString(string[] variants, Tuple<bool, string>[] conditions, NPC n, string key, out string text, string suffix = "")
         {
-            return GetDialogueString(n, $"{key}_{location.Name}", out text);
+            foreach (string variant in variants)
+            {
+                foreach (var condition in conditions)
+                {
+                    // Conditional variant
+                    if (condition.Item1 && GetDialogueString(n, $"{key}{variant}{condition.Item2}{suffix}", out text))
+                        return true;
+                }
+
+                // Common variant
+                if (GetDialogueString(n, $"{key}{variant}{suffix}", out text))
+                    return true;
+            }
+
+            text = key;
+
+            return false;
+        }
+
+        public static bool GetVariousDialogueString(NPC n, string key, out string text)
+        {
+            SDate sdate = SDate.Now();
+            Farmer f = Game1.player;
+
+            string[] variants = 
+            {
+                $"_{sdate.Season}_{sdate.Day}", // mydialog_spring_14
+                $"_{sdate.Season}_{sdate.DayOfWeek}", // mydialog_spring_Monday
+                $"_{sdate.DayOfWeek}", // mydialog_Monday
+                $"_{sdate.Season}", // mydialog_spring
+            };
+
+            Tuple<bool, string>[] conditions =
+            {
+                new Tuple<bool, string>(f.getFriendshipHeartLevelForNPC(n.Name) >= 11, "12"), // Twelve or more hearts friendship (only wife/husband)
+                new Tuple<bool, string>(f.getFriendshipHeartLevelForNPC(n.Name) >= 9, "10"), // Ten or more hearts friendship
+                new Tuple<bool, string>(f.getFriendshipHeartLevelForNPC(n.Name) >= 7, "8"), // Eight or more hearts friendship
+                new Tuple<bool, string>(f.getFriendshipHeartLevelForNPC(n.Name) >= 5, "6"), // Six or more hearts friendship
+                new Tuple<bool, string>(Game1.isRaining, "_Rainy"), // Rainy weather
+                new Tuple<bool, string>(Game1.isSnowing, "_Snowy"), // Snowy weather
+            };
+
+            // Spouse override (try to find spouse various dialogue string)
+            if (Helper.IsSpouseMarriedToFarmer(n, f) && FindLikeDialogueString(variants, conditions, n, key, out text, "_Spouse"))
+                return true;
+
+            // Try to find various dialogue string
+            if (FindLikeDialogueString(variants, conditions, n, key, out text))
+                return true;
+
+            // Try to find default dialogue string
+            return GetDialogueString(n, key, out text); // mydialogue
+        }
+
+        public static bool GetVariousDialogueString(NPC n, string key, GameLocation l, out string text)
+        {
+            return GetVariousDialogueString(n, $"{key}_{l.Name}", out text);
         }
 
         public static bool GetBubbleString(Dictionary<string, string> bubbles, NPC n, GameLocation l, out string text)
         {
-            if (FetchDialogueString(bubbles, $"{l.Name}_{n.Name}", out text))
+            if (GetDialogueString(bubbles, $"{l.Name}_{n.Name}", out text))
             {
                 text = string.Format(text, Game1.player?.Name, n.Name);
 
@@ -62,9 +119,17 @@ namespace PurrplingMod.Utils
             return false;
         }
 
-        public static Dialogue GenerateDialogueByLocation(NPC n, GameLocation l, string key)
+        public static Dialogue GenerateDialogue(NPC n, string key, bool returnsNull = true)
         {
-            if (GetDialogueStringByLocation(n, key, l, out string text))
+            if (GetVariousDialogueString(n, key, out string text) || !returnsNull)
+                return new Dialogue(text, n);
+
+            return null;
+        }
+
+        public static Dialogue GenerateDialogue(NPC n, GameLocation l, string key, bool returnsNull = true)
+        {
+            if (GetVariousDialogueString(n, key, l, out string text) || !returnsNull)
                 return new Dialogue(text, n);
 
             return null;

@@ -4,6 +4,8 @@
   "companionRejectedNight": "Sorry, it's to late for adventure today. Maybe tomorrow$s",
   "companionDismiss": "It was very fun, @.$h#$b#I hope to repeat it soon. See ya.$h",
   "companionDismissAuto": "It's to late. I must to go#$b#But it was very fun, Good night.$h",
-  "companionAfterRecruit": "I am enjoying this adventure.$h#Do you take me into mines?",
-  "companion_Town": "A town"
+  "companionRecruited": "Do you take me into mines?$6",
+  "companion_Town": "A town",
+  "companion_Town_fall": "The leaves covered footpaths.#$b#Pelican town is full of colors. It's beautiful.",
+  "companion_Town_fall_Rainy": "I love fall rain.$l#$b#Can we play in puddles? Splashing in rain watter is funny.$h"
 }

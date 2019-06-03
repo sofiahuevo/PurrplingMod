@@ -8,6 +8,7 @@ using StardewValley.Locations;
 using StardewModdingAPI.Events;
 using Microsoft.Xna.Framework;
 using PurrplingMod.Utils;
+using StardewModdingAPI;
 
 namespace PurrplingMod.Controller
 {
@@ -34,7 +35,7 @@ namespace PurrplingMod.Controller
 
         public void Update(UpdateTickedEventArgs e)
         {
-            if (this.follower == null || this.leader == null)
+            if (this.follower == null || this.leader == null || !Context.CanPlayerMove)
                 return;
 
             if (this.leader.currentLocation != this.follower.currentLocation || this.FollowerLeaderIsTooFar())
