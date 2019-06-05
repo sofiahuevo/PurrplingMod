@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace PurrplingMod.Utils
 {
-    internal static class DialogueHelper
+    internal static partial class DialogueHelper
     {
         private static bool GetDialogueString(Dictionary<string, string> dialogues, string key, out string text)
         {
@@ -69,37 +69,26 @@ namespace PurrplingMod.Utils
 
         public static bool GetVariousDialogueString(NPC n, string key, out string text)
         {
-            SDate sdate = SDate.Now();
             Farmer f = Game1.player;
-
-            string[] variants = 
+            Finder finder = new Finder()
             {
-                $"_{sdate.Season}_{sdate.Day}", // mydialog_spring_14
-                $"_{sdate.Season}_{sdate.DayOfWeek}", // mydialog_spring_Monday
-                $"_{sdate.DayOfWeek}", // mydialog_Monday
-                $"_{sdate.Season}", // mydialog_spring
+                Date = SDate.Now(),
+                IsNight = Game1.isDarkOut(),
+                IsMarried = Helper.IsSpouseMarriedToFarmer(n, f),
+                FriendshipHeartLevel = f.getFriendshipHeartLevelForNPC(n.Name),
+                Weather = Helper.GetCurrentWeatherName(),
             };
 
-            Tuple<bool, string>[] conditions =
-            {
-                new Tuple<bool, string>(f.getFriendshipHeartLevelForNPC(n.Name) >= 11, "12"), // Twelve or more hearts friendship (only wife/husband)
-                new Tuple<bool, string>(f.getFriendshipHeartLevelForNPC(n.Name) >= 9, "10"), // Ten or more hearts friendship
-                new Tuple<bool, string>(f.getFriendshipHeartLevelForNPC(n.Name) >= 7, "8"), // Eight or more hearts friendship
-                new Tuple<bool, string>(f.getFriendshipHeartLevelForNPC(n.Name) >= 5, "6"), // Six or more hearts friendship
-                new Tuple<bool, string>(Game1.isRaining, "_Rainy"), // Rainy weather
-                new Tuple<bool, string>(Game1.isSnowing, "_Snowy"), // Snowy weather
-            };
+            // Generate possible dialogue keys
+            finder.GenerateVariousKeys(key);
 
-            // Spouse override (try to find spouse various dialogue string)
-            if (Helper.IsSpouseMarriedToFarmer(n, f) && FindLikeDialogueString(variants, conditions, n, key, out text, "_Spouse"))
-                return true;
+            // Try to find a relevant dialogue
+            foreach (string k in finder.PossibleKeys)
+                if (GetDialogueString(n, k, out text))
+                    return true;
 
-            // Try to find various dialogue string
-            if (FindLikeDialogueString(variants, conditions, n, key, out text))
-                return true;
-
-            // Try to find default dialogue string
-            return GetDialogueString(n, key, out text); // mydialogue
+            text = key;
+            return false;
         }
 
         public static bool GetVariousDialogueString(NPC n, string key, GameLocation l, out string text)

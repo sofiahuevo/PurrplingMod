@@ -98,7 +98,7 @@ namespace PurrplingMod.StateMachine.State
             Dialogue newDialogue = DialogueHelper.GenerateDialogue(companion, location, "companion");
             Stack<Dialogue> temp = new Stack<Dialogue>(this.StateMachine.Companion.CurrentDialogue.Count);
 
-            if (newDialogue == null && this.currentLocationDialogue == null)
+            if ((newDialogue == null && this.currentLocationDialogue == null) || newDialogue.Equals(this.currentLocationDialogue))
                 return false;
 
             // Remove old location dialogue

@@ -91,6 +91,20 @@ namespace PurrplingMod.Utils
             );
         }
 
+        public static string GetCurrentWeatherName()
+        {
+            if (Game1.isRaining)
+                return "Rainy";
+            if (Game1.isSnowing)
+                return "Snowy";
+            if (Game1.isLightning)
+                return "Stormy";
+            if (Game1.isDebrisWeather)
+                return "Cloudy";
+
+            return "Sunny";
+        }
+
         public static float Distance(Point p1, Point p2)
         {
             return Utility.distance(p1.X, p2.X, p1.Y, p2.Y);
