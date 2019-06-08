@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using StardewValley;
+using xTile.Dimensions;
 
 namespace PurrplingMod.Utils
 {
@@ -105,6 +106,24 @@ namespace PurrplingMod.Utils
             return "Sunny";
         }
 
+        public static bool IsWalkableTile(GameLocation l, Vector2 tile)
+        {
+            StardewValley.Object o = l.getObjectAtTile((int)tile.X, (int)tile.Y);
+            StardewValley.Objects.Furniture furn = o as StardewValley.Objects.Furniture;
+            Fence fence = o as Fence;
+            Torch torch = o as Torch;
+
+            return l.isTileOnMap(tile) 
+                && !l.isTileOccupiedIgnoreFloors(tile)
+                && l.isTilePassable(new Location((int)tile.X, (int)tile.Y), Game1.viewport) 
+                && (!(l is Farm) || !((l as Farm).getBuildingAt(tile) != null)) 
+                && ((o == null) 
+                || (furn != null && furn.furniture_type.Value == 12) 
+                || (fence != null && fence.isGate.Value) 
+                || (torch != null) 
+                || (o.ParentSheetIndex == 590));
+        }
+
         public static float Distance(Point p1, Point p2)
         {
             return Utility.distance(p1.X, p2.X, p1.Y, p2.Y);
@@ -120,5 +139,27 @@ namespace PurrplingMod.Utils
 
             return nearPointsWithDistance;
         }
+
+        public static void WarpTo(NPC follower, Point tilePosition)
+        {
+            follower.Halt();
+            follower.controller = follower.temporaryController = null;
+            follower.setTilePosition(tilePosition);
+        }
+
+        public static void WarpTo(NPC follower, GameLocation location, Point tilePosition)
+        {
+            if (follower.currentLocation == location)
+                WarpTo(follower, tilePosition);
+
+            follower.Halt();
+            follower.controller = follower.temporaryController = null;
+            follower.currentLocation?.characters.Remove(follower);
+            follower.currentLocation = location;
+            follower.setTilePosition(tilePosition);
+
+            location.addCharacter(follower);
+        }
+
     }
 }

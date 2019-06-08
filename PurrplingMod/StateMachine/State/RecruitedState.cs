@@ -5,6 +5,9 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using System.Collections.Generic;
 using System.Linq;
+using StardewValley.Locations;
+using Microsoft.Xna.Framework;
+using System.Reflection;
 
 namespace PurrplingMod.StateMachine.State
 {
@@ -20,15 +23,15 @@ namespace PurrplingMod.StateMachine.State
 
         public override void Entry()
         {
-            this.followController = new FollowController();
-            this.followController.leader = this.StateMachine.CompanionManager.Farmer;
-            this.followController.follower = this.StateMachine.Companion;
+            this.followController = new FollowController(this.StateMachine.Companion, this.StateMachine.CompanionManager.Farmer);
 
             this.StateMachine.Companion.faceTowardFarmerTimer = 0;
             this.StateMachine.Companion.movementPause = 0;
             this.StateMachine.Companion.followSchedule = false;
             this.StateMachine.Companion.temporaryController = null;
             this.StateMachine.Companion.controller = null;
+            this.StateMachine.Companion.eventActor = true;
+            this.StateMachine.Companion.farmerPassesThrough = true;
 
             this.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
             this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
@@ -47,6 +50,8 @@ namespace PurrplingMod.StateMachine.State
 
         public override void Exit()
         {
+            this.StateMachine.Companion.eventActor = false;
+            this.StateMachine.Companion.farmerPassesThrough = false;
             this.CanCreateDialogue = false;
 
             this.Events.GameLoop.UpdateTicked -= this.GameLoop_UpdateTicked;
@@ -68,6 +73,19 @@ namespace PurrplingMod.StateMachine.State
                 this.StateMachine.Companion.updateEmote(Game1.currentGameTime);
                 DialogueHelper.DrawDialogue(dismissalDialogue);
             }
+
+            MineShaft mines = this.StateMachine.Companion.currentLocation as MineShaft;
+
+            // Fix spawn ladder if area is infested and all monsters is killed but NPC following us
+            if (mines != null && mines.mustKillAllMonstersToAdvance())
+            {
+                var monsters = from c in mines.characters where c.IsMonster select c;
+                if (monsters.Count() == 0)
+                {
+                    Vector2 vector2 = (Vector2)mines.GetType().GetField("tileBeneathLadder", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(mines);
+                    mines.createLadderAt(vector2, "newArtifact");
+                }
+            }
         }
 
         private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
@@ -85,7 +103,7 @@ namespace PurrplingMod.StateMachine.State
 
             // Warp companion to farmer if it's needed
             if (companion.currentLocation != e.NewLocation)
-                Game1.warpCharacter(companion, e.NewLocation, farmer.Position);
+                this.followController.ChangeLocation(e.NewLocation);
 
             // Show above head bubble text for location
             if (DialogueHelper.GetBubbleString(bubbles, companion, e.NewLocation, out string bubble))

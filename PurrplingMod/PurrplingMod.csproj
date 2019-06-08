@@ -82,6 +82,7 @@
     <Compile Include="StateMachine\CompanionStateMachine.cs" />
     <Compile Include="StateMachine\State\AvailableState.cs" />
     <Compile Include="StateMachine\State\ResetState.cs" />
+    <Compile Include="Controller\PathFinder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\CompanionDispositions.json">
