@@ -68,6 +68,7 @@ namespace PurrplingMod.StateMachine.State
         {
             if (speakedDialogue == this.acceptalDialogue)
             {
+                this.StateMachine.CompanionManager.Farmer.changeFriendship(40, this.StateMachine.Companion);
                 this.StateMachine.Recruit();
             }
             else if (speakedDialogue == this.rejectionDialogue)

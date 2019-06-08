@@ -34,6 +34,12 @@ namespace PurrplingMod.StateMachine.State
             this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
             this.Events.Player.Warped += this.Player_Warped;
 
+            Buff buff = new Buff(0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 30, this.StateMachine.Companion.Name, this.StateMachine.Companion.displayName);
+            buff.description = "Abbynka";
+
+            Game1.buffsDisplay.addOtherBuff(buff);
+            Game1.buffsDisplay.syncIcons();
+
             if (DialogueHelper.GetVariousDialogueString(this.StateMachine.Companion, "companionRecruited", out string dialogueText))
                 this.StateMachine.Companion.setNewDialogue(dialogueText);
             this.CanCreateDialogue = true;
@@ -73,23 +79,20 @@ namespace PurrplingMod.StateMachine.State
 
         private void Player_Warped(object sender, WarpedEventArgs e)
         {
-            if (e.OldLocation != e.NewLocation)
-            {
-                NPC companion = this.StateMachine.Companion;
-                Farmer farmer = this.StateMachine.CompanionManager.Farmer;
-                Dictionary<string, string> bubbles = this.StateMachine.ContentLoader.LoadStrings("Strings/SpeechBubbles");
+            NPC companion = this.StateMachine.Companion;
+            Farmer farmer = this.StateMachine.CompanionManager.Farmer;
+            Dictionary<string, string> bubbles = this.StateMachine.ContentLoader.LoadStrings("Strings/SpeechBubbles");
 
-                // Warp companion to farmer if it's needed
-                if (companion.currentLocation != e.NewLocation)
-                    Game1.warpCharacter(companion, e.NewLocation, farmer.Position);
+            // Warp companion to farmer if it's needed
+            if (companion.currentLocation != e.NewLocation)
+                Game1.warpCharacter(companion, e.NewLocation, farmer.Position);
 
-                // Show above head bubble text for location
-                if (DialogueHelper.GetBubbleString(bubbles, companion, e.NewLocation, out string bubble))
-                    companion.showTextAboveHead(bubble, preTimer: 250);
+            // Show above head bubble text for location
+            if (DialogueHelper.GetBubbleString(bubbles, companion, e.NewLocation, out string bubble))
+                companion.showTextAboveHead(bubble, preTimer: 250);
 
-                // Push new location dialogue
-                this.TryPushLocationDialogue(e.NewLocation);
-            }
+            // Push new location dialogue
+            this.TryPushLocationDialogue(e.NewLocation);
         }
 
         private bool TryPushLocationDialogue(GameLocation location)
@@ -98,7 +101,7 @@ namespace PurrplingMod.StateMachine.State
             Dialogue newDialogue = DialogueHelper.GenerateDialogue(companion, location, "companion");
             Stack<Dialogue> temp = new Stack<Dialogue>(this.StateMachine.Companion.CurrentDialogue.Count);
 
-            if ((newDialogue == null && this.currentLocationDialogue == null) || newDialogue.Equals(this.currentLocationDialogue))
+            if ((newDialogue == null && this.currentLocationDialogue == null) || (newDialogue != null && newDialogue.Equals(this.currentLocationDialogue)))
                 return false;
 
             // Remove old location dialogue

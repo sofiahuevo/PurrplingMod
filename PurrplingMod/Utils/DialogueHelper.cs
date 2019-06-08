@@ -46,27 +46,6 @@ namespace PurrplingMod.Utils
             return text;
         }
 
-        private static bool FindLikeDialogueString(string[] variants, Tuple<bool, string>[] conditions, NPC n, string key, out string text, string suffix = "")
-        {
-            foreach (string variant in variants)
-            {
-                foreach (var condition in conditions)
-                {
-                    // Conditional variant
-                    if (condition.Item1 && GetDialogueString(n, $"{key}{variant}{condition.Item2}{suffix}", out text))
-                        return true;
-                }
-
-                // Common variant
-                if (GetDialogueString(n, $"{key}{variant}{suffix}", out text))
-                    return true;
-            }
-
-            text = key;
-
-            return false;
-        }
-
         public static bool GetVariousDialogueString(NPC n, string key, out string text)
         {
             Farmer f = Game1.player;
