@@ -8,6 +8,8 @@ using System.Linq;
 using StardewValley.Locations;
 using Microsoft.Xna.Framework;
 using System.Reflection;
+using StardewValley.Menus;
+using StardewValley.Objects;
 
 namespace PurrplingMod.StateMachine.State
 {
@@ -82,8 +84,9 @@ namespace PurrplingMod.StateMachine.State
                 var monsters = from c in mines.characters where c.IsMonster select c;
                 if (monsters.Count() == 0)
                 {
-                    Vector2 vector2 = (Vector2)mines.GetType().GetField("tileBeneathLadder", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(mines);
-                    mines.createLadderAt(vector2, "newArtifact");
+                    Vector2 vector2 = (Vector2)mines.GetType().GetProperty("tileBeneathLadder", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(mines);
+                    if (mines.getTileIndexAt(Utility.Vector2ToPoint(vector2), "Buildings") == -1)
+                        mines.createLadderAt(vector2, "newArtifact");
                 }
             }
         }
@@ -175,6 +178,11 @@ namespace PurrplingMod.StateMachine.State
                     Dialogue dismissalDialogue = new Dialogue(DialogueHelper.GetDialogueString(companion, "companionDismiss"), companion);
                     this.dismissalDialogue = dismissalDialogue;
                     DialogueHelper.DrawDialogue(dismissalDialogue);
+                    break;
+                case "bag":
+                    Chest bag = this.StateMachine.Bag;
+                    this.StateMachine.Companion.currentLocation.playSound("openBox");
+                    Game1.activeClickableMenu = new ItemGrabMenu(bag.items, false, true, new InventoryMenu.highlightThisItem(InventoryMenu.highlightAllItems), new ItemGrabMenu.behaviorOnItemSelect(bag.grabItemFromInventory), this.StateMachine.Companion.displayName, new ItemGrabMenu.behaviorOnItemSelect(bag.grabItemFromChest), false, true, true, true, true, 1, null, -1, this.StateMachine.Companion);
                     break;
             }
         }
