@@ -9,6 +9,7 @@ using StardewValley;
 using System.Xml;
 using System.IO;
 using Microsoft.Xna.Framework;
+using PurrplingMod.Model;
 
 namespace PurrplingMod
 {
@@ -19,6 +20,7 @@ namespace PurrplingMod
         private ContentLoader contentLoader;
         private DialogueDriver DialogueDriver { get; set; }
         private HintDriver HintDriver { get; set; }
+        private StuffDriver StuffDriver { get; set; }
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -29,23 +31,29 @@ namespace PurrplingMod
             helper.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
             helper.Events.GameLoop.DayStarted += this.GameLoop_DayStarted;
             helper.Events.GameLoop.GameLaunched += this.GameLoop_GameLaunched;
-            helper.Events.GameLoop.Saving += this.GameLoop_Saving;
 
             this.DialogueDriver = new DialogueDriver(helper.Events);
             this.HintDriver = new HintDriver(helper.Events);
+            this.StuffDriver = new StuffDriver(helper.Events, helper.Data, this.Monitor);
             this.contentLoader = new ContentLoader(helper.Content, "assets", this.Monitor);
             this.companionManager = new CompanionManager(this.DialogueDriver, this.HintDriver, this.Monitor);
         }
 
-        private void GameLoop_Saving(object sender, SavingEventArgs e)
+        private void PrepareDumpedBags()
         {
             foreach (var csm in this.companionManager.PossibleCompanions)
             {
                 if (csm.Value.Bag.items.Count == 0)
-                    continue;
+                    continue; // Empty bags is not relevant
 
                 Vector2 chestPosition = csm.Value.DumpBag();
-                this.Helper.Data.WriteSaveData($"dumpedbagtile_{csm.Key}", new Tuple<float, float>(chestPosition.X, chestPosition.Y));
+                BagDumpInfo bagInfo = new BagDumpInfo()
+                {
+                    source = csm.Key,
+                    posX = (int)chestPosition.X,
+                    posY = (int)chestPosition.Y,
+                };
+                this.StuffDriver.DumpedBags.Add(bagInfo);
             }
         }
 
@@ -75,6 +83,7 @@ namespace PurrplingMod
         private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
         {
             this.companionManager.ResetStateMachines();
+            this.PrepareDumpedBags();
         }
 
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)
@@ -85,10 +94,6 @@ namespace PurrplingMod
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
             this.companionManager.InitializeCompanions(this.contentLoader, this.Helper.Events);
-            foreach (var csm in this.companionManager.PossibleCompanions)
-            {
-                this.Monitor.Log($"{this.Helper.Data.ReadSaveData<Tuple<float, float>>($"dumpedbagtile_{csm.Key}")}");
-            }
         }
     }
 }
