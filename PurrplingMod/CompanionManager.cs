@@ -18,7 +18,7 @@ namespace PurrplingMod
         private readonly DialogueDriver dialogueDriver;
         private readonly HintDriver hintDriver;
         private readonly IMonitor monitor;
-        private Dictionary<string, CompanionStateMachine> PossibleCompanions { get; }
+        public Dictionary<string, CompanionStateMachine> PossibleCompanions { get; }
 
         public Farmer Farmer
         {

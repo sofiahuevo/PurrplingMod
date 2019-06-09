@@ -4,6 +4,11 @@ using StardewModdingAPI.Events;
 using PurrplingMod.Loader;
 using PurrplingMod.Driver;
 using System.Collections.Generic;
+using StardewValley.Objects;
+using StardewValley;
+using System.Xml;
+using System.IO;
+using Microsoft.Xna.Framework;
 
 namespace PurrplingMod
 {
@@ -24,11 +29,24 @@ namespace PurrplingMod
             helper.Events.GameLoop.DayEnding += this.GameLoop_DayEnding;
             helper.Events.GameLoop.DayStarted += this.GameLoop_DayStarted;
             helper.Events.GameLoop.GameLaunched += this.GameLoop_GameLaunched;
+            helper.Events.GameLoop.Saving += this.GameLoop_Saving;
 
             this.DialogueDriver = new DialogueDriver(helper.Events);
             this.HintDriver = new HintDriver(helper.Events);
             this.contentLoader = new ContentLoader(helper.Content, "assets", this.Monitor);
             this.companionManager = new CompanionManager(this.DialogueDriver, this.HintDriver, this.Monitor);
+        }
+
+        private void GameLoop_Saving(object sender, SavingEventArgs e)
+        {
+            foreach (var csm in this.companionManager.PossibleCompanions)
+            {
+                if (csm.Value.Bag.items.Count == 0)
+                    continue;
+
+                Vector2 chestPosition = csm.Value.DumpBag();
+                this.Helper.Data.WriteSaveData($"dumpedbagtile_{csm.Key}", new Tuple<float, float>(chestPosition.X, chestPosition.Y));
+            }
         }
 
         private void GameLoop_GameLaunched(object sender, GameLaunchedEventArgs e)
@@ -67,6 +85,10 @@ namespace PurrplingMod
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
             this.companionManager.InitializeCompanions(this.contentLoader, this.Helper.Events);
+            foreach (var csm in this.companionManager.PossibleCompanions)
+            {
+                this.Monitor.Log($"{this.Helper.Data.ReadSaveData<Tuple<float, float>>($"dumpedbagtile_{csm.Key}")}");
+            }
         }
     }
 }

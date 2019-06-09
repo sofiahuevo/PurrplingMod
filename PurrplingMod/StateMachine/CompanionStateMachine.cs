@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using PurrplingMod.Loader;
 using PurrplingMod.StateMachine.State;
 using PurrplingMod.StateMachine.StateFeatures;
@@ -7,6 +8,7 @@ using PurrplingMod.Utils;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.Locations;
 using StardewValley.Objects;
 
 namespace PurrplingMod.StateMachine
@@ -25,7 +27,7 @@ namespace PurrplingMod.StateMachine
         public NPC Companion { get; private set; }
         public IContentLoader ContentLoader { get; private set; }
         public IMonitor Monitor { get; }
-        public Chest Bag { get; }
+        public Chest Bag { get; private set; }
         public Dictionary<StateFlag, ICompanionState> States { get; private set; }
         private ICompanionState currentState;
 
@@ -103,6 +105,20 @@ namespace PurrplingMod.StateMachine
 
             this.RecruitedToday = false;
             this.MakeAvailable();
+        }
+
+        public Vector2 DumpBag()
+        {
+            FarmHouse farm = (FarmHouse)Game1.getLocationFromName("FarmHouse");
+            Vector2 place = Utility.PointToVector2(farm.getRandomOpenPointInHouse(Game1.random));
+            Chest dumpedBag = new Chest(true);
+
+            dumpedBag.items.AddRange(this.Bag.items);
+
+            farm.objects.Add(place, dumpedBag);
+            this.Bag = new Chest(true);
+
+            return place;
         }
 
         public void MakeAvailable()
