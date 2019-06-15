@@ -25,19 +25,26 @@ namespace PurrplingMod.Objects
             if (justCheckingForActivity)
                 return true;
 
+            // Read message first if some message was set
+            if (this.Message != null)
+            {
+                who.Halt();
+                Game1.drawLetterMessage(this.Message);
+                this.Message = null; // Drop message after read
+                return true;
+            }
+                
             who.Halt();
             who.freezePause = 1000;
             this.CreateUnpackAnimation(who.currentLocation);
 
+            // Drop items from gift box
             foreach (Item item in this.items)
                 Game1.createItemDebris(item, who.getStandingPosition(), who.FacingDirection, who.currentLocation);
 
             this.items.Clear();
             who.currentLocation.playSound("openBox");
-            who.currentLocation.removeObject(this.TileLocation, true);
-
-            if (this.Message != null)
-                Game1.drawObjectDialogue(this.Message);
+            who.currentLocation.removeObject(this.TileLocation, false); // Destroy box
 
             return true;
         }

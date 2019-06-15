@@ -116,6 +116,7 @@ namespace PurrplingMod.StateMachine
             DumpedBag dumpedBag = new DumpedBag(this.Bag.items.ToList(), place);
 
             dumpedBag.GivenFrom = this.Name;
+            dumpedBag.Message = this.ContentLoader.LoadString("Strings/Strings:bagItemsSentLetter", this.CompanionManager.Farmer.Name, this.Companion.displayName);
 
             farm.objects.Add(place, dumpedBag);
             this.Bag = new Chest(true);

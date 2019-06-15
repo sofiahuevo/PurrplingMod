@@ -32,7 +32,6 @@ namespace PurrplingMod.Driver
         public void DetectAndPrepareBagsToSave()
         {
             FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
-            //Dictionary<Vector2, StardewValley.Object> toSwap = new Dictionary<Vector2, StardewValley.Object>();
 
             this.DumpedBags.Clear();
 
@@ -62,12 +61,6 @@ namespace PurrplingMod.Driver
                 this.Monitor.Log($"Found bag to save from ${bagInfo.source} at position {bagInfo.posX},{bagInfo.posY} with {chest.items.Count} items");
             }
 
-            /*foreach (var toSwapKv in toSwap)
-            {
-                house.objects.Remove(toSwapKv.Key);
-                house.objects.Add(toSwapKv.Key, toSwapKv.Value);
-            }*/
-
             this.Monitor.Log($"Detected {this.DumpedBags.Count} to save.");
         }
 
@@ -75,7 +68,9 @@ namespace PurrplingMod.Driver
 
         public void RevivePossibleBags()
         {
+            int reviveCount = 0;
             FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
+
             foreach(BagDumpInfo bagInfo in this.DumpedBags)
             {
                 Vector2 position = new Vector2(bagInfo.posX, bagInfo.posY);
@@ -94,11 +89,12 @@ namespace PurrplingMod.Driver
                 };
 
                 house.objects[position] = bag;
+                reviveCount++;
 
                 this.Monitor.Log($"Revive dumpedBag on position ${bag.TileLocation} (Items count: {bag.items.Count})");
             }
 
-            this.Monitor.Log("Dumped bags revived!", LogLevel.Info);
+            this.Monitor.Log($"Revived {reviveCount} dumped bags!", LogLevel.Info);
         }
 
         private void GameLoop_SaveLoaded(object sender, SaveLoadedEventArgs e)
