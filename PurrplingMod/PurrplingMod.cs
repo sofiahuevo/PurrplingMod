@@ -39,24 +39,6 @@ namespace PurrplingMod
             this.companionManager = new CompanionManager(this.DialogueDriver, this.HintDriver, this.Monitor);
         }
 
-        private void PrepareDumpedBags()
-        {
-            foreach (var csm in this.companionManager.PossibleCompanions)
-            {
-                if (csm.Value.Bag.items.Count == 0)
-                    continue; // Empty bags is not relevant
-
-                Vector2 chestPosition = csm.Value.DumpBag();
-                BagDumpInfo bagInfo = new BagDumpInfo()
-                {
-                    source = csm.Key,
-                    posX = (int)chestPosition.X,
-                    posY = (int)chestPosition.Y,
-                };
-                this.StuffDriver.DumpedBags.Add(bagInfo);
-            }
-        }
-
         private void GameLoop_GameLaunched(object sender, GameLaunchedEventArgs e)
         {
             /* Preload assets to cache */
@@ -77,13 +59,15 @@ namespace PurrplingMod
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
         {
+            this.StuffDriver.RevivePossibleBags();
             this.companionManager.NewDaySetup();
         }
 
         private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
         {
             this.companionManager.ResetStateMachines();
-            this.PrepareDumpedBags();
+            this.companionManager.DumpCompanionNonEmptyBags();
+            this.StuffDriver.DetectAndPrepareBagsToSave();
         }
 
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)

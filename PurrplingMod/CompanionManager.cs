@@ -85,6 +85,8 @@ namespace PurrplingMod
                 if (csmKv.Value.Name != companionName)
                     csmKv.Value.MakeUnavailable();
             }
+
+            this.monitor.Log($"You are recruited {companionName} companion.");
         }
 
         public void ResetStateMachines()
@@ -99,12 +101,21 @@ namespace PurrplingMod
             {
                 foreach (var companionKv in this.PossibleCompanions)
                     companionKv.Value.NewDaySetup();
+
+                this.monitor.Log("Companions are successfully setup for new day!", LogLevel.Info);
             }
             catch (InvalidStateException e)
             {
                 this.monitor.Log($"Error while trying to setup new day: {e.Message}");
                 this.monitor.ExitGameImmediately(e.Message);
             }
+        }
+
+        public void DumpCompanionNonEmptyBags()
+        {
+            foreach (var csm in this.PossibleCompanions)
+                if (!csm.Value.Bag.isEmpty())
+                    csm.Value.DumpBagInFarmHouse();
         }
 
         internal void CompanionDissmised(bool keepUnavailable = false)

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using PurrplingMod.Loader;
+using PurrplingMod.Objects;
 using PurrplingMod.StateMachine.State;
 using PurrplingMod.StateMachine.StateFeatures;
 using PurrplingMod.Utils;
@@ -107,18 +109,16 @@ namespace PurrplingMod.StateMachine
             this.MakeAvailable();
         }
 
-        public Vector2 DumpBag()
+        public void DumpBagInFarmHouse()
         {
             FarmHouse farm = (FarmHouse)Game1.getLocationFromName("FarmHouse");
             Vector2 place = Utility.PointToVector2(farm.getRandomOpenPointInHouse(Game1.random));
-            Chest dumpedBag = new Chest(true);
+            DumpedBag dumpedBag = new DumpedBag(this.Bag.items.ToList(), place);
 
-            dumpedBag.items.AddRange(this.Bag.items);
+            dumpedBag.GivenFrom = this.Name;
 
             farm.objects.Add(place, dumpedBag);
             this.Bag = new Chest(true);
-
-            return place;
         }
 
         public void MakeAvailable()

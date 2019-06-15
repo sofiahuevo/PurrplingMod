@@ -11,5 +11,7 @@ namespace PurrplingMod.Model
         public string source;
         public int posX;
         public int posY;
+        public int giftboxIndex;
+        public string message;
     }
 }
