@@ -69,6 +69,7 @@
     <Compile Include="Driver\StuffDriver.cs" />
     <Compile Include="Loader\IContentLoader.cs" />
     <Compile Include="Model\BagDumpInfo.cs" />
+    <Compile Include="Model\BuffInfo.cs" />
     <Compile Include="Objects\DumpedBag.cs" />
     <Compile Include="StateMachine\StateFeatures\IRequestedDialogueCreator.cs" />
     <Compile Include="StateMachine\StateFeatures\IDialogueDetector.cs" />
@@ -88,6 +89,9 @@
     <Compile Include="Controller\PathFinder.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\Buffs\Abigail.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="assets\CompanionDispositions.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

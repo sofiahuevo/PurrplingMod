@@ -33,7 +33,7 @@ namespace PurrplingMod.Objects
                 Game1.createItemDebris(item, who.getStandingPosition(), who.FacingDirection, who.currentLocation);
 
             this.items.Clear();
-            who.currentLocation.playSound("woodWhack");
+            who.currentLocation.playSound("openBox");
             who.currentLocation.removeObject(this.TileLocation, true);
 
             if (this.Message != null)

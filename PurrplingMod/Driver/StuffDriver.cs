@@ -50,9 +50,10 @@ namespace PurrplingMod.Driver
                     posX = (int)objKv.Key.X,
                     posY = (int)objKv.Key.Y,
                 };
-
-                Chest chest = new Chest(true);
-                chest.TileLocation = bag.TileLocation;
+                Chest chest = new Chest(true)
+                {
+                    TileLocation = bag.TileLocation
+                };
                 chest.items.AddRange(bag.items);
 
                 house.objects[objKv.Key] = chest;
@@ -86,10 +87,11 @@ namespace PurrplingMod.Driver
                 }
 
                 Chest chest = obj as Chest;
-                DumpedBag bag = new DumpedBag(chest.items.ToList(), position, 0);
-
-                bag.GivenFrom = bagInfo.source;
-                bag.Message = bagInfo.message;
+                DumpedBag bag = new DumpedBag(chest.items.ToList(), position, 0)
+                {
+                    GivenFrom = bagInfo.source,
+                    Message = bagInfo.message
+                };
 
                 house.objects[position] = bag;
 
