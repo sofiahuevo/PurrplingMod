@@ -58,14 +58,15 @@ namespace PurrplingMod.Driver
 
         private void HandleAction(object sender, ButtonPressedEventArgs e)
         {
-            // ignore if player hasn't loaded a save yet or player can't move
-            if (!Context.IsWorldReady || !Context.IsPlayerFree)
+            bool actionButtonPressed = e.Button.IsActionButton() || e.Button.IsUseToolButton();
+
+            // ignore if player hasn't loaded a save yet, player can't move, pressed other button instead of action or event running
+            if (!Context.IsWorldReady || !Context.IsPlayerFree || !actionButtonPressed || Game1.currentLocation?.currentEvent != null)
                 return;
 
             Farmer farmer = Game1.player;
             Rectangle farmerBox = Game1.player.GetBoundingBox();
-            bool actionButtonPressed = e.Button.IsActionButton() || e.Button.IsUseToolButton();
-
+            
             farmerBox.Inflate(64, 64);
 
             foreach (NPC npc in farmer.currentLocation.characters) {

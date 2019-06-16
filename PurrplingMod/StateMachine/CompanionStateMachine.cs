@@ -100,6 +100,13 @@ namespace PurrplingMod.StateMachine
             if (this.CurrentStateFlag != StateFlag.RESET)
                 throw new InvalidStateException($"State machine {this.Name} must be in reset state!");
 
+            if (Utility.isFestivalDay(Game1.dayOfMonth, Game1.currentSeason))
+            {
+                this.Monitor.Log($"{this.Name} is unavailable to recruit due to festival today.");
+                this.MakeUnavailable();
+                return;
+            }
+
             DialogueHelper.SetupCompanionDialogues(this.Companion, this.ContentLoader.LoadStrings($"Dialogue/{this.Name}"));
 
             if (Helper.IsSpouseMarriedToFarmer(this.Companion, this.CompanionManager.Farmer))

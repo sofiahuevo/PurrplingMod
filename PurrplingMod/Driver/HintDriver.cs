@@ -39,7 +39,7 @@ namespace PurrplingMod.Driver
         {
             this.CursorPosition = e.NewPosition;
 
-            if (!Context.IsWorldReady)
+            if (!Context.IsWorldReady || Game1.currentLocation?.currentEvent != null)
                 return;
 
             Vector2 cursorTile = e.OldPosition.Tile;
