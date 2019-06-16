@@ -12,6 +12,8 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 using PurrplingMod.Model;
 using System;
+using PurrplingMod.Buffs;
+using StardewModdingAPI;
 
 namespace PurrplingMod.StateMachine.State
 {
@@ -22,8 +24,12 @@ namespace PurrplingMod.StateMachine.State
         private Dialogue currentLocationDialogue;
 
         public bool CanCreateDialogue { get; private set; }
+        private BuffManager BuffManager { get; set; }
 
-        public RecruitedState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events) {}
+        public RecruitedState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events)
+        {
+            this.BuffManager = new BuffManager(stateMachine.Companion, stateMachine.CompanionManager.Farmer, stateMachine.ContentLoader);
+        }
 
         public override void Entry()
         {
@@ -42,7 +48,10 @@ namespace PurrplingMod.StateMachine.State
             this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
             this.Events.Player.Warped += this.Player_Warped;
 
-            this.AssignBuffs();
+            if (this.BuffManager.HasAssignableBuffs())
+                this.BuffManager.AssignBuffs();
+            else
+                this.StateMachine.Monitor.Log($"Companion {this.StateMachine.Name} has no buffs defined!", LogLevel.Alert);
 
             if (DialogueHelper.GetVariousDialogueString(this.StateMachine.Companion, "companionRecruited", out string dialogueText))
                 this.StateMachine.Companion.setNewDialogue(dialogueText);
@@ -51,7 +60,7 @@ namespace PurrplingMod.StateMachine.State
 
         public override void Exit()
         {
-            this.UnassignBuffs();
+            this.BuffManager.ReleaseBuffs();
 
             this.StateMachine.Companion.eventActor = false;
             this.StateMachine.Companion.farmerPassesThrough = false;
@@ -63,65 +72,6 @@ namespace PurrplingMod.StateMachine.State
 
             this.followController = null;
             this.dismissalDialogue = null;
-        }
-
-        private void AssignBuffs()
-        {
-            BuffInfo buffInfo = this.StateMachine.ContentLoader.Load<BuffInfo>($"Buffs/{this.StateMachine.Name}");
-            if (buffInfo.attributes == null || buffInfo.attributes.Length < 12)
-                throw new Exception("Invalid buff attributes!");
-
-            int[] ft = buffInfo.attributes;
-            Buff buff = new Buff(0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 30, this.StateMachine.Companion.Name, this.StateMachine.Companion.displayName)
-            {
-                millisecondsDuration = 1200000,
-                description = buffInfo.description != null ? buffInfo.description.Replace("#", Environment.NewLine) : null,
-            };
-            Buff statBuff = new Buff(
-                ft[0], ft[1], ft[2], ft[3], ft[4], ft[5], ft[6], ft[7], ft[8], ft[9], ft[10], ft[11],
-                30, this.StateMachine.Companion.Name, this.StateMachine.Companion.displayName)
-            {
-                millisecondsDuration = 1200000,
-            };
-
-            Game1.buffsDisplay.addOtherBuff(buff);
-            buff.which = -420;
-            Game1.buffsDisplay.addOtherBuff(statBuff);
-            statBuff.which = -420;
-
-            if (Helper.IsSpouseMarriedToFarmer(this.StateMachine.Companion, this.StateMachine.CompanionManager.Farmer))
-            {
-                Buff marriedLuckBuff = new Buff(0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 30, this.StateMachine.Companion.Name, this.StateMachine.Companion.displayName)
-                {
-                    millisecondsDuration = 1200000 / 4,
-                    description = this.StateMachine.ContentLoader.LoadString("Strings/Strings:spouseBuffDescription", this.StateMachine.Companion.displayName),
-                    glow = new Color(114, 0, 0, 50), // Passion red lovely glowing
-                };
-                Game1.buffsDisplay.addOtherBuff(marriedLuckBuff);
-                marriedLuckBuff.which = -420;
-            }
-
-            Game1.buffsDisplay.syncIcons();
-        }
-
-        private void UnassignBuffs()
-        {
-            List<Buff> otherBuffs = Game1.buffsDisplay.otherBuffs;
-            List<Buff> toClean = new List<Buff>();
-
-            for (int i = 0; i < otherBuffs.Count; i++)
-            {
-                if (otherBuffs[i] == null || otherBuffs[i].which != -420)
-                    continue;
-
-                otherBuffs[i].removeBuff();
-                toClean.Add(otherBuffs[i]);
-            }
-
-            foreach (Buff buff in toClean)
-                otherBuffs.Remove(buff);
-
-            Game1.buffsDisplay.syncIcons();
         }
 
         private void GameLoop_TimeChanged(object sender, TimeChangedEventArgs e)

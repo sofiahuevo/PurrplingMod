@@ -58,10 +58,10 @@ namespace PurrplingMod.Driver
                 house.objects[objKv.Key] = chest;
 
                 this.DumpedBags.Add(bagInfo);
-                this.Monitor.Log($"Found bag to save from ${bagInfo.source} at position {bagInfo.posX},{bagInfo.posY} with {chest.items.Count} items");
+                this.Monitor.Log($"Found bag to save from {bagInfo.source} at position {bagInfo.posX},{bagInfo.posY} with {chest.items.Count} items");
             }
 
-            this.Monitor.Log($"Detected {this.DumpedBags.Count} to save.");
+            this.Monitor.Log($"Detected {this.DumpedBags.Count} bags to save.");
         }
 
         public IDataHelper DataHelper { get; }

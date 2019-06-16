@@ -127,6 +127,8 @@ namespace PurrplingMod.StateMachine
 
             farm.objects.Add(place, dumpedBag);
             this.Bag = new Chest(true);
+
+            this.Monitor.Log($"{this.Companion} delivered bag contents into farm house at position {place}");
         }
 
         public void MakeAvailable()

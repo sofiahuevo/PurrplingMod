@@ -8,15 +8,17 @@ namespace PurrplingMod.Loader
 {
     public class ContentLoader : IContentLoader
     {
+        private readonly string root;
         private readonly string assetsDir;
         private readonly IMonitor monitor;
         private readonly Dictionary<string, object> assetsMap;
 
         private IContentHelper Helper { get; }
 
-        public ContentLoader(IContentHelper helper, string assetsDir, IMonitor monitor)
+        public ContentLoader(IContentHelper helper, string root, string assetsDir, IMonitor monitor)
         {
             this.Helper = helper;
+            this.root = root;
             this.assetsDir = assetsDir;
             this.assetsMap = new Dictionary<string, object>();
             this.monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
@@ -24,9 +26,9 @@ namespace PurrplingMod.Loader
 
         public bool CanLoad(string assetName)
         {
-            string path = $"{this.assetsDir}/{assetName}.json";
+            string path = $"{this.root}/{this.assetsDir}/{assetName}.json";
 
-            return File.Exists(path.Replace('/', Path.PathSeparator).Replace('\\', Path.PathSeparator));
+            return File.Exists(path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
         }
 
         public T Load<T>(string assetName)

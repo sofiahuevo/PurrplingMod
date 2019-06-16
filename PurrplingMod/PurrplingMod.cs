@@ -35,7 +35,7 @@ namespace PurrplingMod
             this.DialogueDriver = new DialogueDriver(helper.Events);
             this.HintDriver = new HintDriver(helper.Events);
             this.StuffDriver = new StuffDriver(helper.Events, helper.Data, this.Monitor);
-            this.contentLoader = new ContentLoader(helper.Content, "assets", this.Monitor);
+            this.contentLoader = new ContentLoader(helper.Content, helper.DirectoryPath, "assets", this.Monitor);
             this.companionManager = new CompanionManager(this.DialogueDriver, this.HintDriver, this.Monitor);
         }
 

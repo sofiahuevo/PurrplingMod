@@ -62,6 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Buffs\BuffManager.cs" />
     <Compile Include="CompanionManager.cs" />
     <Compile Include="Driver\DialogueDriver.cs" />
     <Compile Include="Controller\FollowController.cs" />
