@@ -37,11 +37,11 @@
 
 ![Various dialogues][dialogues]
 
-**We can save items from our repository to a companion's backpag**
+**We can save items from our repository to a companion's backpack**
 
 ![Using companion's backpack][usebag]
 
-**If we can break adventure, then we can release a companion**
+**If we want to break adventure, then we can release a companion**
 
 ![Release companion][release]
 
