@@ -49,7 +49,7 @@ namespace PurrplingMod.Utils
         public static bool GetVariousDialogueString(NPC n, string key, out string text)
         {
             Farmer f = Game1.player;
-            Finder finder = new Finder()
+            VariousKeyGenerator keygen = new VariousKeyGenerator()
             {
                 Date = SDate.Now(),
                 IsNight = Game1.isDarkOut(),
@@ -59,10 +59,10 @@ namespace PurrplingMod.Utils
             };
 
             // Generate possible dialogue keys
-            finder.GenerateVariousKeys(key);
+            keygen.GenerateVariousKeys(key);
 
             // Try to find a relevant dialogue
-            foreach (string k in finder.PossibleKeys)
+            foreach (string k in keygen.PossibleKeys)
                 if (GetDialogueString(n, k, out text))
                     return true;
 

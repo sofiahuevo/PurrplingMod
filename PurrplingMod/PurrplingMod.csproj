@@ -71,13 +71,13 @@
     <Compile Include="Loader\IContentLoader.cs" />
     <Compile Include="Model\BagDumpInfo.cs" />
     <Compile Include="Model\BuffInfo.cs" />
-    <Compile Include="Objects\DumpedBag.cs" />
+    <Compile Include="Objects\Package.cs" />
     <Compile Include="StateMachine\StateFeatures\IRequestedDialogueCreator.cs" />
     <Compile Include="StateMachine\StateFeatures\IDialogueDetector.cs" />
     <Compile Include="StateMachine\StateFeatures\ICompanionIntegrator.cs" />
     <Compile Include="StateMachine\State\RecruitedState.cs" />
     <Compile Include="StateMachine\State\UnavailableState.cs" />
-    <Compile Include="Utils\DialogueHelper.finder.cs" />
+    <Compile Include="Utils\DialogueHelper.VariousKeyGenerator.cs" />
     <Compile Include="Utils\Helper.cs" />
     <Compile Include="Internal\IUpdateable.cs" />
     <Compile Include="Loader\ContentLoader.cs" />

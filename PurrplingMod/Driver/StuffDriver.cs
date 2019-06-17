@@ -37,7 +37,7 @@ namespace PurrplingMod.Driver
 
             foreach (var objKv in house.objects.Pairs)
             {
-                if (!(objKv.Value is DumpedBag bag))
+                if (!(objKv.Value is Package bag))
                     continue;
 
                 Vector2 chestPosition = bag.TileLocation;
@@ -82,7 +82,7 @@ namespace PurrplingMod.Driver
                 }
 
                 Chest chest = obj as Chest;
-                DumpedBag bag = new DumpedBag(chest.items.ToList(), position, 0)
+                Package bag = new Package(chest.items.ToList(), position, 0)
                 {
                     GivenFrom = bagInfo.source,
                     Message = bagInfo.message
