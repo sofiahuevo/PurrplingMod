@@ -109,7 +109,7 @@ namespace PurrplingMod.StateMachine
 
             DialogueHelper.SetupCompanionDialogues(this.Companion, this.ContentLoader.LoadStrings($"Dialogue/{this.Name}"));
 
-            if (Helper.IsSpouseMarriedToFarmer(this.Companion, this.CompanionManager.Farmer))
+            if (Helper.IsSpouseMarriedToFarmer(this.Companion, this.CompanionManager.Farmer) && this.ContentLoader.CanLoad($"Dialogue/{this.Name}Spouse"))
                 DialogueHelper.SetupCompanionDialogues(this.Companion, this.ContentLoader.LoadStrings($"Dialogue/{this.Name}Spouse"));
 
             this.RecruitedToday = false;
