@@ -7,20 +7,24 @@
 - Download this mod and unzip it into *Stardew Valley/Mods*.
 - Run the game using SMAPI.
 
-## Supported companion NPC's
+## Supported companion NPCs
 
 - Abigail
+- Alex
+- Haley
+
+### Planned companion NPCs to support
 - Maru
 - Shane
 - Leah
-- Haley
 - Emily
 - Penny
-- Alex
 - Sam
 - Sebastian
 - Elliott
 - Harvey
+
+For NPCs listed above we're missing companion dialogues. You can help us and you can create it. How? Fork this repo and see [Dialogue wiki](https://github.com/purrplingcat/PurrplingMod/wiki/Dialogues). You can get inspiration [from code](https://github.com/purrplingcat/PurrplingMod/tree/master/PurrplingMod/assets/Dialogue). Are you created dialogues? Just send us a PR.
 
 ## Compatibility
 
