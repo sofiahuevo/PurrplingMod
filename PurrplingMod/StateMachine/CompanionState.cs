@@ -11,7 +11,14 @@ namespace PurrplingMod.StateMachine
 {
     public interface ICompanionState
     {
+        /// <summary>
+        /// Enter to this state
+        /// </summary>
         void Entry();
+        
+        /// <summary>
+        /// Exit from this state
+        /// </summary>
         void Exit();
     }
 
@@ -26,7 +33,14 @@ namespace PurrplingMod.StateMachine
             this.Events = events;
         }
 
+        /// <summary>
+        /// By default do nothing when this state entered
+        /// </summary>
         public virtual void Entry() {}
+
+        /// <summary>
+        /// By default do nothing when this state was exited
+        /// </summary>
         public virtual void Exit() {}
     }
 }

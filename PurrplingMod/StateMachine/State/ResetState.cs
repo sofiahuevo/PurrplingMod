@@ -327,11 +327,11 @@ namespace PurrplingMod.StateMachine.State
                         previousGameLocation, previousPosition.X, previousPosition.Y, location, xLocation,
                         yLocation, localFacingDirection, endOfRouteAnimation, endOfRouteMessage
                     };
-                    SchedulePathDescription spd = (SchedulePathDescription)pathfinder.Invoke(companion, parameters);
-                    oneDaySchedule.Add(time, spd);
+                    SchedulePathDescription schedulePathDesc = (SchedulePathDescription)pathfinder.Invoke(companion, parameters);
+                    oneDaySchedule.Add(time, schedulePathDesc);
                     previousPosition.X = xLocation;
                     previousPosition.Y = yLocation;
-                    if (timeOfDay >= time && spd.route.Count != 0)
+                    if (timeOfDay >= time && schedulePathDesc.route != null && schedulePathDesc.route.Count != 0)
                     {
                         Stack<Point> sp = oneDaySchedule[time].route;
                         Point p = new Point();

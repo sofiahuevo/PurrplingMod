@@ -49,6 +49,7 @@ namespace PurrplingMod
             this.contentLoader.LoadStrings("Strings/Strings");
             this.contentLoader.LoadStrings("Strings/SpeechBubbles");
 
+            // Preload dialogues for companions
             foreach (string npcName in dispositions)
             {
                 this.contentLoader.LoadStrings($"Dialogue/{npcName}");

@@ -18,6 +18,9 @@ namespace PurrplingMod.StateMachine
 
     internal class CompanionStateMachine
     {
+        /// <summary>
+        /// Allowed states in machine
+        /// </summary>
         public enum StateFlag
         {
             RESET,
@@ -42,6 +45,9 @@ namespace PurrplingMod.StateMachine
             this.Bag = new Chest(true);
         }
 
+        /// <summary>
+        /// Our companion name (Refers NPC name)
+        /// </summary>
         public string Name
         {
             get
@@ -54,6 +60,10 @@ namespace PurrplingMod.StateMachine
         public Dictionary<int, SchedulePathDescription> BackedupSchedule { get; internal set; }
         public bool RecruitedToday { get; private set; }
 
+        /// <summary>
+        /// Change companion state machine state
+        /// </summary>
+        /// <param name="stateFlag">Flag of allowed state</param>
         private void ChangeState(StateFlag stateFlag)
         {
             if (this.States == null)
@@ -76,6 +86,10 @@ namespace PurrplingMod.StateMachine
             this.CurrentStateFlag = stateFlag;
         }
 
+        /// <summary>
+        /// Setup state handlers
+        /// </summary>
+        /// <param name="stateHandlers"></param>
         public void Setup(Dictionary<StateFlag, ICompanionState> stateHandlers)
         {
             if (this.States != null)
@@ -85,21 +99,30 @@ namespace PurrplingMod.StateMachine
             this.ResetStateMachine();
         }
 
+        /// <summary>
+        /// Companion speaked a dialogue
+        /// </summary>
+        /// <param name="speakedDialogue"></param>
         public void DialogueSpeaked(Dialogue speakedDialogue)
         {
+            // Convert state to dialogue detector (if state implements it)
             IDialogueDetector detector = this.currentState as IDialogueDetector;
 
             if (detector != null)
             {
-                detector.OnDialogueSpeaked(speakedDialogue);
+                detector.OnDialogueSpeaked(speakedDialogue); // Handle this dialogue
             }
         }
 
+        /// <summary>
+        /// Setup companion for new day
+        /// </summary>
         public void NewDaySetup()
         {
             if (this.CurrentStateFlag != StateFlag.RESET)
                 throw new InvalidStateException($"State machine {this.Name} must be in reset state!");
 
+            // Today is festival day? Player can't recruit this companion
             if (Utility.isFestivalDay(Game1.dayOfMonth, Game1.currentSeason))
             {
                 this.Monitor.Log($"{this.Name} is unavailable to recruit due to festival today.");
@@ -107,8 +130,10 @@ namespace PurrplingMod.StateMachine
                 return;
             }
 
+            // Setup dialogues for companion for this day
             DialogueHelper.SetupCompanionDialogues(this.Companion, this.ContentLoader.LoadStrings($"Dialogue/{this.Name}"));
 
+            // Spoused or married with her/him? Enhance dialogues with extra spouse dialogues for this day
             if (Helper.IsSpouseMarriedToFarmer(this.Companion, this.CompanionManager.Farmer) && this.ContentLoader.CanLoad($"Dialogue/{this.Name}Spouse"))
                 DialogueHelper.SetupCompanionDialogues(this.Companion, this.ContentLoader.LoadStrings($"Dialogue/{this.Name}Spouse"));
 
@@ -116,6 +141,9 @@ namespace PurrplingMod.StateMachine
             this.MakeAvailable();
         }
 
+        /// <summary>
+        /// Dump items from companion's bag to farmer (player) house
+        /// </summary>
         public void DumpBagInFarmHouse()
         {
             FarmHouse farm = (FarmHouse)Game1.getLocationFromName("FarmHouse");
@@ -132,21 +160,34 @@ namespace PurrplingMod.StateMachine
             this.Monitor.Log($"{this.Companion} delivered bag contents into farm house at position {place}");
         }
 
+        /// <summary>
+        /// Make companion AVAILABLE to recruit
+        /// </summary>
         public void MakeAvailable()
         {
             this.ChangeState(StateFlag.AVAILABLE);
         }
 
+        /// <summary>
+        /// Make companion UNAVAILABLE to recruit
+        /// </summary>
         public void MakeUnavailable()
         {
             this.ChangeState(StateFlag.UNAVAILABLE);
         }
 
+        /// <summary>
+        /// Reset companion's state machine
+        /// </summary>
         public void ResetStateMachine()
         {
             this.ChangeState(StateFlag.RESET);
         }
 
+        /// <summary>
+        /// Dismiss recruited companion
+        /// </summary>
+        /// <param name="keepUnavailableOthers">Keep other companions unavailable?</param>
         internal void Dismiss(bool keepUnavailableOthers = false)
         {
             this.ResetStateMachine();
@@ -159,6 +200,9 @@ namespace PurrplingMod.StateMachine
             this.CompanionManager.CompanionDissmised(keepUnavailableOthers);
         }
 
+        /// <summary>
+        /// Recruit this companion
+        /// </summary>
         public void Recruit()
         {
             this.BackedupSchedule = this.Companion.Schedule;
@@ -181,14 +225,23 @@ namespace PurrplingMod.StateMachine
             this.ContentLoader = null;
         }
 
+        /// <summary>
+        /// Resolve dialogue request
+        /// </summary>
         public void ResolveDialogueRequest()
         {
+            // Can this companion to resolve player's dialogue request?
             if (!this.CanDialogueRequestResolve())
                 return;
 
+            // Handle dialogue request resolution in current machine state
             (this.currentState as IRequestedDialogueCreator).CreateRequestedDialogue();
         }
 
+        /// <summary>
+        /// Can request a dialogue for this companion in current state?
+        /// </summary>
+        /// <returns>True if dialogue request can be resolved</returns>
         public bool CanDialogueRequestResolve()
         {
             return this.currentState is IRequestedDialogueCreator dcreator && dcreator.CanCreateDialogue;
