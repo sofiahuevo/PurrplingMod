@@ -6,5 +6,5 @@
   "UniqueID": "purrplingcat.npcadventure",
   "EntryDll": "NpcAdventure.dll",
   "MinimumApiVersion": "2.11.0",
-  "UpdateKeys": []
+  "UpdateKeys": [ "Nexus:4582" ]
 }
