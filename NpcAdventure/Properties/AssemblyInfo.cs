@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // Obecné informace o sestavení se řídí přes následující 
 // sadu atributů. Změnou hodnot těchto atributů se upraví informace
 // přidružené k sestavení.
-[assembly: AssemblyTitle("PurrplingMod")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("NpcAdventure")]
+[assembly: AssemblyDescription("It's time to adventure!")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PurrplingMod")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyProduct("NpcAdventure")]
+[assembly: AssemblyCopyright("Copyright © PurrplingCat 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

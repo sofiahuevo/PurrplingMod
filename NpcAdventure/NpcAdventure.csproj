@@ -7,8 +7,8 @@
     <ProjectGuid>{644E8E3D-1F60-4742-8E8C-655652D44615}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PurrplingMod</RootNamespace>
-    <AssemblyName>PurrplingMod</AssemblyName>
+    <RootNamespace>NpcAdventure</RootNamespace>
+    <AssemblyName>NpcAdventure</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
