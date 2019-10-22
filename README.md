@@ -1,6 +1,19 @@
 ![following][library]
 
-# PurrplingMod (WIP)
+# It's time to adventure (NPC Adventures)
+
+**WARNING: THIS MOD IS IN PRE-ALPHA BUILD!** It may be unstable with some bugs. Found any defect? Report it and help improvement this mod. Any idea? Create a proposal on Github. Thanks.
+
+Go to an adventure with Pelican Town's villagers! Recruit bachelorete or bachlor and go to adventure togehter.
+
+## Features
+
+- Ask NPC to a follow farmer (5 hearts and more required)
+- Recruited NPC can fight with monsters (with fists!)
+- Various dialogues for different locations (incomplete yet)
+- Can save items from our repository to a npc's backpack
+- If you want to break adventure, then you can release a companion
+- Next morning you can find a package with your items you saved in companion's backpack
 
 ## Install
 - [Install the latest version of SMAPI](https://smapi.io).
