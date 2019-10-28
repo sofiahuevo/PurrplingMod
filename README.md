@@ -40,7 +40,7 @@ For NPCs listed above we're missing companion dialogues. You can help us and you
 ## Compatibility
 
 - Works with Stardew Valley 1.3 on Linux/Mac/Windows.
-- Works in single player and multiplayer. If there are multiplayer limitations, explain them here.
+- Works in **single player** ONLY.
 
 ## Feature preview
 
