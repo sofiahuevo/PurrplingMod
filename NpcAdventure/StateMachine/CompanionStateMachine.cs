@@ -33,7 +33,7 @@ namespace NpcAdventure.StateMachine
         public NPC Companion { get; private set; }
         public CompanionMetaData Metadata { get; }
         public IContentLoader ContentLoader { get; private set; }
-        public IMonitor Monitor { get; }
+        private IMonitor Monitor { get; }
         public Chest Bag { get; private set; }
         public Dictionary<StateFlag, ICompanionState> States { get; private set; }
         private ICompanionState currentState;

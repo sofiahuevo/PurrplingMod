@@ -25,14 +25,14 @@ namespace NpcAdventure.StateMachine.State
         public bool CanCreateDialogue { get; private set; }
         private BuffManager BuffManager { get; set; }
 
-        public RecruitedState(CompanionStateMachine stateMachine, IModEvents events) : base(stateMachine, events)
+        public RecruitedState(CompanionStateMachine stateMachine, IModEvents events, IMonitor monitor) : base(stateMachine, events, monitor)
         {
             this.BuffManager = new BuffManager(stateMachine.Companion, stateMachine.CompanionManager.Farmer, stateMachine.ContentLoader);
         }
 
         public override void Entry()
         {
-            this.ai = new AI_StateMachine(this.StateMachine.Companion, this.StateMachine.CompanionManager.Farmer, this.StateMachine.Metadata, this.StateMachine.ContentLoader, this.Events, this.StateMachine.Monitor);
+            this.ai = new AI_StateMachine(this.StateMachine.Companion, this.StateMachine.CompanionManager.Farmer, this.StateMachine.Metadata, this.StateMachine.ContentLoader, this.Events, this.monitor);
 
             if (this.StateMachine.Companion.doingEndOfRouteAnimation.Value)
                 this.FinishScheduleAnimation();
@@ -53,7 +53,7 @@ namespace NpcAdventure.StateMachine.State
             if (this.BuffManager.HasAssignableBuffs())
                 this.BuffManager.AssignBuffs();
             else
-                this.StateMachine.Monitor.Log($"Companion {this.StateMachine.Name} has no buffs defined!", LogLevel.Alert);
+                this.monitor.Log($"Companion {this.StateMachine.Name} has no buffs defined!", LogLevel.Alert);
 
             if (DialogueHelper.GetVariousDialogueString(this.StateMachine.Companion, "companionRecruited", out string dialogueText))
                 this.StateMachine.Companion.setNewDialogue(dialogueText);
@@ -72,9 +72,9 @@ namespace NpcAdventure.StateMachine.State
 
             // And then play finish animation "end of route animation" when companion is recruited
             // Must be called via reflection, because they are private members of NPC class
-            NpcAdventureMod.Instance.Helper.Reflection.GetMethod(this.StateMachine.Companion, "finishEndOfRouteAnimation").Invoke();
+            NpcAdventureMod.ModHelper.Reflection.GetMethod(this.StateMachine.Companion, "finishEndOfRouteAnimation").Invoke();
             this.StateMachine.Companion.doingEndOfRouteAnimation.Value = false;
-            NpcAdventureMod.Instance.Helper.Reflection.GetField<Boolean>(this.StateMachine.Companion, "currentlyDoingEndOfRouteAnimation").SetValue(false);
+            NpcAdventureMod.ModHelper.Reflection.GetField<Boolean>(this.StateMachine.Companion, "currentlyDoingEndOfRouteAnimation").SetValue(false);
         }
 
         public override void Exit()

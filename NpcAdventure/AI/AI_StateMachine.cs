@@ -30,7 +30,7 @@ namespace NpcAdventure.AI
         public readonly NPC npc;
         public readonly Character player;
         private readonly IModEvents events;
-        public readonly IMonitor monitor;
+        internal IMonitor Monitor { get; private set; }
         internal readonly CompanionMetaData metadata;
         private readonly IContentLoader loader;
         private Dictionary<State, IController> controllers;
@@ -41,7 +41,7 @@ namespace NpcAdventure.AI
             this.npc = npc ?? throw new ArgumentNullException(nameof(npc));
             this.player = player ?? throw new ArgumentNullException(nameof(player));
             this.events = events ?? throw new ArgumentException(nameof(events));
-            this.monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
+            this.Monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
             this.metadata = metadata;
             this.loader = loader;
         }
@@ -69,7 +69,7 @@ namespace NpcAdventure.AI
 
         private void ChangeState(State state)
         {
-            this.monitor.Log($"AI changes state {this.CurrentState} -> {state}");
+            this.Monitor.Log($"AI changes state {this.CurrentState} -> {state}");
 
             if (this.CurrentController != null)
             {
@@ -95,7 +95,7 @@ namespace NpcAdventure.AI
             if (this.changeStateCooldown == 0 && this.CurrentState != State.FIGHT && this.PlayerIsNear() && this.IsThereAnyMonster())
             {
                 this.ChangeState(State.FIGHT);
-                this.monitor.Log("A 50ft monster is here!");
+                this.Monitor.Log("A 50ft monster is here!");
             }
 
             if (this.CurrentState == State.FIGHT && this.CurrentController.IsIdle)
