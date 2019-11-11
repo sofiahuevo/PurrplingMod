@@ -35,10 +35,11 @@ namespace NpcAdventure.StateMachine
         public IContentLoader ContentLoader { get; private set; }
         private IMonitor Monitor { get; }
         public Chest Bag { get; private set; }
+        public IReflectionHelper Reflection { get; }
         public Dictionary<StateFlag, ICompanionState> States { get; private set; }
         private ICompanionState currentState;
 
-        public CompanionStateMachine(CompanionManager manager, NPC companion, CompanionMetaData metadata, IContentLoader loader, IMonitor monitor = null)
+        public CompanionStateMachine(CompanionManager manager, NPC companion, CompanionMetaData metadata, IContentLoader loader, IReflectionHelper reflection, IMonitor monitor = null)
         {
             this.CompanionManager = manager;
             this.Companion = companion;
@@ -46,6 +47,7 @@ namespace NpcAdventure.StateMachine
             this.ContentLoader = loader;
             this.Monitor = monitor;
             this.Bag = new Chest(true);
+            this.Reflection = reflection;
         }
 
         /// <summary>

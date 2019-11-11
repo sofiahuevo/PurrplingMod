@@ -13,7 +13,6 @@ namespace NpcAdventure
         private DialogueDriver DialogueDriver { get; set; }
         private HintDriver HintDriver { get; set; }
         private StuffDriver StuffDriver { get; set; }
-        internal static IModHelper ModHelper { get; private set; }
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -30,8 +29,6 @@ namespace NpcAdventure
             this.StuffDriver = new StuffDriver(helper.Events, helper.Data, this.Monitor);
             this.contentLoader = new ContentLoader(helper.Content, helper.DirectoryPath, "assets", this.Monitor);
             this.companionManager = new CompanionManager(this.DialogueDriver, this.HintDriver, this.Monitor);
-
-            NpcAdventureMod.ModHelper = helper;
         }
 
         private void GameLoop_GameLaunched(object sender, GameLaunchedEventArgs e)
@@ -76,7 +73,7 @@ namespace NpcAdventure
 
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
-            this.companionManager.InitializeCompanions(this.contentLoader, this.Helper.Events);
+            this.companionManager.InitializeCompanions(this.contentLoader, this.Helper.Events, this.Helper.Reflection);
         }
     }
 }

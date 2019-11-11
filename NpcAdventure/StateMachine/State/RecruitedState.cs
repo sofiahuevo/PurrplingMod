@@ -72,9 +72,9 @@ namespace NpcAdventure.StateMachine.State
 
             // And then play finish animation "end of route animation" when companion is recruited
             // Must be called via reflection, because they are private members of NPC class
-            NpcAdventureMod.ModHelper.Reflection.GetMethod(this.StateMachine.Companion, "finishEndOfRouteAnimation").Invoke();
+            this.StateMachine.Reflection.GetMethod(this.StateMachine.Companion, "finishEndOfRouteAnimation").Invoke();
             this.StateMachine.Companion.doingEndOfRouteAnimation.Value = false;
-            NpcAdventureMod.ModHelper.Reflection.GetField<Boolean>(this.StateMachine.Companion, "currentlyDoingEndOfRouteAnimation").SetValue(false);
+            this.StateMachine.Reflection.GetField<Boolean>(this.StateMachine.Companion, "currentlyDoingEndOfRouteAnimation").SetValue(false);
         }
 
         public override void Exit()
@@ -116,7 +116,7 @@ namespace NpcAdventure.StateMachine.State
                 var monsters = from c in mines.characters where c.IsMonster select c;
                 if (monsters.Count() == 0)
                 {
-                    Vector2 vector2 = (Vector2)mines.GetType().GetProperty("tileBeneathLadder", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(mines);
+                    Vector2 vector2 = this.StateMachine.Reflection.GetProperty<Vector2>(mines, "tileBeneathLadder").GetValue();
                     if (mines.getTileIndexAt(Utility.Vector2ToPoint(vector2), "Buildings") == -1)
                         mines.createLadderAt(vector2, "newArtifact");
                 }
