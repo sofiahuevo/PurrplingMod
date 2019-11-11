@@ -151,18 +151,20 @@ namespace NpcAdventure.AI.Controller
         private class IdleBehavior : Internal.IUpdateable
         {
             protected readonly IdleController controller;
+            private readonly IMonitor monitor;
 
             public IdleBehavior(IdleController controller)
             {
                 this.controller = controller;
+                this.monitor = this.controller.ai.Monitor;
             }
 
             public virtual void StartBehavior() {
-                NpcAdventureMod.Instance.Monitor.Log($"Starting idle behavior `{this.GetType().Name}`");
+                this.monitor.Log($"Starting idle behavior `{this.GetType().Name}`");
             }
 
             public virtual void StopBehavior() {
-                NpcAdventureMod.Instance.Monitor.Log($"Stopping idle behavior `{this.GetType().Name}`");
+                this.monitor.Log($"Stopping idle behavior `{this.GetType().Name}`");
             }
 
             public virtual void Update(UpdateTickedEventArgs e) { }

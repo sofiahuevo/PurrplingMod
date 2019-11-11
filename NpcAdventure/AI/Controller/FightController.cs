@@ -299,7 +299,7 @@ namespace NpcAdventure.AI.Controller
 
             if (!criticalFist && !this.defendFistUsed && companionBox.Intersects(enemyBox))
             {
-                this.ai.monitor.Log("Critical dangerous: Using defense fists!");
+                this.ai.Monitor.Log("Critical dangerous: Using defense fists!");
                 this.defendFistUsed = true;
                 this.DoFightSpeak();
                 this.DoDamage(true); // Force fist when no damage given to a monster with weapon
@@ -425,7 +425,7 @@ namespace NpcAdventure.AI.Controller
             if (this.pathToFollow == null)
             {
                 this.potentialIddle = true;
-                this.ai.monitor.Log($"Fight controller iddle, because can't find a path to monster '{this.leader?.Name}'");
+                this.ai.Monitor.Log($"Fight controller iddle, because can't find a path to monster '{this.leader?.Name}'");
             }
         }
 
