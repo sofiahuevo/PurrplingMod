@@ -1,6 +1,7 @@
 ﻿using NpcAdventure.AI.Controller;
 using NpcAdventure.Loader;
 using NpcAdventure.Model;
+using NpcAdventure.StateMachine;
 using NpcAdventure.Utils;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -17,8 +18,9 @@ namespace NpcAdventure.AI
     /// <summary>
     /// State machine for companion AI
     /// </summary>
-    public class AI_StateMachine : Internal.IUpdateable
+    internal class AI_StateMachine : Internal.IUpdateable
     {
+        const int HEAL_COUNTDOWN = 2000;
         public enum State
         {
             FOLLOW,
@@ -28,26 +30,31 @@ namespace NpcAdventure.AI
 
         private const float MONSTER_DISTANCE = 9f;
         public readonly NPC npc;
-        public readonly Character player;
+        public readonly Farmer player;
         private readonly IModEvents events;
         internal IMonitor Monitor { get; private set; }
-        internal readonly CompanionMetaData metadata;
+
         private readonly IContentLoader loader;
         private Dictionary<State, IController> controllers;
         private int changeStateCooldown = 0;
+        private int medkits = 3;
+        private int healCooldown = 0;
+        private bool lifeSaved;
 
-        internal AI_StateMachine(NPC npc, Character player, CompanionMetaData metadata, IContentLoader loader, IModEvents events, IMonitor monitor)
+        internal AI_StateMachine(CompanionStateMachine csm, IModEvents events, IMonitor monitor)
         {
-            this.npc = npc ?? throw new ArgumentNullException(nameof(npc));
-            this.player = player ?? throw new ArgumentNullException(nameof(player));
+            this.npc = csm.Companion;
+            this.player = csm.CompanionManager.Farmer;
             this.events = events ?? throw new ArgumentException(nameof(events));
             this.Monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
-            this.metadata = metadata;
-            this.loader = loader;
+            this.Csm = csm;
+            this.loader = csm.ContentLoader;
         }
 
         public State CurrentState { get; private set; }
         internal IController CurrentController { get => this.controllers[this.CurrentState]; }
+
+        internal CompanionStateMachine Csm { get; }
 
         public event EventHandler<EventArgsLocationChanged> LocationChanged;
 
@@ -59,12 +66,52 @@ namespace NpcAdventure.AI
             this.controllers = new Dictionary<State, IController>()
             {
                 [State.FOLLOW] = new FollowController(this),
-                [State.FIGHT] = new FightController(this, this.loader, this.events, this.metadata.Sword),
+                [State.FIGHT] = new FightController(this, this.loader, this.events, this.Csm.Metadata.Sword),
                 [State.IDLE] = new IdleController(this, this.loader),
             };
 
             // By default AI following the player
             this.ChangeState(State.FOLLOW);
+        }
+
+        public bool PerformAction()
+        {
+            if (this.Csm.HasSkill("doctor") && (this.player.health < this.player.maxHealth / 3) && this.healCooldown == 0 && this.medkits != -1)
+            {
+                this.TryHealFarmer();
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryHealFarmer()
+        {
+            if (this.medkits > 0 && this.player.health < this.player.maxHealth)
+            {
+                int healthBonus = (this.player.maxHealth / 100) * (this.player.getFriendshipHeartLevelForNPC(this.npc.Name) / 2); // % health bonus based on friendship hearts
+                int health = Math.Max(10, (1 / this.player.health * 10) + Game1.random.Next(0, (int)(this.player.maxHealth * .1f))) + healthBonus;
+                this.player.health += health;
+                this.healCooldown = HEAL_COUNTDOWN;
+                this.medkits--;
+
+                if (this.player.health > this.player.maxHealth)
+                    this.player.health = this.player.maxHealth;
+
+                Game1.drawDialogue(this.npc, DialogueHelper.GetDialogueString(this.npc, "heal"));
+                Game1.addHUDMessage(new HUDMessage(this.Csm.ContentLoader.LoadString("Strings/Strings:healed", this.npc.displayName, health), HUDMessage.health_type));
+                this.Monitor.Log($"{this.npc.Name} healed you! Remaining medkits: {this.medkits}", LogLevel.Info);
+                return true;
+            }
+
+            if (this.medkits == 0)
+            {
+                this.Monitor.Log($"No medkits. {this.npc.Name} can't heal you!", LogLevel.Info);
+                Game1.drawDialogue(this.npc, DialogueHelper.GetDialogueString(this.npc, "nomedkits"));
+                this.medkits = -1;
+            }
+
+            return false;
         }
 
         private void ChangeState(State state)
@@ -125,6 +172,26 @@ namespace NpcAdventure.AI
             if (this.changeStateCooldown > 0)
                 this.changeStateCooldown--;
 
+            // Countdown to companion can heal you if heal cooldown greather than zero
+            if (this.healCooldown > 0 && Context.IsPlayerFree)
+            {
+                // Every 3 seconds while countdown add 1% of maxhealth to player's health (Companion heal side-effect) 
+                // Take effect when cooldown half way though and player's health is lower than 60% of maxhealth
+                // Adds count of friendship hearts as health bonus
+                if (e.IsMultipleOf(180) && (this.healCooldown > HEAL_COUNTDOWN / 2) && this.player.health < (this.player.maxHealth * .6f))
+                {
+                   
+                    this.player.health += Math.Max(1, (int)Math.Round(this.player.maxHealth * .01f)) + (int)Math.Round(this.player.getFriendshipHeartLevelForNPC(this.npc.Name) / 4f);
+                }
+                this.healCooldown--;
+            }
+
+            if (this.Csm.HasSkill("doctor") && this.medkits > 0 && this.player.health < 5 && this.player.health > 0 && !this.lifeSaved)
+            {
+                this.Monitor.Log($"{this.npc.Name} try to save your poor life.", LogLevel.Info);
+                this.lifeSaved = this.TryHealFarmer();
+            }
+
             if (this.CurrentController != null)
                 this.CurrentController.Update(e);
         }
@@ -153,6 +220,7 @@ namespace NpcAdventure.AI
 
         public void Dispose()
         {
+            this.CurrentController.Deactivate();
             this.controllers.Clear();
             this.controllers = null;
         }

@@ -32,7 +32,7 @@ namespace NpcAdventure.StateMachine.State
 
         public override void Entry()
         {
-            this.ai = new AI_StateMachine(this.StateMachine.Companion, this.StateMachine.CompanionManager.Farmer, this.StateMachine.Metadata, this.StateMachine.ContentLoader, this.Events, this.monitor);
+            this.ai = new AI_StateMachine(this.StateMachine, this.Events, this.monitor);
 
             if (this.StateMachine.Companion.doingEndOfRouteAnimation.Value)
                 this.FinishScheduleAnimation();
@@ -191,6 +191,9 @@ namespace NpcAdventure.StateMachine.State
 
         public void CreateRequestedDialogue()
         {
+            if (this.ai != null && this.ai.PerformAction())
+                return;
+
             Farmer leader = this.StateMachine.CompanionManager.Farmer;
             GameLocation location = this.StateMachine.CompanionManager.Farmer.currentLocation;
             string question = this.StateMachine.ContentLoader.LoadString("Strings/Strings:recruitedWant");

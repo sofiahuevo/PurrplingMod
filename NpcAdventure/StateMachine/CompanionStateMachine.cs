@@ -166,6 +166,48 @@ namespace NpcAdventure.StateMachine
         }
 
         /// <summary>
+        /// Does companion have this skill?
+        /// </summary>
+        /// <param name="skill">Which skill</param>
+        /// <returns>True if companion has this skill, otherwise False</returns>
+        public bool HasSkill(string skill)
+        {
+            return this.Metadata.PersonalSkills.Contains(skill);
+        }
+
+        /// <summary>
+        /// Does companion have all of these skills?
+        /// </summary>
+        /// <param name="skills">Which skills</param>
+        /// <returns>True if companion has all of them, otherwise False</returns>
+        public bool HasSkills(params string[] skills)
+        {
+            foreach (string skill in skills)
+            {
+                if (!this.HasSkill(skill))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Does companion have any of these skills?
+        /// </summary>
+        /// <param name="skills">Which skills</param>
+        /// <returns>True if companion have any of these skills, otherwise False</returns>
+        public bool HasSkillsAny(params string[] skills)
+        {
+            foreach (string skill in skills)
+            {
+                if (this.HasSkill(skill))
+                    return true;
+            }
+
+            return false;
+        } 
+
+        /// <summary>
         /// Make companion AVAILABLE to recruit
         /// </summary>
         public void MakeAvailable()

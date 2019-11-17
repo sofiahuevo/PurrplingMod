@@ -62,9 +62,9 @@ namespace NpcAdventure.AI.Controller
             this.leader = null;
             this.pathFinder.GoalCharacter = null;
             this.events = events;
-            this.weapon = this.GetSword(sword, this.ai.metadata.Profession == "warrior");
+            this.weapon = this.GetSword(sword, ai.Csm.HasSkill("warrior"));
             this.bubbles = content.LoadStrings("Strings/SpeechBubbles");
-            this.fightSpeechTriggerThres = ai.metadata.Profession == "warrior" ? 0.33 : 0.15;
+            this.fightSpeechTriggerThres = ai.Csm.HasSkill("warrior") ? 0.33 : 0.15;
 
             this.attackAnimation = new List<FarmerSprite.AnimationFrame>[4]
             {
@@ -203,11 +203,11 @@ namespace NpcAdventure.AI.Controller
 
             if (Game1.random.NextDouble() < this.fightSpeechTriggerThres && DialogueHelper.GetBubbleString(this.bubbles, this.follower, "fight", out string text))
             {
-                bool isRed = this.ai.metadata.Profession == "warrior" && Game1.random.NextDouble() < 0.1;
+                bool isRed = this.ai.Csm.HasSkill("warrior") && Game1.random.NextDouble() < 0.1;
                 this.follower.showTextAboveHead(text, isRed ? 2 : -1);
                 this.fightBubbleCooldown = 400;
             }
-            else if (this.ai.metadata.Profession == "warrior" && Game1.random.NextDouble() < this.fightSpeechTriggerThres / 2)
+            else if (this.ai.Csm.HasSkill("warrior") && Game1.random.NextDouble() < this.fightSpeechTriggerThres / 2)
             {
                 this.follower.clearTextAboveHead();
                 this.follower.doEmote(12);

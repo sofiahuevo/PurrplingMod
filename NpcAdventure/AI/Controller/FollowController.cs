@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace NpcAdventure.AI.Controller
 {
-    public class FollowController : IController
+    internal class FollowController : IController
     {
         public const int FOLLOWING_LOST_TIMEOUT = 15;
         public const float SPEEDUP_DISTANCE_THRESHOLD = 7;
@@ -53,7 +53,7 @@ namespace NpcAdventure.AI.Controller
 
         public virtual bool IsIdle => this.idleTImer == 0;
 
-        public FollowController(AI_StateMachine ai)
+        internal FollowController(AI_StateMachine ai)
         {
             this.pathToFollow = new Queue<Vector2>();
             this.ai = ai;
@@ -188,6 +188,9 @@ namespace NpcAdventure.AI.Controller
 
         protected virtual void PathfindingRemakeCheck()
         {
+            if (this.leader == null)
+                return;
+
             Vector2 leaderCurrentTile = this.leader.getTileLocation();
 
             if (this.pathFinder.GameLocation != this.leader.currentLocation) {
