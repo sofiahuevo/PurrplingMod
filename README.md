@@ -66,11 +66,16 @@ For NPCs listed above we're missing companion dialogues. You can help us and you
 
 ![Delivered items][delivery]
 
+**Companion with `doctor` skill can heal you if you are injured**
+
+![Companion heal a player][heal]
+
 More features comming soon...
 
-[library]: https://github.com/purrplingcat/PurrplingMod/blob/master/docs/library.gif
-[ask2follow]: https://github.com/purrplingcat/PurrplingMod/blob/master/docs/asktofollow.gif
-[usebag]: https://github.com/purrplingcat/PurrplingMod/blob/master/docs/usebag.gif
-[dialogues]: https://github.com/purrplingcat/PurrplingMod/blob/master/docs/dialogues.gif
-[release]: https://github.com/purrplingcat/PurrplingMod/blob/master/docs/release.gif
-[delivery]: https://github.com/purrplingcat/PurrplingMod/blob/master/docs/delivery.gif
+[library]: docs/library.gif
+[ask2follow]: docs/asktofollow.gif
+[usebag]: docs/usebag.gif
+[dialogues]: /docs/dialogues.gif
+[release]: docs/release.gif
+[delivery]: docs/delivery.gif
+[heal]: docs/harveyheal.gif
