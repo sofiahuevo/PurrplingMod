@@ -188,7 +188,7 @@ namespace NpcAdventure.AI.Controller
 
         protected virtual void PathfindingRemakeCheck()
         {
-            if (this.leader == null)
+            if (this.leader == null || this.leader.currentLocation == null)
                 return;
 
             Vector2 leaderCurrentTile = this.leader.getTileLocation();
