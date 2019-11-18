@@ -7,5 +7,8 @@
   "spouseBuffDescription": "+2 addtional luck (and lovely glowing), beacause you are married with {0}",
   "bagItemsSentLetter": "Hi {0},^^You forgot some items in my bag. I've sent them back to you.^Yesterday's adventure was fine and I look forward to the next.^^    - {1}",
   "healed": "{0} healed you! (+{1} Health)",
-  "lifeSaved": "{0} saved your life for this time! Be patient."
+  "lifeSaved": "{0} saved your life for this time! Be patient.",
+  "skill.warrior": "Warrior ({0}'s skill)",
+  "skill.doctor": "Doctor ({0}'s skill)",
+  "skill.fighter": "Fighter ({0}'s skill)"
 }

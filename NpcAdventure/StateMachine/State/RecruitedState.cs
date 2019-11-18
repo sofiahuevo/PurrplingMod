@@ -98,6 +98,15 @@ namespace NpcAdventure.StateMachine.State
 
                 e.SpriteBatch.Draw(Game1.mouseCursors, vector3, new Rectangle(384, 373, 18, 18), Color.White * 1f, 0f, Vector2.Zero, 4f, SpriteEffects.None, 1f);
                 e.SpriteBatch.Draw(Game1.mouseCursors, vector2, icon, Color.White * 1f, 0f, Vector2.Zero, 3f, SpriteEffects.None, 1f);
+
+                Rectangle bounding = new Rectangle((int)vector3.X, (int)vector3.Y, 18 * 4, 18 * 4);
+
+                if (bounding.Contains(Game1.getMouseX(), Game1.getMouseY()))
+                {
+                    string text = this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skill.{skill}", this.StateMachine.Companion.displayName);
+                    IClickableMenu.drawHoverText(e.SpriteBatch, text, Game1.smallFont);
+                }
+
                 i++;
             }
         }
