@@ -2,6 +2,10 @@
 using StardewModdingAPI.Events;
 using NpcAdventure.Loader;
 using NpcAdventure.Driver;
+using StardewValley;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace NpcAdventure
 {
@@ -63,7 +67,6 @@ namespace NpcAdventure
         {
             this.companionManager.ResetStateMachines();
             this.companionManager.DumpCompanionNonEmptyBags();
-            this.StuffDriver.PrepareDeliveredBagsToSave();
         }
 
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)

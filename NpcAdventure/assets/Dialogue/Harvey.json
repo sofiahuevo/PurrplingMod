@@ -5,6 +5,6 @@
   "companionDismiss": "Time for me to head back to the clinic. Thanks for a fun time @.$h",
   "companionDismissAuto": "I'm absolutely exhausted. I've got to get some rest. Sleep is very important you know so don't stay out too late. Take care.",
   "companionRecruited": "Let's get going! I've brought my first-aid kit just in case.$h",
-  "heal": "Don't die on me here!",
-  "nomedkits": "I'm out of needles!"
+  "heal": "Hold still. This might sting a little.$1",
+  "nomedkits": "Uh-oh, I've run out of medkits.$7"
 }

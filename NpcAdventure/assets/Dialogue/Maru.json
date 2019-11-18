@@ -5,6 +5,6 @@
   "companionDismiss": "I've collected enough samples to last a while. Thanks.",
   "companionDismissAuto": "It's time for me to head home. Thanks for a refreshing day @!$h",
   "companionRecruited": "I wonder if we'll discover anything new.$h",
-  "heal": "You're looking hurt, come here, I'll heal you",
-  "nomedkits": "This is only what Harvey gave me, I'm out of medkits"
+  "heal": "Let's get you patched up.$3",
+  "nomedkits": "I'll have to stop by Harvey's Clinic, I haven't got any more bandages.$6"
 }

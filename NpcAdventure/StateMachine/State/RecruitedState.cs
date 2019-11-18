@@ -13,6 +13,7 @@ using System;
 using NpcAdventure.Buffs;
 using StardewModdingAPI;
 using NpcAdventure.AI;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace NpcAdventure.StateMachine.State
 {
@@ -49,6 +50,7 @@ namespace NpcAdventure.StateMachine.State
             this.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
             this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
             this.Events.Player.Warped += this.Player_Warped;
+            this.Events.Display.RenderingHud += this.Display_RenderingHud;
 
             if (this.BuffManager.HasAssignableBuffs())
                 this.BuffManager.AssignBuffs();
@@ -60,6 +62,44 @@ namespace NpcAdventure.StateMachine.State
             this.CanCreateDialogue = true;
 
             this.ai.Setup();
+        }
+
+        private void Display_RenderingHud(object sender, RenderingHudEventArgs e)
+        {
+            var skills = this.StateMachine.Metadata.PersonalSkills;
+            int i = 0;
+            foreach (string skill in skills)
+            {
+                Rectangle titleSafeArea = Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea();
+                Rectangle icon;
+                Vector2 vector2 = new Vector2(titleSafeArea.Left + 38 + (i * 76), titleSafeArea.Bottom - 52);
+                Vector2 vector3 = new Vector2(titleSafeArea.Left + 18 + (i * 76), titleSafeArea.Bottom - 76);
+
+                if (Game1.isOutdoorMapSmallerThanViewport())
+                {
+                    vector2.X = Math.Max(titleSafeArea.Left + 38 + (i * 76), -Game1.viewport.X + 38 + (i * 76));
+                    vector3.X = Math.Max(titleSafeArea.Left + 18 + (i * 76), -Game1.viewport.X + 18 + (i * 76));
+                }
+
+                switch (skill)
+                {
+                    case "doctor":
+                        icon = new Rectangle(0, 428, 10, 10);
+                        break;
+                    case "warrior":
+                        icon = new Rectangle(120, 428, 10, 10);
+                        break;
+                    case "fighter":
+                        icon = new Rectangle(40, 428, 10, 10);
+                        break;
+                    default:
+                        continue;
+                }
+
+                e.SpriteBatch.Draw(Game1.mouseCursors, vector3, new Rectangle(384, 373, 18, 18), Color.White * 1f, 0f, Vector2.Zero, 4f, SpriteEffects.None, 1f);
+                e.SpriteBatch.Draw(Game1.mouseCursors, vector2, icon, Color.White * 1f, 0f, Vector2.Zero, 3f, SpriteEffects.None, 1f);
+                i++;
+            }
         }
 
         /// <summary>
@@ -89,6 +129,7 @@ namespace NpcAdventure.StateMachine.State
             this.Events.GameLoop.UpdateTicked -= this.GameLoop_UpdateTicked;
             this.Events.GameLoop.TimeChanged -= this.GameLoop_TimeChanged;
             this.Events.Player.Warped -= this.Player_Warped;
+            this.Events.Display.RenderingHud -= this.Display_RenderingHud;
 
             this.ai = null;
             this.dismissalDialogue = null;
