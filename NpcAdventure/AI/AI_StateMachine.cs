@@ -113,13 +113,13 @@ namespace NpcAdventure.AI
 
         private void CheckPotentialStateChange()
         {
-            if (this.changeStateCooldown == 0 && this.CurrentState != State.FIGHT && this.PlayerIsNear() && this.IsThereAnyMonster())
+            if (this.Csm.HasSkillsAny("fighter", "warrior") && this.changeStateCooldown == 0 && this.CurrentState != State.FIGHT && this.PlayerIsNear() && this.IsThereAnyMonster())
             {
                 this.ChangeState(State.FIGHT);
                 this.Monitor.Log("A 50ft monster is here!");
             }
 
-            if (this.CurrentState == State.FIGHT && this.CurrentController.IsIdle)
+            if (this.CurrentState != State.FOLLOW && this.CurrentController.IsIdle)
             {
                 this.changeStateCooldown = 100;
                 this.ChangeState(State.FOLLOW);
@@ -128,11 +128,6 @@ namespace NpcAdventure.AI
             if (this.CurrentState == State.FOLLOW && this.CurrentController.IsIdle)
             {
                 this.ChangeState(State.IDLE);
-            }
-
-            if (this.CurrentState == State.IDLE && this.CurrentController.IsIdle)
-            {
-                this.ChangeState(State.FOLLOW);
             }
         }
 

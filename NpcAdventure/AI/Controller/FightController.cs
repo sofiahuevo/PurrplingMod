@@ -62,7 +62,7 @@ namespace NpcAdventure.AI.Controller
             this.leader = null;
             this.pathFinder.GoalCharacter = null;
             this.events = events;
-            this.weapon = this.GetSword(sword, ai.Csm.HasSkill("warrior"));
+            this.weapon = this.GetSword(sword);
             this.bubbles = content.LoadStrings("Strings/SpeechBubbles");
             this.fightSpeechTriggerThres = ai.Csm.HasSkill("warrior") ? 0.33 : 0.15;
 
@@ -91,7 +91,7 @@ namespace NpcAdventure.AI.Controller
         };
         }
 
-        private int GetWarriorSwordIndex(int fallbackSword)
+        private int GetSwordIndex(int fallbackSword)
         {
             Farmer farmer = this.ai.player as Farmer;
 
@@ -122,12 +122,9 @@ namespace NpcAdventure.AI.Controller
             }
         }
 
-        private MeleeWeapon GetSword(int sword, bool isWarrior)
+        private MeleeWeapon GetSword(int sword)
         {
-            if (isWarrior)
-            {
-                sword = this.GetWarriorSwordIndex(sword);
-            }
+            sword = this.GetSwordIndex(sword);
 
             return sword >= 0 ? new MeleeWeapon(sword) : null;
         }
@@ -290,25 +287,35 @@ namespace NpcAdventure.AI.Controller
 
             if (criticalFist)
             {
-                attrs.knockBack *= 4;
+                attrs.knockBack *= 2.7f;
                 attrs.smashAround /= 2f;
             }
 
-            companionBox.Inflate(8, 8); // Personal space
+            if (criticalFist && this.follower.FacingDirection != 0)
+            {
+                this.follower.currentLocation.temporarySprites.Add(new TemporaryAnimatedSprite("TileSheets\\animations", new Microsoft.Xna.Framework.Rectangle(0, 960, 128, 128), 60f, 4, 0, this.follower.Position, false, this.follower.FacingDirection == 3, 1f, 0.0f, Color.White, .5f, 0.0f, 0.0f, 0.0f, false));
+            }
+
+            companionBox.Inflate(4, 4); // Personal space
             effectiveArea.Inflate((int)(effectiveArea.Width * attrs.smashAround + attrs.addedEffectiveArea), (int)(effectiveArea.Height * attrs.smashAround + attrs.addedEffectiveArea));
 
-            if (!criticalFist && !this.defendFistUsed && companionBox.Intersects(enemyBox))
+            if (!criticalFist && !this.defendFistUsed && this.ai.Csm.HasSkill("warrior") && companionBox.Intersects(enemyBox))
             {
                 this.ai.Monitor.Log("Critical dangerous: Using defense fists!");
                 this.defendFistUsed = true;
-                this.DoFightSpeak();
                 this.DoDamage(true); // Force fist when no damage given to a monster with weapon
                 return;
             }
 
+            if (criticalFist || (Game1.random.NextDouble() > .7f && Game1.random.NextDouble() < .3f))
+                this.DoFightSpeak();
+
             if (this.follower.currentLocation.damageMonster(effectiveArea, attrs.minDamage, attrs.maxDamage, false, attrs.knockBack, attrs.addedPrecision, attrs.critChance, attrs.critMultiplier, !criticalFist, this.realLeader as Farmer))
             {
-                this.follower.currentLocation.playSound("clubhit");
+                if (criticalFist)
+                    this.follower.currentLocation.playSound("clubSmash");
+                else
+                    this.follower.currentLocation.playSound("clubhit");
             }
         }
 
@@ -445,7 +452,7 @@ namespace NpcAdventure.AI.Controller
 
         private void Display_RenderedWorld(object sender, RenderedWorldEventArgs e)
         {
-            if (this.weapon != null && this.weaponSwingCooldown > this.SwingThreshold)
+            if (this.weapon != null && this.weaponSwingCooldown > this.SwingThreshold && !this.defendFistUsed)
             {
                 int frames = this.weapon.type.Value == 3 ? 4 : 7;
                 int duration = this.CooldownTimeout - this.SwingThreshold;
