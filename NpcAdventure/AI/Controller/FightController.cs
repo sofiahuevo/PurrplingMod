@@ -202,19 +202,19 @@ namespace NpcAdventure.AI.Controller
             {
                 bool isRed = this.ai.Csm.HasSkill("warrior") && Game1.random.NextDouble() < 0.1;
                 this.follower.showTextAboveHead(text, isRed ? 2 : -1);
-                this.fightBubbleCooldown = 400;
+                this.fightBubbleCooldown = 600;
             }
             else if (this.ai.Csm.HasSkill("warrior") && Game1.random.NextDouble() < this.fightSpeechTriggerThres / 2)
             {
                 this.follower.clearTextAboveHead();
                 this.follower.doEmote(12);
-                this.fightBubbleCooldown = 350;
+                this.fightBubbleCooldown = 550;
             }
             else if (Game1.random.NextDouble() > (this.fightSpeechTriggerThres + this.fightSpeechTriggerThres * .33f))
             {
                 this.follower.clearTextAboveHead();
                 this.follower.doEmote(16);
-                this.fightBubbleCooldown = 300;
+                this.fightBubbleCooldown = 500;
             }
         }
 
@@ -293,13 +293,14 @@ namespace NpcAdventure.AI.Controller
 
             if (criticalFist && this.follower.FacingDirection != 0)
             {
+                this.follower.currentLocation.playSound("clubSmash");
                 this.follower.currentLocation.temporarySprites.Add(new TemporaryAnimatedSprite("TileSheets\\animations", new Microsoft.Xna.Framework.Rectangle(0, 960, 128, 128), 60f, 4, 0, this.follower.Position, false, this.follower.FacingDirection == 3, 1f, 0.0f, Color.White, .5f, 0.0f, 0.0f, 0.0f, false));
             }
 
-            companionBox.Inflate(4, 4); // Personal space
+            companionBox.Inflate(8, 8); // Personal space
             effectiveArea.Inflate((int)(effectiveArea.Width * attrs.smashAround + attrs.addedEffectiveArea), (int)(effectiveArea.Height * attrs.smashAround + attrs.addedEffectiveArea));
 
-            if (!criticalFist && !this.defendFistUsed && this.ai.Csm.HasSkill("warrior") && companionBox.Intersects(enemyBox))
+            if (!criticalFist && !this.defendFistUsed && this.ai.Csm.HasSkill("warrior") && companionBox.Intersects(enemyBox) && Game1.random.NextDouble() < .33f)
             {
                 this.ai.Monitor.Log("Critical dangerous: Using defense fists!");
                 this.defendFistUsed = true;
@@ -307,15 +308,11 @@ namespace NpcAdventure.AI.Controller
                 return;
             }
 
-            if (criticalFist || (Game1.random.NextDouble() > .7f && Game1.random.NextDouble() < .3f))
-                this.DoFightSpeak();
-
             if (this.follower.currentLocation.damageMonster(effectiveArea, attrs.minDamage, attrs.maxDamage, false, attrs.knockBack, attrs.addedPrecision, attrs.critChance, attrs.critMultiplier, !criticalFist, this.realLeader as Farmer))
             {
-                if (criticalFist)
-                    this.follower.currentLocation.playSound("clubSmash");
-                else
-                    this.follower.currentLocation.playSound("clubhit");
+                this.follower.currentLocation.playSound("clubhit");
+                if (criticalFist || (Game1.random.NextDouble() > .7f && Game1.random.NextDouble() < .3f))
+                    this.DoFightSpeak();
             }
         }
 

@@ -67,6 +67,8 @@ namespace NpcAdventure.StateMachine.State
         private void Display_RenderingHud(object sender, RenderingHudEventArgs e)
         {
             var skills = this.StateMachine.Metadata.PersonalSkills;
+            string toolTipedSkill = "";
+            bool drawTooltip = false;
             int i = 0;
             foreach (string skill in skills)
             {
@@ -103,14 +105,19 @@ namespace NpcAdventure.StateMachine.State
 
                 if (bounding.Contains(Game1.getMouseX(), Game1.getMouseY()))
                 {
-                    string text = this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skill.{skill}", this.StateMachine.Companion.displayName)
-                        + Environment.NewLine
-                        + this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skillDescription.{skill}");
-
-                    IClickableMenu.drawHoverText(e.SpriteBatch, text, Game1.smallFont);
+                    toolTipedSkill = skill;
+                    drawTooltip = true;
                 }
 
                 i++;
+            }
+
+            if (drawTooltip)
+            {
+                string text = this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skill.{toolTipedSkill}", this.StateMachine.Companion.displayName)
+                        + Environment.NewLine
+                        + this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skillDescription.{toolTipedSkill}");
+                IClickableMenu.drawHoverText(e.SpriteBatch, text, Game1.smallFont);
             }
         }
 
