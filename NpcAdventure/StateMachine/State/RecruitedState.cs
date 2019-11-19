@@ -103,7 +103,10 @@ namespace NpcAdventure.StateMachine.State
 
                 if (bounding.Contains(Game1.getMouseX(), Game1.getMouseY()))
                 {
-                    string text = this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skill.{skill}", this.StateMachine.Companion.displayName);
+                    string text = this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skill.{skill}", this.StateMachine.Companion.displayName)
+                        + Environment.NewLine
+                        + this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skillDescription.{skill}");
+
                     IClickableMenu.drawHoverText(e.SpriteBatch, text, Game1.smallFont);
                 }
 
