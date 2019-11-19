@@ -9,13 +9,21 @@ Go to an adventure with Pelican Town's villagers! Recruit bachelorete or bachlor
 ## Features
 
 - Ask NPC to a follow farmer (5 hearts and more required)
-- Recruited NPC can fight with monsters (with swords and with fists)
+- Recruited NPC can fight with monsters (with swords and for NPC with personal skill fighter)
 - Various dialogues for different locations (incomplete yet)
 - Can save items from our repository to a npc's backpack
 - If you want to break adventure, then you can release a companion
 - Next morning you can find a package with your items you saved in companion's backpack
 - Idle animations
 - Speech bubbles while companion fighting
+- [NEW] Different personal skills: warrior, fighter and doctor (next comming soon)
+- [NEW] Doctor can heal you if your health is under 30% and can try to save your life before death
+- [NEW] Warrior can use critical defense fists
+- [NEW] Fighter can level up (syncing level with player) and can upgrade swords
+- [NEW] Display personal skills in HUD (with mouseover tooltip)
+- [NEW] Better critical defense fist fight animation and sound
+
+Next features comming soon...
 
 ## Install
 - [Install the latest version of SMAPI](https://smapi.io).
@@ -24,18 +32,18 @@ Go to an adventure with Pelican Town's villagers! Recruit bachelorete or bachlor
 
 ## Supported companion NPCs
 
-- Abigail
-- Alex
+- Abigail (warrior)
+- Alex (warrior)
 - Haley
-- Maru
-- Shane
+- Maru (doctor)
+- Shane (warrior)
 - Leah
 - Emily
 - Penny
 - Sam
 - Sebastian
 - Elliott
-- Harvey
+- Harvey (doctor)
 
 For NPCs listed above we're missing companion dialogues. You can help us and you can create it. How? Fork this repo and see [Dialogue wiki](https://github.com/purrplingcat/PurrplingMod/wiki/Dialogues). You can get inspiration [from code](https://github.com/purrplingcat/PurrplingMod/tree/master/PurrplingMod/assets/Dialogue). Are you created dialogues? Just send us a PR.
 
