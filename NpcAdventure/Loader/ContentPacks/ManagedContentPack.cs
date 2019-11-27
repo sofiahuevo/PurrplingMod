@@ -26,9 +26,6 @@ namespace NpcAdventure.Loader.ContentPacks
         /// <summary>The managed content pack.</summary>
         public IContentPack Pack { get; }
 
-        /// <summary>The content pack's manifest.</summary>
-        public IManifest Manifest => this.Pack.Manifest;
-
 
         /*********
         ** Public methods

@@ -32,7 +32,7 @@ namespace NpcAdventure
         private void RegisterEvents(IModEvents events)
         {
             events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
-            events.Specialised.LoadStageChanged += this.Specialised_LoadStageChanged;
+            events.Specialized.LoadStageChanged += this.Specialized_LoadStageChanged;
             events.GameLoop.ReturnedToTitle += this.GameLoop_ReturnedToTitle;
             events.GameLoop.DayEnding += this.GameLoop_DayEnding;
             events.GameLoop.DayStarted += this.GameLoop_DayStarted;
@@ -49,7 +49,7 @@ namespace NpcAdventure
             this.StuffDriver.RegisterEvents(this.Helper.Events);
         }
 
-        private void Specialised_LoadStageChanged(object sender, LoadStageChangedEventArgs e)
+        private void Specialized_LoadStageChanged(object sender, LoadStageChangedEventArgs e)
         {
             if (e.NewStage == StardewModdingAPI.Enums.LoadStage.Loaded)
             {
