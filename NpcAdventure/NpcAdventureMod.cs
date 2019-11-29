@@ -6,6 +6,9 @@ using StardewValley;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using Harmony;
+using System.Reflection;
+using NpcAdventure.Events;
 using NpcAdventure.Model;
 
 namespace NpcAdventure
@@ -14,12 +17,16 @@ namespace NpcAdventure
     public class NpcAdventureMod : Mod
     {
         private CompanionManager companionManager;
+
+        public static IMonitor GameMonitor { get; private set; }
+
         private ContentLoader contentLoader;
         private Config config;
 
         private DialogueDriver DialogueDriver { get; set; }
         private HintDriver HintDriver { get; set; }
         private StuffDriver StuffDriver { get; set; }
+        private ISpecialModEvents SpecialEvents { get; set; }
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -41,12 +48,22 @@ namespace NpcAdventure
 
         private void GameLoop_GameLaunched(object sender, GameLaunchedEventArgs e)
         {
+            this.SpecialEvents = new SpecialModEvents();
             this.DialogueDriver = new DialogueDriver(this.Helper.Events);
             this.HintDriver = new HintDriver(this.Helper.Events);
             this.StuffDriver = new StuffDriver(this.Helper.Data, this.Monitor);
             this.contentLoader = new ContentLoader(this.Helper.Content, this.Helper.ContentPacks, this.ModManifest.UniqueID, "assets", this.Helper.DirectoryPath, this.Monitor);
             this.companionManager = new CompanionManager(this.DialogueDriver, this.HintDriver, this.config, this.Monitor);
             this.StuffDriver.RegisterEvents(this.Helper.Events);
+            
+            //Harmony
+            HarmonyInstance harmony = HarmonyInstance.Create("Purrplingcat.NpcAdventure");
+            harmony.Patch(
+                original: AccessTools.Method(typeof(GameLocation), "draw"),
+                postfix: new HarmonyMethod(typeof(Patches.GameLocationDrawPatch), nameof(Patches.GameLocationDrawPatch.Postfix))
+            );
+
+            Patches.GameLocationDrawPatch.Setup(this.SpecialEvents);
         }
 
         private void Specialized_LoadStageChanged(object sender, LoadStageChangedEventArgs e)
@@ -98,7 +115,7 @@ namespace NpcAdventure
 
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
-            this.companionManager.InitializeCompanions(this.contentLoader, this.Helper.Events, this.Helper.Reflection);
+            this.companionManager.InitializeCompanions(this.contentLoader, this.Helper.Events, this.SpecialEvents, this.Helper.Reflection);
         }
     }
 }
