@@ -98,23 +98,34 @@ namespace NpcAdventure
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
         {
+            if (Context.IsMultiplayer)
+                return;
             this.companionManager.NewDaySetup();
         }
 
         private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
         {
+            if (Context.IsMultiplayer)
+                return;
             this.companionManager.ResetStateMachines();
             this.companionManager.DumpCompanionNonEmptyBags();
         }
 
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)
         {
+            if (Context.IsMultiplayer)
+                return;
             this.companionManager.UninitializeCompanions();
             this.contentLoader.InvalidateCache();
         }
 
         private void GameLoop_SaveLoaded(object sender, StardewModdingAPI.Events.SaveLoadedEventArgs e)
         {
+            if (Context.IsMultiplayer)
+            {
+                this.Monitor.Log("Companions not initalized, because multiplayer currently unsupported in NPC Adventures.", LogLevel.Warn);
+                return;
+            }
             this.companionManager.InitializeCompanions(this.contentLoader, this.Helper.Events, this.SpecialEvents, this.Helper.Reflection);
         }
     }
