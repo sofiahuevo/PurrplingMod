@@ -22,7 +22,7 @@ Go to an adventure with Pelican Town's villagers! Recruit bachelorete or bachlor
 - Fighter can level up (syncing level with player) and can upgrade swords
 - Display personal skills in HUD (with mouseover tooltip)
 - Better critical defense fist fight animation and sound
-- [NEW] Support for content packs and localizations (see [how to create content pack](wiki/Content-packs) on wiki)
+- [NEW] Support for content packs and localizations (see [how to create content pack](https://github.com/purrplingcat/PurrplingMod/wiki/Content-packs) on wiki)
 - [NEW] User configuration (via `config.json`, see [SMAPI docs] (https://stardewvalleywiki.com/Modding:Player_Guide/Getting_Started#Configure_mods)) 
 
 Next features comming soon...
