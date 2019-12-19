@@ -78,7 +78,7 @@ namespace NpcAdventure.AI.Controller
                 if (this.currentAnimationIndex == i)
                     i = ++i % this.animations.Count; // Generated the same animation? Roll next in range!
 
-                if (!skipOutro)
+                if (!skipOutro && this.currentAnimationIndex >= 0)
                 {
                     // Play outro before animation change
                     this.npc.Sprite.setCurrentAnimation(

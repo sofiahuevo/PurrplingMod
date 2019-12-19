@@ -36,7 +36,7 @@ namespace NpcAdventure.StateMachine.State
 
         public override void Entry()
         {
-            this.ai = new AI_StateMachine(this.StateMachine, this.Events, this.monitor);
+            this.ai = new AI_StateMachine(this.StateMachine, this.StateMachine.CompanionManager.Hud, this.Events, this.monitor);
 
             if (this.StateMachine.Companion.doingEndOfRouteAnimation.Value)
                 this.FinishScheduleAnimation();

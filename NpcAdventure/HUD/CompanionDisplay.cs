@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using NpcAdventure.AI;
 using NpcAdventure.Loader;
 using NpcAdventure.Model;
 using StardewModdingAPI.Events;
@@ -14,8 +15,11 @@ namespace NpcAdventure.HUD
     {
         public List<CompanionSkill> Skills { get; }
         public Config Config { get; }
+
+        private NPC companion;
         private ClickableTextureComponent avatar;
         private string hoverText;
+        private AI_StateMachine.State state;
         private readonly IContentLoader contentLoader;
 
         public CompanionDisplay(Config config, IContentLoader contentLoader)
@@ -30,9 +34,23 @@ namespace NpcAdventure.HUD
             this.Skills.Add(new CompanionSkill(type, description));
         }
 
+        public void SetCompanionState(AI.AI_StateMachine.State state)
+        {
+            if (this.avatar != null && this.companion != null)
+            {
+                string whoText = this.contentLoader.LoadString("Strings/Strings:recruitedCompanionHint", this.companion.displayName);
+                string stateText = this.contentLoader.LoadString($"Strings/Strings:companionState_{state.ToString().ToLower()}");
+
+                this.avatar.hoverText = whoText + Environment.NewLine + stateText;
+            }
+
+            this.state = state;
+        }
+
         public void AssignCompanion(NPC companion)
         {
             string hoverText = this.contentLoader.LoadString("Strings/Strings:recruitedCompanionHint", companion.displayName);
+            this.companion = companion;
             this.avatar = new ClickableTextureComponent("", Rectangle.Empty, null, hoverText, companion.Sprite.Texture, companion.getMugShotSourceRect(), 4f, false);
         }
 
@@ -65,8 +83,7 @@ namespace NpcAdventure.HUD
 
         public void DrawSkills(SpriteBatch spriteBatch)
         {
-            Rectangle titleSafeArea = Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea();
-            Vector2 position = new Vector2(Game1.viewport.Width - 70 - IClickableMenu.borderWidth, 370);
+            Vector2 position = new Vector2(Game1.viewport.Width - 80 - IClickableMenu.borderWidth, 370);
 
             for (int i = 0; i < this.Skills.Count; i++)
             {
@@ -90,12 +107,27 @@ namespace NpcAdventure.HUD
 
         public void DrawAvatar(SpriteBatch spriteBatch)
         {
+            Rectangle icon;
             Vector2 position = new Vector2(Game1.viewport.Width - 70 - IClickableMenu.borderWidth, 318);
             if (Game1.isOutdoorMapSmallerThanViewport())
                 position.X = Math.Min(position.X, -Game1.viewport.X + Game1.currentLocation.map.Layers[0].LayerWidth * 64 - 70 - IClickableMenu.borderWidth);
             Utility.makeSafe(ref position, 64, 64);
             this.avatar.bounds = new Rectangle((int)position.X + 16, (int)position.Y, 64, 96);
             this.avatar.draw(spriteBatch, Color.White, 1);
+
+            switch (this.state)
+            {
+                case AI_StateMachine.State.IDLE:
+                    icon = new Rectangle(434, 475, 9, 9);
+                    break;
+                case AI_StateMachine.State.FIGHT:
+                    icon = new Rectangle(120, 428, 9, 9);
+                    break;
+                default:
+                    return;
+            }
+
+            spriteBatch.Draw(Game1.mouseCursors, new Vector2(position.X + 54, position.Y + 78), icon, Color.White * 1f, 0f, Vector2.Zero, 3f, SpriteEffects.None, 1f);
         }
 
         public void PerformHoverAction(int x, int y)

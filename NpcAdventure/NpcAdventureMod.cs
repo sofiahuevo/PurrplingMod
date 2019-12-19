@@ -47,10 +47,10 @@ namespace NpcAdventure
             events.GameLoop.DayStarted += this.GameLoop_DayStarted;
             events.GameLoop.GameLaunched += this.GameLoop_GameLaunched;
             events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
-            events.Display.RenderedHud += this.Display_RenderedHud;
+            events.Display.RenderingHud += this.Display_RenderingHud; ;
         }
 
-        private void Display_RenderedHud(object sender, RenderedHudEventArgs e)
+        private void Display_RenderingHud(object sender, RenderingHudEventArgs e)
         {
             if (Context.IsWorldReady && this.companionHud != null)
                 this.companionHud.Draw(e.SpriteBatch);
