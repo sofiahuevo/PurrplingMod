@@ -14,5 +14,8 @@
   "skillDescription.doctor": "Peut soigner dans les situations de dangers.",
   "skill.fighter": "Combattant (Compétence de {0})",
   "skillDescription.fighter": "Peut se battre avec son épée.",
-  "recruitedCompanionHint": "Compagnon recruté: {0}"
+  "recruitedCompanionHint": "Compagnon recruté: {0}",
+  "companionState_follow": "Statut : Vous accompagne",
+  "companionState_idle": "Statut : En attente",
+  "companionState_fight": "Statut : En combat"
 }
