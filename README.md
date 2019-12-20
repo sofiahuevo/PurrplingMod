@@ -2,7 +2,7 @@
 
 # It's time to adventure (NPC Adventures)
 
-**WARNING: THIS MOD IS IN ALPHA BUILD!** It may be unstable with some bugs. Found any defect? Report it and help improvement this mod. Any idea? Create a proposal on Github. Thanks.
+**THIS MOD IS IN ALPHA BUILD!** It may be unstable with some bugs. Found any defect? Report it and help improvement this mod. Any idea? Create a proposal on Github. Thanks.
 
 Go to an adventure with Pelican Town's villagers! Recruit bachelorete or bachlor and go to adventure togehter.
 
