@@ -50,7 +50,7 @@ Next features comming soon...
 | Elliott   |                 | +3 Fishing                   |
 | Harvey    | Doctor          | +3 Defense                   |
 
-All listed NPCs can figth with sword!
+All listed NPCs can figth with sword! **Married spouse** grants additional buffs **+1 Luck** and **+1 Magnetic** radius
 
 For some NPCs listed above we're missing companion dialogues. You can help us and you can create it. How? Fork this repo and see [Dialogue wiki](https://github.com/purrplingcat/PurrplingMod/wiki/Dialogues). You can get inspiration [from code](https://github.com/purrplingcat/PurrplingMod/tree/master/PurrplingMod/assets/Dialogue). Are you created dialogues? Just send us a PR.
 
