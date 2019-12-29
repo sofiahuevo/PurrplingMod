@@ -49,7 +49,9 @@ Next features comming soon...
 | Elliott   |                 | +3 Fishing                   |
 | Harvey    | Doctor          | +3 Defense                   |
 
-For NPCs listed above we're missing companion dialogues. You can help us and you can create it. How? Fork this repo and see [Dialogue wiki](https://github.com/purrplingcat/PurrplingMod/wiki/Dialogues). You can get inspiration [from code](https://github.com/purrplingcat/PurrplingMod/tree/master/PurrplingMod/assets/Dialogue). Are you created dialogues? Just send us a PR.
+All listed NPCs can figth with sword!
+
+For some NPCs listed above we're missing companion dialogues. You can help us and you can create it. How? Fork this repo and see [Dialogue wiki](https://github.com/purrplingcat/PurrplingMod/wiki/Dialogues). You can get inspiration [from code](https://github.com/purrplingcat/PurrplingMod/tree/master/PurrplingMod/assets/Dialogue). Are you created dialogues? Just send us a PR.
 
 ## Custom NPCs
 
