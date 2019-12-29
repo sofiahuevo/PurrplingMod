@@ -34,18 +34,20 @@ Next features comming soon...
 
 ## Supported companion NPCs
 
-- Abigail (warrior)
-- Alex (warrior)
-- Haley
-- Maru (doctor)
-- Shane (warrior)
-- Leah
-- Emily
-- Penny
-- Sam
-- Sebastian
-- Elliott
-- Harvey (doctor)
+| Companion | Personal skills | Buffs                        |
+| --------- | --------------- | ---------------------------- |
+| Abigail   | Warrior         | +1 Speed, +1 Luck, +1 Attack |
+| Alex      | Warrior         | +1 Speed, +2 Attack          |
+| Haley     |                 | +2 Luck                      |
+| Maru      | Doctor          | +1 Mining, +1 Luck, +1 Speed |
+| Shane     |                 | +3 Farming                   |
+| Leah      |                 | +2 Foraging                  |
+| Emily     |                 | +2 Mining                    |
+| Penny     |                 | +3 Farming                   |
+| Sam       |                 | +2 Speed                     |
+| Sebastian | Warrior         | +1 Speed, +1 Luck, +1 Attack |
+| Elliott   |                 | +3 Fishing                   |
+| Harvey    | Doctor          | +3 Defense                   |
 
 For NPCs listed above we're missing companion dialogues. You can help us and you can create it. How? Fork this repo and see [Dialogue wiki](https://github.com/purrplingcat/PurrplingMod/wiki/Dialogues). You can get inspiration [from code](https://github.com/purrplingcat/PurrplingMod/tree/master/PurrplingMod/assets/Dialogue). Are you created dialogues? Just send us a PR.
 
@@ -60,7 +62,7 @@ You can add your custom NPC as companion to this mod via content pack. See [docu
 
 ## Translations
 
-- English (corashirou, [smirkii](https://www.nexusmods.com/users/75542598), [purrplingcat](https://www.nexusmods.com/users/68185132))
+- English (Corashirou, [RememberEmber](https://www.nexusmods.com/users/11961608), [PurrplingCat](https://www.nexusmods.com/users/68185132))
 - Portuguese Brazilian ([andril11](https://www.nexusmods.com/users/68848663))
 - French ([Reikounet](https://www.nexusmods.com/users/70092158))
 - Chinese ([wu574932346](https://www.nexusmods.com/users/67777356))
@@ -97,7 +99,7 @@ More features comming soon...
 
 - [purrplingcat](https://www.nexusmods.com/users/68185132) - main developer and producer
 - Corashirou - author of dialogues and texts
-- [smirkii](https://www.nexusmods.com/users/75542598) - author of dialogues and texts
+- [RememberEmber](https://www.nexusmods.com/users/11961608) - author of dialogues and texts
 - [andril11](https://www.nexusmods.com/users/68848663) - Portuguese translation
 - [Reikounet](https://www.nexusmods.com/users/70092158) - French translation
 - [wu574932346](https://www.nexusmods.com/users/67777356) - Chinese translation
