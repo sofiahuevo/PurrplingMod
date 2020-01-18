@@ -8,7 +8,6 @@ using NpcAdventure.Loader;
 using StardewModdingAPI.Events;
 using NpcAdventure.Utils;
 using NpcAdventure.StateMachine.State;
-using static NpcAdventure.StateMachine.CompanionStateMachine;
 using NpcAdventure.Model;
 using NpcAdventure.Events;
 using NpcAdventure.HUD;

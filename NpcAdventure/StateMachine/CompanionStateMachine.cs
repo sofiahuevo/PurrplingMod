@@ -16,19 +16,18 @@ using StardewValley.Objects;
 
 namespace NpcAdventure.StateMachine
 {
-
-    internal class CompanionStateMachine
+    /// <summary>
+    /// Allowed states in machine
+    /// </summary>
+    public enum StateFlag
     {
-        /// <summary>
-        /// Allowed states in machine
-        /// </summary>
-        public enum StateFlag
-        {
-            RESET,
-            AVAILABLE,
-            RECRUITED,
-            UNAVAILABLE,
-        }
+        RESET,
+        AVAILABLE,
+        RECRUITED,
+        UNAVAILABLE,
+    }
+    internal class CompanionStateMachine : ICompanionStateMachine
+    {
         public CompanionManager CompanionManager { get; private set; }
         public NPC Companion { get; private set; }
         public CompanionMetaData Metadata { get; }
@@ -68,6 +67,7 @@ namespace NpcAdventure.StateMachine
         public bool SuggestedToday { get; internal set; }
         public bool CanSuggestToday { get; private set; }
         public HashSet<string> SpokenDialogues { get; private set; }
+        public ICompanionState CurrentState { get => this.currentState; }
 
         /// <summary>
         /// Change companion state machine state
@@ -239,7 +239,7 @@ namespace NpcAdventure.StateMachine
             }
 
             return false;
-        } 
+        }
 
         /// <summary>
         /// Make companion AVAILABLE to recruit
@@ -332,6 +332,11 @@ namespace NpcAdventure.StateMachine
         public bool CanPerformAction()
         {
             return this.currentState is IActionPerformer dcreator && dcreator.CanPerformAction;
+        }
+
+        public ICompanionState GetCurrentState()
+        {
+            return this.currentState;
         }
     }
 

@@ -22,6 +22,7 @@ namespace NpcAdventure
                 return;
 
             consoleCommands.Add("npcadventure_eligible", "Make player eligible to recruit a companion (server or singleplayer only)", this.Eligible);
+            consoleCommands.Add("npcadventure_contentpacks", "List installed content packs and which patches are applied", this.ContentPacks);
             this.monitor.Log("Registered debug commands", LogLevel.Info);
         }
 
@@ -35,6 +36,30 @@ namespace NpcAdventure
             } else
             {
                 this.monitor.Log("Can't eligible player when game is not loaded, in non-adventure mode or not running on server!", LogLevel.Alert);
+            }
+        }
+
+        private void ContentPacks(string command, string[] args)
+        {
+            switch(args[0])
+            {
+                case "list":
+                    this.monitor.Log("List of installed content packs for NPC Adventures:\n", LogLevel.Info);
+                    foreach(var pack in this.npcAdventureMod.Helper.ContentPacks.GetOwned())
+                    {
+                        this.monitor.Log($"{pack.Manifest.Name} v{pack.Manifest.Version} by {pack.Manifest.Author} ({pack.Manifest.UniqueID})", LogLevel.Info);
+                    }
+                    break;
+                case "patches":
+                    this.monitor.Log("Applied patches from content packs to NPC Adventures:\n", LogLevel.Info);
+                    foreach (var patch in this.npcAdventureMod.ContentLoader.ContentPackProvider.patches)
+                    {
+                        this.monitor.Log($"{patch.LogName} action {patch.Action} patching {patch.Target}", LogLevel.Info);
+                    }
+                    break;
+                default:
+                    this.monitor.Log($"Unknown subcommand: {args[0]}", LogLevel.Info);
+                    break;
             }
         }
 

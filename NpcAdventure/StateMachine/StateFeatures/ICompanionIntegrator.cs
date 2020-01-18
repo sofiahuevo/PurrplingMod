@@ -1,6 +1,6 @@
 ﻿namespace NpcAdventure.StateMachine.StateFeatures
 {
-    internal interface ICompanionIntegrator
+    public interface ICompanionIntegrator
     {
         void ReintegrateCompanionNPC();
     }

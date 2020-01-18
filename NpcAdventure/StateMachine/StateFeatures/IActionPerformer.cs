@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NpcAdventure.StateMachine.StateFeatures
 {
-    interface IActionPerformer
+    public interface IActionPerformer
     {
         bool CanPerformAction { get; }
         bool PerformAction(Farmer who, GameLocation location);

@@ -36,6 +36,11 @@ namespace NpcAdventure
             Commander.Register(this);
         }
 
+        public override object GetApi()
+        {
+            return new NPCAdventureAPI(this);
+        }
+
         private void RegisterEvents(IModEvents events)
         {
             events.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;

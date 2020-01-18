@@ -13,7 +13,7 @@ namespace NpcAdventure.Loader
     {
         private readonly string modName;
         private readonly IMonitor monitor;
-        private readonly List<AssetPatch> patches;
+        public readonly List<IAssetPatch> patches;
 
         /// <summary>
         /// Provides patches from content packs into mod's content
@@ -141,7 +141,7 @@ namespace NpcAdventure.Loader
         /// <param name="asset"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        private List<AssetPatch> GetPatchesForAsset(IAssetInfo asset, string action)
+        private List<IAssetPatch> GetPatchesForAsset(IAssetInfo asset, string action)
         {
             return this.patches.Where((p) => p.Action.Equals(action) && asset.AssetNameEquals($"{this.modName}/{p.Target}")).ToList();
         }
@@ -151,10 +151,10 @@ namespace NpcAdventure.Loader
         /// </summary>
         /// <param name="helper"></param>
         /// <returns></returns>
-        public List<AssetPatch> LoadPatches(IContentPackHelper helper)
+        public List<IAssetPatch> LoadPatches(IContentPackHelper helper)
         {
             var packs = helper.GetOwned();
-            var patches = new List<AssetPatch>();
+            var patches = new List<IAssetPatch>();
             int skippedPacks = 0;
             int skippedPatches = 0;
 

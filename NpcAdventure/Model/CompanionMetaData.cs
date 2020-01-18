@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NpcAdventure.Model
 {
-    class CompanionMetaData
+    public class CompanionMetaData
     {
         public CompanionMetaData(string rawMetadata)
         {

@@ -15,6 +15,7 @@ namespace NpcAdventure.Loader
         private readonly IMonitor monitor;
         private readonly Dictionary<string, object> assetCache;
 
+        internal ContentPackProvider ContentPackProvider { get; }
         private IContentHelper Helper { get; }
         private string ModName { get; }
 
@@ -30,10 +31,11 @@ namespace NpcAdventure.Loader
             this.Helper = helper;
             this.ModName = modName;
             this.assetCache = new Dictionary<string, object>();
+            this.ContentPackProvider = new ContentPackProvider(modName, contentPacks, monitor);
             this.monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
 
             // Assign asset source manager to load and edit mod's assets
-            AssetsManager assetsManager = new AssetsManager(modName, assetsDir, helper, new ContentPackProvider(modName, contentPacks, monitor), monitor);
+            AssetsManager assetsManager = new AssetsManager(modName, assetsDir, helper, this.ContentPackProvider, monitor);
             this.Helper.AssetLoaders.Add(assetsManager);
             this.Helper.AssetEditors.Add(assetsManager);
         }
