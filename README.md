@@ -6,7 +6,7 @@
 
 Go to an adventure with Pelican Town's villagers! Recruit bachelorete or bachlor and go to an adventure togehter.
 
-**Watch [trailer video](https://www.youtube.com/watch?v=gFX9OVSS3fg) for this mod**
+**Watch [trailer video](https://www.youtube.com/watch?v=gFX9OVSS3fg) for this mod.**
 **Looking for user guide? See [Documentation](docs/index.md)**
 
 ## Features
