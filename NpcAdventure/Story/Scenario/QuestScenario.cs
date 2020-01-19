@@ -44,6 +44,7 @@ namespace NpcAdventure.Story.Scenario
 
             int id = StoryHelper.ResolveId(e.Quest.id.Value);
             string type = this.StoryHelper.GetQuestType(id);
+            var fresh = this.StoryHelper.GetQuestById(id);
 
             if (type.Equals(TYPE_RECRUITMENT))
             {
@@ -52,6 +53,10 @@ namespace NpcAdventure.Story.Scenario
 
                 e.Quest.currentObjective = this.contentLoader.LoadString($"Strings/Strings:questObjective.recruitment", ps.recruited.Count, e.Quest.completionString.Value);
             }
+
+            // Refresh strings
+            e.Quest.questTitle = fresh.questTitle;
+            e.Quest.questDescription = fresh.questDescription;
         }
 
         private void Events_QuestCompleted(object sender, IQuestCompletedArgs e)
