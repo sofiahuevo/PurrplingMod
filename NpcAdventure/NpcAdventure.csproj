@@ -116,6 +116,7 @@
     <Compile Include="Loader\ContentPacks\AssetPatch.cs" />
     <Compile Include="Loader\AssetsManager.cs" />
     <Compile Include="Loader\ContentPacks\ManagedContentPack.cs" />
+    <Compile Include="Loader\AssetPatchHelper.cs" />
     <Compile Include="Model\Config.cs" />
     <Compile Include="Model\ContentPackData.cs" />
     <Compile Include="Loader\ContentPacks\ContentPackProvider.cs" />
@@ -174,6 +175,9 @@
     <None Include="assets\Data\Events.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="assets\Data\Events.pt-BR.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="assets\Data\IdleBehaviors.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -181,6 +185,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="assets\Data\Quests.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Data\Quests.pt-BR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="assets\Dialogue\Abigail.fr-FR.json">

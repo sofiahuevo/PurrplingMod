@@ -36,9 +36,9 @@ Target mod id `purrplingcat.npcadventure`. Optional we can define a minimum vers
 In your content pack folder create file `content.json` and we can define custom contents for mod. A little example for define contents for custom NPC (custom NPC must be exists in game. This content packs not define game's NPC, we must add that NPC in other SMAPI mod or content pack, like via [Content Patcher](https://www.nexusmods.com/stardewvalley/mods/1915), [CustomNPC](https://www.nexusmods.com/stardewvalley/mods/1607) or other mod that can add new contents into game and define NPCs):
 
 **<your_cp_folder>/content.json**
-```json
+```js
 {
-  "Format": "1.1",
+  "Format": "1.2",
   "Changes": [
     {
       "Action": "Edit",
@@ -48,7 +48,8 @@ In your content pack folder create file `content.json` and we can define custom 
     {
       "Action": "Load",
       "Target": "Dialogue/Ashley",
-      "FromFile": "assets/dialogues/ashley.json"
+      "FromFile": "assets/dialogues/ashley.json",
+      "LogName": "Ashley's dialogue" // optional. Can be used for action edit too
     }
   ]
 }
@@ -58,16 +59,53 @@ In your content pack folder create file `content.json` and we can define custom 
 
 | Field         | Means                                                                                                 |
 | ------------- | ----------------------------------------------------------------------------------------------------- |
-| `Format`      | The format version. You should always use the latest version (currently 1.1) to use the latest features and avoid obsolete behavior. Old formats could not be supported in current mod version. |
+| `Format`      | The format version. You should always use the latest version (currently 1.2) to use the latest features and avoid obsolete behavior. Old formats could not be supported in current mod version. |
 | `Changes`     | The changes you want to make. Each entry is called a patch, and describes a specific action to perform: Edit json file or load new  |
 
 Under key `Changes` we must define content definitions. It's a list of dicts with these keys:
 
-| Field         | Means                                                                                                 |
-| ------------- | ----------------------------------------------------------------------------------------------------- |
-| `Action`      | The kind of change to make: `Load` for replace content or load new; `Edit` for patch existing content |
-| `Target`      | The NPC Adventures mod asset you want to patch. This is the file path inside mod's assets folder, without the file extension or language (like `Dialogue/Abigail` to edit `assets/Dialogue/Abigail.json`)                 |
-| `FromFile`    | The relative path to the content file in your content pack folder to patch into the target (like assets/dialogue/abigail.json). Supports only `.json` files.                                                             |
+| Field                | Means                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| `Action`             | The kind of change to make: `Load` for replace content or load new; `Edit` for patch existing content |
+| `Target`             | The NPC Adventures mod asset you want to patch. This is the file path inside mod's assets folder, without the file extension or language (like `Dialogue/Abigail` to edit `assets/Dialogue/Abigail.json`)                 |
+| `FromFile`           | The relative path to the content file in your content pack folder to patch into the target (like assets/dialogue/abigail.json). Supports only `.json` files.                                                             |
+| `LogName` (optional) | This string replaces a default entry #no description in log with custom description                   |
+| `Locale` (optional)  | **Can be used in `Edit` action only!** This key defines a lang code (like `pt-BR` and etc), for which this patch can be applied. Use this in pair with the existing content in mod or with existing patch (can be used in pair with action `Load` patch too). Locale patches are applied only for active game localization for which are defined. |
+
+### Localized content pack patches example
+
+```js
+{
+  "Format": "1.2",
+  "Changes": [
+    {
+      "Action": "Edit",
+      "Target": "Data/CompanionDispositions",
+      "FromFile": "assets/data/companionDispositions.json"
+    },
+    {
+      "Action": "Load",
+      "Target": "Dialogue/Ashley",
+      "FromFile": "assets/dialogues/ashley.json",
+      "LogName": "Ashley's dialogue",
+    },
+    {
+      "Action": "Edit",
+      "Target": "Dialogue/Ashley",
+      "FromFile": "assets/dialogues/ashley.pt-BR.json"
+      "Locale": "pt-BR",
+      "LogName": "Portuguese translation for Ashley's dialogue"
+    },
+    {
+      "Action": "Edit",
+      "Target": "Dialogue/Abigail",
+      "FromFile": "assets/dialogues/abigail.pt-BR.json",
+      "Locale": "fr-FR",
+      "LogName": "Abigail's french dialogue patch"
+    }
+  ]
+}
+```
 
 ## Release a content pack
 See [content packs](https://stardewvalleywiki.com/Modding:Content_packs) on the wiki for general info. Suggestions:
