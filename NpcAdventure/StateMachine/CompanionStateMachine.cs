@@ -16,19 +16,9 @@ using StardewValley.Objects;
 
 namespace NpcAdventure.StateMachine
 {
-    /// <summary>
-    /// Allowed states in machine
-    /// </summary>
-    public enum StateFlag
+    public class CompanionStateMachine
     {
-        RESET,
-        AVAILABLE,
-        RECRUITED,
-        UNAVAILABLE,
-    }
-    internal class CompanionStateMachine : ICompanionStateMachine
-    {
-        public CompanionManager CompanionManager { get; private set; }
+        internal CompanionManager CompanionManager { get; private set; }
         public NPC Companion { get; private set; }
         public CompanionMetaData Metadata { get; }
         public IContentLoader ContentLoader { get; private set; }
@@ -38,9 +28,19 @@ namespace NpcAdventure.StateMachine
         public Dictionary<StateFlag, ICompanionState> States { get; private set; }
         private ICompanionState currentState;
 
-        public CompanionStateMachine(CompanionManager manager, NPC companion, CompanionMetaData metadata, IContentLoader loader, IReflectionHelper reflection, IMonitor monitor = null)
+        /// <summary>
+        /// Allowed states in machine
+        /// </summary>
+        public enum StateFlag
         {
-            this.CompanionManager = manager;
+            RESET,
+            AVAILABLE,
+            RECRUITED,
+            UNAVAILABLE,
+        }
+
+        public CompanionStateMachine(NPC companion, CompanionMetaData metadata, IContentLoader loader, IReflectionHelper reflection, IMonitor monitor = null)
+        {
             this.Companion = companion;
             this.Metadata = metadata;
             this.ContentLoader = loader;
@@ -50,16 +50,15 @@ namespace NpcAdventure.StateMachine
             this.SpokenDialogues = new HashSet<string>();
         }
 
+        internal CompanionStateMachine(CompanionManager manager, NPC companion, CompanionMetaData metadata, IContentLoader loader, IReflectionHelper reflection, IMonitor monitor = null) : this(companion, metadata, loader, reflection, monitor)
+        {
+            this.CompanionManager = manager;
+        }
+
         /// <summary>
         /// Our companion name (Refers NPC name)
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return this.Companion.Name;
-            }
-        }
+        public string Name => this.Companion.Name;
 
         public StateFlag CurrentStateFlag { get; private set; }
         public Dictionary<int, SchedulePathDescription> BackedupSchedule { get; internal set; }
@@ -67,14 +66,15 @@ namespace NpcAdventure.StateMachine
         public bool SuggestedToday { get; internal set; }
         public bool CanSuggestToday { get; private set; }
         public HashSet<string> SpokenDialogues { get; private set; }
-        public ICompanionState CurrentState { get => this.currentState; }
 
         /// <summary>
         /// Change companion state machine state
         /// </summary>
         /// <param name="stateFlag">Flag of allowed state</param>
-        private void ChangeState(StateFlag stateFlag)
+        protected void ChangeState(StateFlag stateFlag)
         {
+            var oldStateFlag = this.CurrentStateFlag;
+
             if (this.States == null)
                 throw new InvalidStateException("State machine is not ready! Call setup first.");
 
@@ -89,10 +89,12 @@ namespace NpcAdventure.StateMachine
                 this.currentState.Exit();
             }
 
+            
             newState.Entry();
             this.currentState = newState;
-            this.Monitor.Log($"{this.Name} changed state: {this.CurrentStateFlag.ToString()} -> {stateFlag.ToString()}");
+            this.Monitor.Log($"{this.Name} changed state: {oldStateFlag.ToString()} -> {stateFlag.ToString()}");
             this.CurrentStateFlag = stateFlag;
+            this.CompanionManager.FireCompanionStateChanged(this, oldStateFlag, stateFlag);
         }
 
         /// <summary>
@@ -106,6 +108,12 @@ namespace NpcAdventure.StateMachine
 
             this.States = stateHandlers;
             this.ResetStateMachine();
+        }
+
+        internal void Setup(CompanionManager manager, Dictionary<StateFlag, ICompanionState> stateHandlers)
+        {
+            this.CompanionManager = manager;
+            this.Setup(stateHandlers);
         }
 
         /// <summary>

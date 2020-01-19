@@ -96,6 +96,7 @@
     <Compile Include="AI\Controller\IdleController.cs" />
     <Compile Include="AI\Controller\IdleController.LookAroundBehavior.cs" />
     <Compile Include="AI\EventArgsLocationChanged.cs" />
+    <Compile Include="Events\ICompanionEvents.cs" />
     <Compile Include="Loader\ContentPacks\IAssetPatch.cs" />
     <Compile Include="NPCAdventureAPI.cs" />
     <Compile Include="Buffs\BuffManager.cs" />
@@ -128,7 +129,6 @@
     <Compile Include="Patches\NpcCheckActionPatch.cs" />
     <Compile Include="Patches\QuestPatch.cs" />
     <Compile Include="Internal\SetOnce.cs" />
-    <Compile Include="StateMachine\ICompanionStateMachine.cs" />
     <Compile Include="Story\Messaging\GameMasterMessage.cs" />
     <Compile Include="Story\Messaging\IGameMasterMessage.cs" />
     <Compile Include="Story\Messaging\RecruitMessage.cs" />

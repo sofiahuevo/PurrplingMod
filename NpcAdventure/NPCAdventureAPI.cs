@@ -1,4 +1,5 @@
-﻿using NpcAdventure.Loader;
+﻿using NpcAdventure.Events;
+using NpcAdventure.Loader;
 using NpcAdventure.Loader.ContentPacks;
 using NpcAdventure.Model;
 using NpcAdventure.StateMachine;
@@ -8,17 +9,23 @@ using StardewModdingAPI;
 using StardewValley;
 using System.Collections.Generic;
 using System.Linq;
+using static NpcAdventure.StateMachine.CompanionStateMachine;
 
 namespace NpcAdventure
 {
     public interface INPCAdventureAPI
     {
         IGameMaster GameMaster { get; }
-        IEnumerable<ICompanionStateMachine> Companions { get; }
+        IEnumerable<CompanionStateMachine> Companions { get; }
+        IContentLoader ContentLoader { get; }
+        ISpecialModEvents SpecialEvents { get; }
+        ICompanionEvents CompanionEvents { get; }
         void AddCompanion(NPC npc, CompanionMetaData metadata, Dictionary<StateFlag, ICompanionState> stateHandlers, IContentLoader contentLoader = null, IMonitor monitor = null);
         void AddCompanion(NPC npc, CompanionMetaData metadata, IContentLoader contentLoader = null, IMonitor monitor = null);
+        void AddCompanion(CompanionStateMachine csm, Dictionary<StateFlag, ICompanionState> stateHandlers);
+        void AddCompanion(CompanionStateMachine csm, IMonitor monitor = null);
         void AddPatch(IAssetPatch patch);
-        ICompanionStateMachine GetCompanion(string name);
+        CompanionStateMachine GetCompanion(string name);
         IEnumerable<IAssetPatch> GetPatches(IManifest manifest);
     }
 
@@ -35,12 +42,18 @@ namespace NpcAdventure
 
         public IGameMaster GameMaster { get; set; }
 
-        public IEnumerable<ICompanionStateMachine> Companions => this.mod
+        public IEnumerable<CompanionStateMachine> Companions => this.mod
             .CompanionManager?
             .PossibleCompanions
-            .Select(pair => (ICompanionStateMachine)pair.Value);
+            .Select(pair => pair.Value);
 
-        public ICompanionStateMachine GetCompanion(string name)
+        public IContentLoader ContentLoader => this.mod.ContentLoader;
+
+        public ISpecialModEvents SpecialEvents => this.mod.SpecialEvents;
+
+        public ICompanionEvents CompanionEvents => this.mod.CompanionManager;
+
+        public CompanionStateMachine GetCompanion(string name)
         {
             return this.mod.CompanionManager.PossibleCompanions[name];
         }
@@ -80,6 +93,25 @@ namespace NpcAdventure
                 .ContentPackProvider
                 .patches
                 .Where(p => p.Source.UniqueID.Equals(manifest.UniqueID));
+        }
+
+        public void AddCompanion(CompanionStateMachine csm, Dictionary<StateFlag, ICompanionState> stateHandlers)
+        {
+            csm.Setup(this.mod.CompanionManager, stateHandlers);
+            this.mod.CompanionManager.PossibleCompanions.Add(csm.Name, csm);
+        }
+
+        public void AddCompanion(CompanionStateMachine csm, IMonitor monitor = null)
+        {
+            var stateHandlers = new Dictionary<StateFlag, ICompanionState>()
+            {
+                [StateFlag.RESET] = new ResetState(csm, this.mod.Helper.Events, monitor ?? this.mod.Monitor),
+                [StateFlag.AVAILABLE] = new AvailableState(csm, this.mod.Helper.Events, monitor ?? this.mod.Monitor),
+                [StateFlag.RECRUITED] = new RecruitedState(csm, this.mod.Helper.Events, this.mod.SpecialEvents, monitor ?? this.mod.Monitor),
+                [StateFlag.UNAVAILABLE] = new UnavailableState(csm, this.mod.Helper.Events, monitor ?? this.mod.Monitor),
+            };
+
+            this.AddCompanion(csm, stateHandlers);
         }
     }
 }

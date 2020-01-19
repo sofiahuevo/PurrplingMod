@@ -13,14 +13,20 @@ using NpcAdventure.Events;
 using NpcAdventure.HUD;
 using NpcAdventure.Story;
 using NpcAdventure.Story.Messaging;
+using static NpcAdventure.StateMachine.CompanionStateMachine;
 
 namespace NpcAdventure
 {
-    internal class CompanionManager
+    internal class CompanionManager : ICompanionEvents
     {
         private readonly DialogueDriver dialogueDriver;
         private readonly HintDriver hintDriver;
         private readonly IMonitor monitor;
+
+        public event EventHandler Initialized;
+        public event EventHandler Uninitialized;
+        public event EventHandler<ICompanionStateChangedEventArgs> CompanionStateChanged;
+        public event EventHandler<ICompanionReadyForNewDayEventArgs> ReadyForNewDay;
 
         public Dictionary<string, CompanionStateMachine> PossibleCompanions { get; }
         public IGameMaster GameMaster { get; }
@@ -138,6 +144,11 @@ namespace NpcAdventure
             this.monitor.Log($"You are recruited {companionName} companion.");
         }
 
+        internal void FireCompanionStateChanged(CompanionStateMachine csm, StateFlag oldStateFlag, StateFlag newStateFlag)
+        {
+            this.CompanionStateChanged?.Invoke(this, new CompanionStateChangedEventArgs(csm, oldStateFlag, newStateFlag));
+        }
+
         /// <summary>
         /// Reset all state machines of companions
         /// </summary>
@@ -158,6 +169,7 @@ namespace NpcAdventure
                 foreach (var companionKv in this.PossibleCompanions)
                     companionKv.Value.NewDaySetup();
 
+                this.ReadyForNewDay?.Invoke(this, new CompanionReadyForNewDayEventArgs(this.PossibleCompanions));
                 this.monitor.Log("Companions are successfully setup for new day!", LogLevel.Info);
             }
             catch (InvalidStateException e)
@@ -221,6 +233,7 @@ namespace NpcAdventure
                 this.PossibleCompanions.Add(npcName, csm);
             }
 
+            this.Initialized?.Invoke(this, EventArgs.Empty);
             this.monitor.Log($"Initalized {this.PossibleCompanions.Count} companions.", LogLevel.Info);
         }
 
@@ -236,7 +249,32 @@ namespace NpcAdventure
             }
 
             this.PossibleCompanions.Clear();
+            this.Uninitialized?.Invoke(this, EventArgs.Empty);
             this.monitor.Log("Companions uninitialized", LogLevel.Info);
+        }
+
+        private class CompanionStateChangedEventArgs : ICompanionStateChangedEventArgs
+        {
+            public CompanionStateChangedEventArgs(CompanionStateMachine csm, StateFlag oldStateFlag, StateFlag newStateFlag)
+            {
+                this.Csm = csm;
+                this.OldStateFlag = oldStateFlag;
+                this.NewStateFlag = newStateFlag;
+            }
+
+            public CompanionStateMachine Csm { get; }
+            public StateFlag OldStateFlag { get; }
+            public StateFlag NewStateFlag { get; }
+        }
+
+        private class CompanionReadyForNewDayEventArgs : ICompanionReadyForNewDayEventArgs
+        {
+            public CompanionReadyForNewDayEventArgs(Dictionary<string, CompanionStateMachine> readyCompanions)
+            {
+                this.ReadyCompanions = readyCompanions;
+            }
+
+            public Dictionary<string, CompanionStateMachine> ReadyCompanions { get; }
         }
     }
 }
