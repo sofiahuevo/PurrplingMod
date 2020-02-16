@@ -30,6 +30,12 @@ namespace NpcAdventure
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            if (Constants.TargetPlatform == GamePlatform.Android)
+            {
+                this.Monitor.Log("This mod can't be loaded because is not compatible with Android version of SMAPI and SDV! This is a known issue, don't report it.", LogLevel.Error);
+                return;
+            }
+
             this.RegisterEvents(helper.Events);
             this.Config = helper.ReadConfig<Config>();
             this.ContentLoader = new ContentLoader(this.Helper.Content, this.Helper.ContentPacks, this.ModManifest.UniqueID, "assets", this.Monitor);

@@ -207,7 +207,12 @@ namespace NpcAdventure
                 NPC companion = Game1.getCharacterFromName(npcName, true);
 
                 if (companion == null)
-                    throw new Exception($"Can't find NPC with name '{npcName}'");
+                {
+                    this.monitor.Log($"Unable to initialize companion `{npcName}`, because this NPC cannot be found in the game. " +
+                        "Are you trying to add a custom NPC as a companion? Check the mod which adds this NPC into the game. " +
+                        "Don't report this as a bug to NPC Adventures unless it's a vanilla game NPC.", LogLevel.Error);
+                    continue;
+                }
 
                 CompanionStateMachine csm = new CompanionStateMachine(this, companion, new CompanionMetaData(dispositions[npcName]), loader, reflection, this.monitor);
                 Dictionary<StateFlag, ICompanionState> stateHandlers = new Dictionary<StateFlag, ICompanionState>()
