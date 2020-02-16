@@ -69,6 +69,8 @@ For some NPCs listed above we're missing companion dialogues. You can help us an
 
 By default this mod is played in adventure mode. This mode brings quests and events to interaction with your companions. For enable companion asking you must reach **10 level of mines**, have granted access to **Adventurer's guild** and received **letter from Marlon with invitation** and seen **Adventure begins** event with Marlon. Then you can ask villagers to companion. Marlon's letter you will receive morning when you reached **level 20, you have a 66% (3 hearts for default level 5 required hearts) of required heart level with any recruitable villager and you have an access to Adventurer's guild.** You already reached level and you have access and you installed/updated this mod? You will receive letter morning immediately (must to go out from FarmHouse to receive it tomorrow).
 
+## Classic mode
+
 Worried about adventure mode? Do you want old companion functionality like was in alpha versions? Don't be sad, just **disable adventure mode** in [configuration](docs/guide/configuration.md). By disabling adventure mode you disable also all quest lines and companion events!
 
 ## Custom NPCs
