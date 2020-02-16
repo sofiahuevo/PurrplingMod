@@ -1,5 +1,13 @@
 # Full changelog
 
+## 0.11.0 beta
+
+- Added special errors and warning log messages for known incompatabilities (#101 #102)
+- Changed Marlon's invitaion letter conditions (#95)
+- Fixed invalid cast for quests and events assets (#89)
+- Added support for localizations in content packs (#83 #89)
+- *INTERNAL* Added tool for localization coverage reporting
+
 ## 0.10.2 beta
 
 - Fixed text deffects for Maru and Marlon's letter (#90)
