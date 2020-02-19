@@ -9,6 +9,15 @@ Go to an adventure with Pelican Town's villagers! Recruit bachelorete or bachlor
 **Watch [trailer video](https://www.youtube.com/watch?v=gFX9OVSS3fg) for this mod.**
 **Looking for user guide? See [Documentation](docs/index.md)**
 
+## Get it!
+
+Download this mod on **[Nexusmods](https://nexusmods.com/stardewvalley/mods/4582)**
+
+### Install
+- [Install the latest version of SMAPI](https://smapi.io).
+- Download this mod and unzip it into *Stardew Valley/Mods*.
+- Run the game using SMAPI.
+
 ## Features
 
 - Ask NPC to a follow farmer (5 hearts and more required)
@@ -38,11 +47,6 @@ Go to an adventure with Pelican Town's villagers! Recruit bachelorete or bachlor
 - [NEW] New documentation for players and modders/content creators
 
 Next features comming soon...
-
-## Install
-- [Install the latest version of SMAPI](https://smapi.io).
-- Download this mod and unzip it into *Stardew Valley/Mods*.
-- Run the game using SMAPI.
 
 ## Supported companion NPCs
 
