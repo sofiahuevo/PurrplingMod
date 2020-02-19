@@ -48,7 +48,7 @@ Download this mod on **[Nexusmods](https://nexusmods.com/stardewvalley/mods/4582
 
 Next features comming soon...
 
-## Supported companion NPCs
+### Supported companion NPCs
 
 | Companion | Personal skills | Buffs                        |
 | --------- | --------------- | ---------------------------- |
@@ -69,15 +69,15 @@ All listed NPCs can figth with sword! **Married spouse** grants additional buffs
 
 For some NPCs listed above we're missing companion dialogues. You can help us and you can create it. How? Fork this repo and see [Dialogue wiki](https://github.com/purrplingcat/PurrplingMod/wiki/Dialogues). You can get inspiration [from code](https://github.com/purrplingcat/PurrplingMod/tree/master/PurrplingMod/assets/Dialogue). Are you created dialogues? Just send us a PR.
 
-## Adventure mode
+### Adventure mode
 
 By default this mod is played in adventure mode. This mode brings quests and events to interaction with your companions. For enable companion asking you must reach **10 level of mines**, have granted access to **Adventurer's guild** and received **letter from Marlon with invitation** and seen **Adventure begins** event with Marlon. Then you can ask villagers to companion. Marlon's letter you will receive morning when you reached **level 20, you have a 66% (3 hearts for default level 5 required hearts) of required heart level with any recruitable villager and you have an access to Adventurer's guild.** You already reached level and you have access and you installed/updated this mod? You will receive letter morning immediately (must to go out from FarmHouse to receive it tomorrow).
 
-## Classic mode
+### Classic mode
 
 Worried about adventure mode? Do you want old companion functionality like was in alpha versions? Don't be sad, just **disable adventure mode** in [configuration](docs/guide/configuration.md). By disabling adventure mode you disable also all quest lines and companion events!
 
-## Custom NPCs
+### Custom NPCs
 
 You can add your custom NPC as companion to this mod via content pack. See [documentation](https://github.com/purrplingcat/PurrplingMod/wiki/Content-packs)
 
