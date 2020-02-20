@@ -23,5 +23,4 @@ Bellow you can see a configuration schema with default values
 
 ## See also
 
-- [Getting started](guide/getting-started.md)
-- Gameplay
+- [Getting started](getting-started.md)
