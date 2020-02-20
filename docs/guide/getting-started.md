@@ -29,7 +29,6 @@ There are some changes in mod's code. You must do some edits in your content pac
 
 ## See also
 
-- Gameplay
-- [Configuration](guide/configuration.md)
-- [Modder's upgrade guide](upgrading.md)
-- [How to create a content pack](modding/content-packs.md)
+- [Configuration](configuration.md)
+- [Modder's upgrade guide](../modding/upgrading.md)
+- [How to create a content pack](../modding/content-packs.md)
