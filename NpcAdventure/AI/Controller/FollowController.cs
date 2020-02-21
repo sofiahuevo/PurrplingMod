@@ -20,9 +20,6 @@ namespace NpcAdventure.AI.Controller
         public const float DECELERATION = 0.025f;
 
         private Vector2 negativeOne = new Vector2(-1, -1);
-
-        public Character leader;
-        public NPC follower;
         protected PathFinder pathFinder;
         protected FollowJoystick joystick;
         public int followingLostTime = 0;
@@ -31,19 +28,27 @@ namespace NpcAdventure.AI.Controller
         public Vector2 leaderLastTileCheckPoint;
         private int idleTimer;
 
+        private int retryCount;
+
         public virtual bool IsIdle => this.idleTimer == 0;
+
+        public NPC Follower { get => this.ai.Csm.Companion; }
+        public Character Leader { get; set; }
 
         internal FollowController(AI_StateMachine ai)
         {
             this.pathToFollow = new Queue<Vector2>();
             this.ai = ai;
-            this.leader = ai.player;
-            this.follower = ai.npc;
-            this.pathFinder = new PathFinder(this.follower.currentLocation, this.follower, this.leader);
-            this.joystick = new FollowJoystick(ref this.follower, this.pathFinder);
+            this.Leader = ai.player;
+            this.pathFinder = new PathFinder(this.Follower.currentLocation, this.Follower, this.Leader);
+
+            NPC follower = this.Follower;
+
+            this.joystick = new FollowJoystick(ref follower, this.pathFinder);
 
             this.ai.LocationChanged += this.Ai_LocationChanged;
             this.joystick.Move += this.OnMove;
+	        this.joystick.Stuck += this.OnStuck;
         }
 
         private void OnMove(object sender, FollowJoystick.MoveEventArgs e)
@@ -51,23 +56,40 @@ namespace NpcAdventure.AI.Controller
             this.idleTimer = e.IsLastFrame ? Game1.random.Next(480, 840) : -1;
         }
 
+	    private void OnStuck(object sender, FollowJoystick.StuckEventArgs e)
+	    {
+	        if (this.Leader is Farmer && ++this.retryCount >= 3)
+	        {
+	            this.Follower.setTileLocation(this.Leader.getTileLocation());
+		        this.retryCount = 0;
+	        }
+	    }
+
         private void Ai_LocationChanged(object sender, EventArgsLocationChanged e)
         {
             // We are not active controller? Don't handle changed location event
             if (this.ai.CurrentController != this)
                 return;
 
+            NPC follower = this.Follower; // cannot pass directly
+
+            this.joystick.ResetFollower(ref follower);
+
             this.leaderLastTileCheckPoint = this.negativeOne;
             this.joystick.Reset();
             this.PathfindingRemakeCheck();
+            this.retryCount = 0;
         }
 
         public virtual void Update(UpdateTickedEventArgs e)
         {
-            if (this.follower == null || this.leader == null || (!Context.IsPlayerFree && !Context.IsMultiplayer))
+            if (this.Follower == null || this.Leader == null || (!Context.IsPlayerFree && !Context.IsMultiplayer))
                 return;
 
             this.CheckIdleState();
+
+            if (!Context.IsMainPlayer)
+                return; // do not do further processing
 
             if (this.joystick.IsFollowing)
                 this.DriveSpeed();
@@ -86,13 +108,13 @@ namespace NpcAdventure.AI.Controller
 
         protected virtual void PathfindingRemakeCheck()
         {
-            if (this.leader == null || this.leader.currentLocation == null)
+            if (this.Leader == null || this.Leader.currentLocation == null)
                 return;
 
-            Vector2 leaderCurrentTile = this.leader.getTileLocation();
+            Vector2 leaderCurrentTile = this.Leader.getTileLocation();
 
-            if (this.pathFinder.GameLocation != this.leader.currentLocation) {
-                this.pathFinder.GameLocation = this.leader.currentLocation;
+            if (this.pathFinder.GameLocation != this.Leader.currentLocation) {
+                this.pathFinder.GameLocation = this.Leader.currentLocation;
             }
 
             if (this.leaderLastTileCheckPoint != leaderCurrentTile)
@@ -107,7 +129,7 @@ namespace NpcAdventure.AI.Controller
         {
             if (distanceFromFarmer > MOVE_THRESHOLD_DISTANCE * Game1.tileSize * 4)
             {
-                if (this.leader is Farmer farmer && farmer.getMovementSpeed() > 5.28f)
+                if (this.Leader is Farmer farmer && farmer.getMovementSpeed() > 5.28f)
                     return farmer.getMovementSpeed() + 2.65f;
 
                 return 5.28f;
@@ -115,7 +137,7 @@ namespace NpcAdventure.AI.Controller
 
             if (distanceFromFarmer > MOVE_THRESHOLD_DISTANCE * Game1.tileSize)
             {
-                if (this.leader is Farmer farmer)
+                if (this.Leader is Farmer farmer)
                     return farmer.getMovementSpeed();
                 return 4f;
             }
@@ -129,8 +151,8 @@ namespace NpcAdventure.AI.Controller
 
         public void DriveSpeed()
         {
-            Point fp = this.follower.GetBoundingBox().Center;
-            Point lp = this.leader.GetBoundingBox().Center;
+            Point fp = this.Follower.GetBoundingBox().Center;
+            Point lp = this.Leader.GetBoundingBox().Center;
 
             Vector2 diff = new Vector2(lp.X, lp.Y) - new Vector2(fp.X, fp.Y);
             this.joystick.Speed = this.GetMovementSpeedBasedOnDistance(diff.Length());
@@ -138,7 +160,7 @@ namespace NpcAdventure.AI.Controller
 
         public virtual void Activate()
         {
-            if (this.leader != null)
+            if (this.Leader != null && Context.IsMainPlayer)
             {
                 this.PathfindingRemakeCheck();
             }

@@ -13,13 +13,15 @@ using NpcAdventure.Buffs;
 using StardewModdingAPI;
 using NpcAdventure.AI;
 using NpcAdventure.Events;
+using static NpcAdventure.NetCode.NetEvents;
+using NpcAdventure.NetCode;
 using NpcAdventure.Internal;
 
 namespace NpcAdventure.StateMachine.State
 {
     internal class RecruitedState : CompanionState, IActionPerformer, IDialogueDetector
     {
-        private AI_StateMachine ai;
+        public AI_StateMachine ai;
         private Dialogue dismissalDialogue;
         private Dialogue currentLocationDialogue;
         private Dialogue recruitedDialogue;
@@ -28,17 +30,21 @@ namespace NpcAdventure.StateMachine.State
 
         public bool CanPerformAction { get; private set; }
         private BuffManager BuffManager { get; set; }
+        private NetEvents netEvents;
         public ISpecialModEvents SpecialEvents { get; }
 
-        public RecruitedState(CompanionStateMachine stateMachine, IModEvents events, ISpecialModEvents specialEvents, IMonitor monitor) : base(stateMachine, events, monitor)
+        public RecruitedState(CompanionStateMachine stateMachine, IModEvents events, ISpecialModEvents specialEvents, IMonitor monitor, NetEvents netEvents) : base(stateMachine, events, monitor)
         {
             this.BuffManager = new BuffManager(stateMachine.Companion, stateMachine.CompanionManager.Farmer, stateMachine.ContentLoader, this.monitor);
             this.SpecialEvents = specialEvents;
+            this.netEvents = netEvents;
         }
 
-        public override void Entry()
+        public override void Entry(Farmer byWhom)
         {
-            this.ai = new AI_StateMachine(this.StateMachine, this.StateMachine.CompanionManager.Hud, this.Events, this.monitor);
+            this.setByWhom = byWhom;
+
+            this.ai = new AI_StateMachine(this.StateMachine, this.setByWhom, this.StateMachine.CompanionManager.Hud, this.Events, this.monitor, this.netEvents);
             this.timeOfRecruit = Game1.timeOfDay;
 
             if (this.StateMachine.Companion.doingEndOfRouteAnimation.Value)
@@ -53,29 +59,44 @@ namespace NpcAdventure.StateMachine.State
             this.StateMachine.Companion.eventActor = true;
             this.StateMachine.Companion.farmerPassesThrough = true;
 
-            this.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
-            this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
             this.Events.Player.Warped += this.Player_Warped;
             this.Events.Input.ButtonPressed += this.Input_ButtonPressed;
             this.SpecialEvents.RenderedLocation += this.SpecialEvents_RenderedLocation;
 
+            this.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
+
+            this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChangedBoth;
+
+            if (Game1.IsMasterGame)
+            {
+                this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChangedServer;
+            }
+
+            
             this.recruitedDialogue = DialogueHelper.GenerateDialogue(this.StateMachine.Companion, "companionRecruited");
             this.CanPerformAction = true;
 
             if (this.recruitedDialogue != null)
                 this.StateMachine.Companion.CurrentDialogue.Push(this.recruitedDialogue);
 
-            foreach (string skill in this.StateMachine.Metadata.PersonalSkills)
+            this.ai.Setup();
+
+            if (byWhom == Game1.player)
             {
-                string text = this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skill.{skill}", this.StateMachine.Companion.displayName)
-                        + Environment.NewLine
-                        + this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skillDescription.{skill}").Replace("#", Environment.NewLine);
-                this.StateMachine.CompanionManager.Hud.AddSkill(skill, text);
+                foreach (string skill in this.StateMachine.Metadata.PersonalSkills)
+                {
+                    string text = this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skill.{skill}", this.StateMachine.Companion.displayName)
+                            + Environment.NewLine
+                            + this.StateMachine.ContentLoader.LoadString($"Strings/Strings:skillDescription.{skill}").Replace("#", Environment.NewLine);
+                    this.StateMachine.CompanionManager.Hud.AddSkill(skill, text);
+                }
             }
 
-            this.StateMachine.CompanionManager.Hud.AssignCompanion(this.StateMachine.Companion);
-            this.BuffManager.AssignBuffs();
-            this.ai.Setup();
+            if (this.GetByWhom() == Game1.player)
+            {
+                this.StateMachine.CompanionManager.Hud.AssignCompanion(this.StateMachine.Companion);
+                this.BuffManager.AssignBuffs();
+            }
 
             if (this.BuffManager.HasProsthetics())
             {
@@ -96,7 +117,9 @@ namespace NpcAdventure.StateMachine.State
 
         private void SpecialEvents_RenderedLocation(object sender, ILocationRenderedEventArgs e)
         {
-            this.ai.Draw(e.SpriteBatch);
+            if (Game1.getCharacterFromName(this.StateMachine.Companion.Name).currentLocation == Game1.currentLocation)
+                if (this.ai != null)
+                    this.ai.Draw(e.SpriteBatch);
         }
 
         /// <summary>
@@ -117,7 +140,10 @@ namespace NpcAdventure.StateMachine.State
         public override void Exit()
         {
             this.BuffManager.ReleaseBuffs();
-            this.ai.Dispose();
+            if (this.ai != null)
+            {
+                this.ai.Dispose();
+            }
 
             this.StateMachine.Companion.eventActor = false;
             this.StateMachine.Companion.farmerPassesThrough = false;
@@ -126,19 +152,19 @@ namespace NpcAdventure.StateMachine.State
             this.SpecialEvents.RenderedLocation -= this.SpecialEvents_RenderedLocation;
             this.Events.Input.ButtonPressed -= this.Input_ButtonPressed;
             this.Events.GameLoop.UpdateTicked -= this.GameLoop_UpdateTicked;
-            this.Events.GameLoop.TimeChanged -= this.GameLoop_TimeChanged;
+            this.Events.GameLoop.TimeChanged -= this.GameLoop_TimeChangedServer;
+            this.Events.GameLoop.TimeChanged -= this.GameLoop_TimeChangedBoth;
             this.Events.Player.Warped -= this.Player_Warped;
 
             this.ai = null;
             this.dismissalDialogue = null;
-            this.StateMachine.CompanionManager.Hud.Reset();
+            if (this.GetByWhom() == Game1.player)
+                this.StateMachine.CompanionManager.Hud.Reset();
         }
 
-        private void GameLoop_TimeChanged(object sender, TimeChangedEventArgs e)
+        private void GameLoop_TimeChangedBoth(object sender, TimeChangedEventArgs e)
         {
-            this.StateMachine.Companion.clearSchedule();
-
-            if (e.NewTime >= 2200)
+            if (e.NewTime >= 2200 && this.GetByWhom() == Game1.player)
             {
                 NPC companion = this.StateMachine.Companion;
                 Dialogue dismissalDialogue = new Dialogue(DialogueHelper.GetSpecificDialogueText(companion, this.StateMachine.CompanionManager.Farmer, "companionDismissAuto"), companion);
@@ -146,7 +172,14 @@ namespace NpcAdventure.StateMachine.State
                 this.StateMachine.Companion.doEmote(24);
                 this.StateMachine.Companion.updateEmote(Game1.currentGameTime);
                 DialogueHelper.DrawDialogue(dismissalDialogue);
+                this.StateMachine.CompanionManager.netEvents.FireEvent(new CompanionDismissEvent(this.StateMachine.Companion), Game1.MasterPlayer);
+                Game1.fadeScreenToBlack();
             }
+        }
+
+        private void GameLoop_TimeChangedServer(object sender, TimeChangedEventArgs e)
+        {
+            this.StateMachine.Companion.clearSchedule();
 
             // Fix spawn ladder if area is infested and all monsters is killed but NPC following us
             if (this.StateMachine.Companion.currentLocation is MineShaft mines && mines.mustKillAllMonstersToAdvance())
@@ -191,7 +224,8 @@ namespace NpcAdventure.StateMachine.State
             if (e.IsMultipleOf(20))
                 this.FixProblemsWithNPC();
 
-            this.ai.Update(e);
+            if (this.ai != null)
+                this.ai.Update(e);
         }
 
         private void FixProblemsWithNPC()
@@ -204,21 +238,31 @@ namespace NpcAdventure.StateMachine.State
             this.StateMachine.Companion.eventActor = true;
         }
 
-        private void Player_Warped(object sender, WarpedEventArgs e)
+        public void PlayerHasWarped(GameLocation from, GameLocation to)
         {
+            this.StateMachine.ReseatCompanion(this.StateMachine.Companion); // force refresh maybe? If it helps?
+
             NPC companion = this.StateMachine.Companion;
             Dictionary<string, string> bubbles = this.StateMachine.ContentLoader.LoadStrings("Strings/SpeechBubbles");
 
             // Warp companion to farmer if it's needed
-            if (companion.currentLocation != e.NewLocation)
-                this.ai.ChangeLocation(e.NewLocation);
+            if (companion.currentLocation != to)
+            {
+                NpcAdventureMod.GameMonitor.Log("Warping NPC " + this.StateMachine.Companion.Name + " to a new location " + to.Name);
+                this.ai.ChangeLocation(to);
+            }
 
             // Show above head bubble text for location
-            if (Game1.random.NextDouble() > .66f && DialogueHelper.GetBubbleString(bubbles, companion, e.NewLocation, out string bubble))
+            if (Game1.random.NextDouble() > 66f && DialogueHelper.GetBubbleString(bubbles, companion, to, out string bubble))
                 companion.showTextAboveHead(bubble, preTimer: 250);
 
             // Push new location dialogue
-            this.TryPushLocationDialogue(e.NewLocation, true);
+            this.TryPushLocationDialogue(from);
+        }
+
+        private void Player_Warped(object sender, WarpedEventArgs e)
+        {
+            this.StateMachine.CompanionManager.netEvents.FireEvent(new PlayerWarpedEvent(this.StateMachine.Companion, e.OldLocation, e.NewLocation), null, true);
         }
 
         private void TryPushLocationDialogue(GameLocation location, bool warped = false)
@@ -268,49 +312,37 @@ namespace NpcAdventure.StateMachine.State
             if (this.ai != null && this.ai.PerformAction())
                 return true;
 
-            string question = this.StateMachine.ContentLoader.LoadString("Strings/Strings:recruitedWant");
-            Response[] responses =
+            if (this.GetByWhom() != who)
             {
-                new Response("bag", this.StateMachine.ContentLoader.LoadString("Strings/Strings:recruitedWant.bag")),
-                new Response("dismiss", this.StateMachine.ContentLoader.LoadString("Strings/Strings:recruitedWant.dismiss")),
-                new Response("nothing", this.StateMachine.ContentLoader.LoadString("Strings/Strings:recruitedWant.nothing")),
-            };
+                return true;
+            }
 
-            location.createQuestionDialogue(question, responses, (_, answer) => {
-                if (answer != "nothing")
-                {
-                    this.StateMachine.Companion.Halt();
-                    this.StateMachine.Companion.facePlayer(who);
-                    this.ReactOnAsk(this.StateMachine.Companion, who, answer); ;
-                }
-            }, this.StateMachine.Companion);
+            string[] answers = { "bag", "dismiss", "nothing" };
 
+            this.StateMachine.CompanionManager.netEvents.FireEvent(new QuestionEvent("recruitedWant", this.StateMachine.Companion, answers), this.setByWhom);
+            
             return true;
         }
 
-        private void ReactOnAsk(NPC companion, Farmer leader, string action)
+        public void OnDialogueSpeaked(string question, string response)
         {
-            switch (action)
+            if(question == "recruitedWant")
             {
-                case "dismiss":
-                    Dialogue dismissalDialogue = new Dialogue(DialogueHelper.GetSpecificDialogueText(companion, leader, "companionDismiss"), companion);
-                    this.dismissalDialogue = dismissalDialogue;
-                    DialogueHelper.DrawDialogue(dismissalDialogue);
-                    break;
-                case "bag":
-                    Chest bag = this.StateMachine.Bag;
-                    this.StateMachine.Companion.currentLocation.playSound("openBox");
-                    Game1.activeClickableMenu = new ItemGrabMenu(bag.items, false, true, new InventoryMenu.highlightThisItem(InventoryMenu.highlightAllItems), new ItemGrabMenu.behaviorOnItemSelect(bag.grabItemFromInventory), this.StateMachine.Companion.displayName, new ItemGrabMenu.behaviorOnItemSelect(bag.grabItemFromChest), false, true, true, true, true, 1, null, -1, this.StateMachine.Companion);
-                    break;
-            }
-        }
-
-        public void OnDialogueSpeaked(Dialogue speakedDialogue)
-        {
-            if (speakedDialogue == this.dismissalDialogue)
-            {
-                // After companion speaked a dismissal dialogue dismiss (unrecruit) companion who speaked that
-                this.StateMachine.Dismiss(Game1.timeOfDay >= 2200);
+                switch(response)
+                {
+                    case "nothing":
+                        break;
+                    case "dismiss":
+                        this.StateMachine.CompanionManager.netEvents.FireEvent(new DialogEvent("companionDismiss", this.StateMachine.Companion), this.setByWhom);
+                        this.StateMachine.CompanionManager.netEvents.FireEvent(new CompanionDismissEvent(this.StateMachine.Companion), Game1.MasterPlayer);
+                        Game1.fadeScreenToBlack();
+                        break;
+                    case "bag": // TODO move to server syncing somehow, no idea how this works!
+                        Chest bag = this.StateMachine.Bag;
+                        this.StateMachine.Companion.currentLocation.playSound("openBox");
+                        Game1.activeClickableMenu = new ItemGrabMenu(bag.items, false, true, new InventoryMenu.highlightThisItem(InventoryMenu.highlightAllItems), new ItemGrabMenu.behaviorOnItemSelect(bag.grabItemFromInventory), this.StateMachine.Companion.displayName, new ItemGrabMenu.behaviorOnItemSelect(bag.grabItemFromChest), false, true, true, true, true, 1, null, -1, this.StateMachine.Companion);
+                        break;
+                }
             }
         }
     }

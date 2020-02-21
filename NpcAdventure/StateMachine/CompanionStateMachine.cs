@@ -13,6 +13,7 @@ using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
+using static NpcAdventure.NetCode.NetEvents;
 
 namespace NpcAdventure.StateMachine
 {
@@ -34,10 +35,11 @@ namespace NpcAdventure.StateMachine
         public CompanionMetaData Metadata { get; }
         public IContentLoader ContentLoader { get; private set; }
         private IMonitor Monitor { get; }
-        public Chest Bag { get; private set; }
+
+        public Chest Bag { get; set; }
         public IReflectionHelper Reflection { get; }
         public Dictionary<StateFlag, ICompanionState> States { get; private set; }
-        private ICompanionState currentState;
+        public ICompanionState currentState { get; private set; }
 
         public CompanionStateMachine(CompanionManager manager, NPC companion, CompanionMetaData metadata, IContentLoader loader, IReflectionHelper reflection, IMonitor monitor = null)
         {
@@ -73,8 +75,11 @@ namespace NpcAdventure.StateMachine
         /// Change companion state machine state
         /// </summary>
         /// <param name="stateFlag">Flag of allowed state</param>
-        private void ChangeState(StateFlag stateFlag)
+        private void ChangeState(StateFlag stateFlag, Farmer byWhom)
         {
+            if (!Context.IsMainPlayer && this.CurrentStateFlag == StateFlag.RECRUITED && stateFlag != StateFlag.RECRUITED) // sync bag status to server when we're leaving recruited state
+                this.CompanionManager.netEvents.FireEvent(new SendBagEvent(this.Companion, this.Bag));
+
             if (this.States == null)
                 throw new InvalidStateException("State machine is not ready! Call setup first.");
 
@@ -89,10 +94,17 @@ namespace NpcAdventure.StateMachine
                 this.currentState.Exit();
             }
 
-            newState.Entry();
+            newState.Entry(byWhom);
             this.currentState = newState;
             this.Monitor.Log($"{this.Name} changed state: {this.CurrentStateFlag.ToString()} -> {stateFlag.ToString()}");
             this.CurrentStateFlag = stateFlag;
+        }
+
+        internal void ReseatCompanion(NPC n)
+        {
+            NpcAdventureMod.GameMonitor.Log("Resetting NPC " + n.Name);
+            if (n.Name == this.Companion.Name)
+                this.Companion = n;
         }
 
         /// <summary>
@@ -105,7 +117,7 @@ namespace NpcAdventure.StateMachine
                 throw new InvalidOperationException("State machine is already set up!");
 
             this.States = stateHandlers;
-            this.ResetStateMachine();
+            this.ResetStateMachine(null);
         }
 
         /// <summary>
@@ -114,16 +126,11 @@ namespace NpcAdventure.StateMachine
         /// <param name="speakedDialogue"></param>
         public void DialogueSpeaked(Dialogue speakedDialogue)
         {
-            // Convert state to dialogue detector (if state implements it)
-            if (this.currentState is IDialogueDetector detector)
-            {
-                detector.OnDialogueSpeaked(speakedDialogue); // Handle this dialogue
-            }
 
             if (speakedDialogue is CompanionDialogue companionDialogue && companionDialogue.SpecialAttributes.Contains("session"))
             {
                 // Remember session spoken dialogue this day (forget morning)
-                this.SpokenDialogues.Add(companionDialogue.Tag);
+                this.SpokenDialogues.Add(companionDialogue.Tag); // TODO move to the proper side
             }
         }
 
@@ -132,28 +139,33 @@ namespace NpcAdventure.StateMachine
         /// </summary>
         public void NewDaySetup()
         {
+            // Setup dialogues for companion for this day
+            DialogueHelper.SetupCompanionDialogues(this.Companion, this.ContentLoader.LoadStrings($"Dialogue/{this.Name}"));
+            this.SpokenDialogues.Clear();
+
+            if (!Game1.IsMasterGame)
+                return;
+
             if (this.CurrentStateFlag != StateFlag.RESET)
                 throw new InvalidStateException($"State machine {this.Name} must be in reset state!");
-
+            
             // Today is festival day? Player can't recruit this companion
             if (Utility.isFestivalDay(Game1.dayOfMonth, Game1.currentSeason))
             {
                 this.Monitor.Log($"{this.Name} is unavailable to recruit due to festival today.");
-                this.MakeUnavailable();
+                this.MakeUnavailable(null);
                 return;
             }
 
-            // Setup dialogues for companion for this day
-            DialogueHelper.SetupCompanionDialogues(this.Companion, this.ContentLoader.LoadStrings($"Dialogue/{this.Name}"));
-
+            this.MakeAvailable(null);
             this.RecruitedToday = false;
             this.SuggestedToday = false;
             this.CanSuggestToday = Game1.random.NextDouble() > .5f
                                    && !(this.Companion.isMarried() && SDate.Now().DayOfWeek == DayOfWeek.Monday);
-            this.SpokenDialogues.Clear();
-            this.MakeAvailable();
+
             if (this.CanSuggestToday)
                 this.Monitor.Log($"{this.Name} can suggest adventure today!");
+
         }
 
         /// <summary>
@@ -161,18 +173,17 @@ namespace NpcAdventure.StateMachine
         /// </summary>
         public void DumpBagInFarmHouse()
         {
-            FarmHouse farm = (FarmHouse)Game1.getLocationFromName("FarmHouse");
-            Vector2 place = Utility.PointToVector2(farm.getRandomOpenPointInHouse(Game1.random));
+            FarmHouse house = Game1.getLocationFromName(this.currentState.GetByWhom().homeLocation) as FarmHouse;
+            
+            Vector2 place = Utility.PointToVector2(house.getRandomOpenPointInHouse(Game1.random));
             Package dumpedBag = new Package(this.Bag.items.ToList(), place)
             {
                 GivenFrom = this.Name,
                 Message = this.ContentLoader.LoadString("Strings/Strings:bagItemsSentLetter", this.CompanionManager.Farmer.Name, this.Companion.displayName)
             };
-
-            farm.objects.Add(place, dumpedBag);
-            this.Bag = new Chest(true);
-
+            house.objects.Add(place, dumpedBag);
             this.Monitor.Log($"{this.Companion} delivered bag contents into farm house at position {place}");
+            
         }
 
         public Dialogue GenerateLocationDialogue(GameLocation location, string suffix = "")
@@ -244,47 +255,64 @@ namespace NpcAdventure.StateMachine
         /// <summary>
         /// Make companion AVAILABLE to recruit
         /// </summary>
-        public void MakeAvailable()
+        public void MakeAvailable(Farmer byWhom)
         {
-            this.ChangeState(StateFlag.AVAILABLE);
+            this.CompanionManager.netEvents.FireEvent(new CompanionChangedState(this.Companion, StateFlag.AVAILABLE, byWhom), null, true);
+        }
+
+        public void MakeLocalAvailable(Farmer byWhom)
+        {
+            this.ChangeState(StateFlag.AVAILABLE, byWhom);
         }
 
         /// <summary>
         /// Make companion UNAVAILABLE to recruit
         /// </summary>
-        public void MakeUnavailable()
+        public void MakeUnavailable(Farmer byWhom)
         {
-            this.ChangeState(StateFlag.UNAVAILABLE);
+            this.CompanionManager.netEvents.FireEvent(new CompanionChangedState(this.Companion, StateFlag.UNAVAILABLE, byWhom), null, true);
+        }
+
+        public void MakeLocalUnavailable(Farmer byWhom)
+        {
+            this.ChangeState(StateFlag.UNAVAILABLE, byWhom);
         }
 
         /// <summary>
         /// Reset companion's state machine
         /// </summary>
-        public void ResetStateMachine()
+        public void ResetStateMachine(Farmer byWhom)
         {
-            this.ChangeState(StateFlag.RESET);
+            if (Game1.IsMasterGame)
+              this.CompanionManager.netEvents.FireEvent(new CompanionChangedState(this.Companion, StateFlag.RESET, byWhom), null, true);
+        }
+
+        public void ResetLocalStateMachine(Farmer byWhom)
+        {
+            this.ChangeState(StateFlag.RESET, byWhom);
         }
 
         /// <summary>
         /// Dismiss recruited companion
         /// </summary>
         /// <param name="keepUnavailableOthers">Keep other companions unavailable?</param>
-        internal void Dismiss(bool keepUnavailableOthers = false)
+        internal void Dismiss(Farmer byWhom, bool keepUnavailableOthers = false)
         {
-            this.ResetStateMachine();
+            this.ResetStateMachine(byWhom);
 
             if (this.currentState is ICompanionIntegrator integrator)
                 integrator.ReintegrateCompanionNPC();
 
             this.BackedupSchedule = null;
-            this.ChangeState(StateFlag.UNAVAILABLE);
-            this.CompanionManager.CompanionDissmised(keepUnavailableOthers);
+            //this.ChangeState(StateFlag.UNAVAILABLE, byWhom);
+            this.MakeUnavailable(byWhom);
+            this.CompanionManager.CompanionDissmised(byWhom, keepUnavailableOthers);
         }
 
         /// <summary>
         /// Recruit this companion
         /// </summary>
-        public void Recruit()
+        public void Recruit(Farmer byWhom)
         {
             this.BackedupSchedule = this.Companion.Schedule;
             this.RecruitedToday = true;
@@ -295,8 +323,13 @@ namespace NpcAdventure.StateMachine
                 this.Companion.setTileLocation(this.Companion.GetGrabTile());
             }
 
-            this.ChangeState(StateFlag.RECRUITED);
-            this.CompanionManager.CompanionRecuited(this.Companion.Name);
+            this.CompanionManager.netEvents.FireEvent(new CompanionChangedState(this.Companion, StateFlag.RECRUITED, byWhom), null, true);
+        }
+
+        public void RecruitLocally(Farmer byWhom)
+        {
+            this.ChangeState(StateFlag.RECRUITED, byWhom);
+            this.CompanionManager.CompanionRecuited(this.Companion.Name, byWhom);
         }
 
         public void Dispose()

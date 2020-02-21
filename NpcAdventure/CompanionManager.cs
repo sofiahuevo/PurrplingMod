@@ -11,9 +11,11 @@ using NpcAdventure.StateMachine.State;
 using static NpcAdventure.StateMachine.CompanionStateMachine;
 using NpcAdventure.Model;
 using NpcAdventure.Events;
+using NpcAdventure.NetCode;
 using NpcAdventure.HUD;
 using NpcAdventure.Story;
 using NpcAdventure.Story.Messaging;
+using static NpcAdventure.NetCode.NetEvents;
 
 namespace NpcAdventure
 {
@@ -27,6 +29,9 @@ namespace NpcAdventure
         public IGameMaster GameMaster { get; }
         public CompanionDisplay Hud { get; }
         public Config Config { get; }
+        public NetEvents netEvents;
+
+        private IContentLoader loader;
 
         public Farmer Farmer
         {
@@ -38,7 +43,7 @@ namespace NpcAdventure
             }
         }
 
-        public CompanionManager(IGameMaster gameMaster, DialogueDriver dialogueDriver, HintDriver hintDriver, CompanionDisplay hud, Config config, IMonitor monitor)
+        public CompanionManager(IGameMaster gameMaster, DialogueDriver dialogueDriver, HintDriver hintDriver, CompanionDisplay hud, Config config, IMonitor monitor, NetEvents netEvents)
         {
             this.GameMaster = gameMaster ?? throw new ArgumentNullException(nameof(gameMaster));
             this.dialogueDriver = dialogueDriver ?? throw new ArgumentNullException(nameof(dialogueDriver));
@@ -47,6 +52,7 @@ namespace NpcAdventure
             this.monitor = monitor ?? throw new ArgumentNullException(nameof(monitor));
             this.PossibleCompanions = new Dictionary<string, CompanionStateMachine>();
             this.Config = config ?? throw new ArgumentNullException(nameof(config));
+            this.netEvents = netEvents;
 
             this.dialogueDriver.DialogueChanged += this.DialogueDriver_DialogueChanged;
             this.hintDriver.CheckHint += this.HintDriver_CheckHint;
@@ -73,6 +79,28 @@ namespace NpcAdventure
             }
         }
 
+        internal void UpdateNPC(NpcListChangedEventArgs e)
+        {
+            NpcAdventureMod.GameMonitor.Log("Resetting NPCs...");
+            foreach (NPC n in e.Added)
+            {
+                bool found = this.PossibleCompanions.TryGetValue(n.Name, out var csm);
+                if (found)
+                {
+                    csm.ReseatCompanion(n);
+                }
+            }
+        }
+
+        internal void SyncLocalBags()
+        {
+            foreach(var csmKv in this.PossibleCompanions)
+            {
+                if (csmKv.Value.currentState.GetByWhom() == Game1.player && csmKv.Value.CurrentStateFlag == StateFlag.RECRUITED)
+                    this.netEvents.FireEvent(new SendBagEvent(csmKv.Value.Companion, csmKv.Value.Bag));
+            }
+        }
+
         /// <summary>
         /// Handle check hint event from event driver
         /// </summary>
@@ -89,7 +117,7 @@ namespace NpcAdventure
             // - and has'nt any dialogues in queue 
             // - and we can ask this companion for following (recruit)
             if (this.PossibleCompanions.TryGetValue(e.Npc.Name, out CompanionStateMachine csm)
-                && this.CanRecruit()
+                && this.CanRecruit(e.Npc)
                 && csm.Name == e.Npc?.Name
                 && csm.CanPerformAction()
                 && e.Npc.CurrentDialogue.Count == 0
@@ -109,13 +137,18 @@ namespace NpcAdventure
             return false;
         }
 
-        internal bool CanRecruit()
+        internal bool CanRecruit(NPC n)
         {
             if (!Context.IsWorldReady || this.Farmer == null)
             {
                 return false;
             }
 
+            foreach(var companion in this.PossibleCompanions) // TODO remove this when you can have multiple people follow :-)
+            {
+                if (companion.Value.CurrentStateFlag == StateFlag.RECRUITED && companion.Value.currentState.GetByWhom() == Game1.player && companion.Key != n.Name)
+                    return false;
+            }
             if (this.GameMaster.Mode == GameMasterMode.OFFLINE)
                 return true; // In non-adventure mode we can recruit a companion
 
@@ -126,17 +159,13 @@ namespace NpcAdventure
         /// When any companion was recruited
         /// </summary>
         /// <param name="companionName">NPC name of companion</param>
-        internal void CompanionRecuited(string companionName)
+        internal void CompanionRecuited(string companionName, Farmer byWhom)
         {
-            foreach (var csmKv in this.PossibleCompanions)
+            if (byWhom == Game1.player)
             {
-                // All other companions are unavailable now (Player can't recruit them right now)
-                if (csmKv.Value.Name != companionName)
-                    csmKv.Value.MakeUnavailable();
+                this.GameMaster.SendEventMessage(new RecruitMessage(companionName));
+                this.monitor.Log($"You have recruited {companionName} companion.");
             }
-
-            this.GameMaster.SendEventMessage(new RecruitMessage(companionName));
-            this.monitor.Log($"You are recruited {companionName} companion.");
         }
 
         /// <summary>
@@ -145,7 +174,7 @@ namespace NpcAdventure
         public void ResetStateMachines()
         {
             foreach (var companionKv in this.PossibleCompanions)
-                companionKv.Value.ResetStateMachine();
+                companionKv.Value.ResetStateMachine(null);
         }
 
         /// <summary>
@@ -181,15 +210,15 @@ namespace NpcAdventure
         /// When any companion dissmised (relieved from duty, unfollow player)
         /// </summary>
         /// <param name="keepUnavailable">Set this companion unavailable after dismiss?</param>
-        internal void CompanionDissmised(bool keepUnavailable = false)
+        internal void CompanionDissmised(Farmer byWhom, bool keepUnavailable = false)
         {
-            foreach (var csmKv in this.PossibleCompanions)
+            /*foreach (var csmKv in this.PossibleCompanions)
             {
                 if (keepUnavailable)
-                    csmKv.Value.MakeUnavailable();
+                    csmKv.Value.MakeUnavailable(byWhom);
                 else if (!csmKv.Value.RecruitedToday)
-                    csmKv.Value.MakeAvailable();
-            }
+                    csmKv.Value.MakeAvailable(byWhom);
+            }*/
         }
 
         /// <summary>
@@ -202,6 +231,7 @@ namespace NpcAdventure
         {
             Dictionary<string, string> dispositions = loader.Load<Dictionary<string, string>>("Data/CompanionDispositions");
 
+            this.PossibleCompanions.Clear();
             foreach (string npcName in dispositions.Keys)
             {
                 NPC companion = Game1.getCharacterFromName(npcName, true);
@@ -219,15 +249,16 @@ namespace NpcAdventure
                 {
                     [StateFlag.RESET] = new ResetState(csm, gameEvents, this.monitor),
                     [StateFlag.AVAILABLE] = new AvailableState(csm, gameEvents, this.monitor),
-                    [StateFlag.RECRUITED] = new RecruitedState(csm, gameEvents, specialEvents, this.monitor),
+                    [StateFlag.RECRUITED] = new RecruitedState(csm, gameEvents, specialEvents, this.monitor, this.netEvents),
                     [StateFlag.UNAVAILABLE] = new UnavailableState(csm, gameEvents, this.monitor),
                 };
 
-                csm.Setup(stateHandlers);
                 this.PossibleCompanions.Add(npcName, csm);
+                csm.Setup(stateHandlers);
             }
 
             this.monitor.Log($"Initalized {this.PossibleCompanions.Count} companions.", LogLevel.Info);
+            this.loader = loader;
         }
 
         /// <summary>
@@ -243,6 +274,18 @@ namespace NpcAdventure
 
             this.PossibleCompanions.Clear();
             this.monitor.Log("Companions uninitialized", LogLevel.Info);
+        }
+
+        internal void PlayerDisconnected(Farmer farmer)
+        {
+            foreach (var companionKv in this.PossibleCompanions)
+            {
+                if (companionKv.Value.CurrentStateFlag == StateFlag.RECRUITED && companionKv.Value.currentState.GetByWhom() == farmer)
+                {
+                    this.monitor.Log("Resetting companion " + companionKv.Key + " to unavailable state as player has disconnected.");
+                    companionKv.Value.MakeUnavailable(farmer);
+                }
+            }
         }
     }
 }

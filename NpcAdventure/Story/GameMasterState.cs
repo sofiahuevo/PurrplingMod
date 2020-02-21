@@ -25,6 +25,11 @@ namespace NpcAdventure.Story
             return this.GetPlayerState(Game1.player);
         }
 
+        public void SetPlayerStateFromNetwork(Farmer player, PlayerState state)
+        {
+            this.EligiblePlayers[player.UniqueMultiplayerID] = state;
+        }
+
         public class PlayerState
         {
             public bool isEligible = false;

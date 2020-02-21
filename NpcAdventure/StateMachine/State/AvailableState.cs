@@ -5,6 +5,7 @@ using StardewValley;
 using StardewModdingAPI;
 using System.Collections.Generic;
 using System;
+using static NpcAdventure.NetCode.NetEvents;
 
 namespace NpcAdventure.StateMachine.State
 {
@@ -15,17 +16,26 @@ namespace NpcAdventure.StateMachine.State
         private Dialogue suggestionDialogue;
         private bool recruitRequestsEnabled;
 
-        public bool CanPerformAction { get => this.recruitRequestsEnabled && this.StateMachine.CompanionManager.CanRecruit(); }
+        public bool CanPerformAction { get => this.recruitRequestsEnabled && this.StateMachine.CompanionManager.CanRecruit(this.StateMachine.Companion); }
 
         private int doNotAskUntil;
 
         public AvailableState(CompanionStateMachine stateMachine, IModEvents events, IMonitor monitor) : base(stateMachine, events, monitor) {}
 
-        public override void Entry()
+        public override void Entry(Farmer byWhom)
         {
-            this.recruitRequestsEnabled = true;
+            this.setByWhom = byWhom;
             this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged;
             this.Events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
+            if (Game1.IsMasterGame)
+            {
+                this.Events.GameLoop.TimeChanged += this.GameLoop_TimeChanged_Server;
+            }
+        }
+
+        private void GameLoop_TimeChanged_Server(object sender, TimeChangedEventArgs e)
+        {
+            this.recruitRequestsEnabled = true;
         }
 
         private void GameLoop_UpdateTicked(object sender, UpdateTickedEventArgs e)
@@ -118,43 +128,68 @@ namespace NpcAdventure.StateMachine.State
 
         public override void Exit()
         {
-            if (this.StateMachine.Companion.CurrentDialogue.Contains(this.suggestionDialogue))
-            {
-                DialogueHelper.RemoveDialogueFromStack(this.StateMachine.Companion, this.suggestionDialogue);
-                this.monitor.Log($"EXIT STATE: Removed adventure suggest dialogue from {this.StateMachine.Companion.Name}'s stack.");
-            }
-
             this.Events.GameLoop.UpdateTicked -= this.GameLoop_UpdateTicked;
             this.Events.GameLoop.TimeChanged -= this.GameLoop_TimeChanged;
-            this.recruitRequestsEnabled = false;
-            this.acceptalDialogue = null;
-            this.rejectionDialogue = null;
-            this.suggestionDialogue = null;
         }
 
-        private void ReactOnAnswer(NPC n, Farmer leader)
+        public void Recruit(Farmer byWhom)
         {
-            if (leader.getFriendshipHeartLevelForNPC(n.Name) < this.StateMachine.CompanionManager.Config.HeartThreshold || Game1.timeOfDay >= 2200)
+            if (!this.StateMachine.Companion.doingEndOfRouteAnimation.Value)
             {
-                Dialogue rejectionDialogue = new Dialogue(
-                    DialogueHelper.GetSpecificDialogueText(
-                        n, leader, Game1.timeOfDay >= 2200 ? "companionRejectedNight" : "companionRejected"), n);
+                this.StateMachine.Companion.Halt();
+                this.StateMachine.Companion.facePlayer(byWhom);
+            }
+            this.ReactOnAnswer(this.StateMachine.Companion, byWhom);
+        }
 
-                this.rejectionDialogue = rejectionDialogue;
-                DialogueHelper.DrawDialogue(rejectionDialogue);
+        private void ReactOnAnswer(NPC n, Farmer byWhom)
+        {
+            if (this.StateMachine.CompanionManager.PossibleCompanions[n.Name].CurrentStateFlag != CompanionStateMachine.StateFlag.AVAILABLE) // make sure they're not taken
+            {
+                this.StateMachine.CompanionManager.netEvents.FireEvent(new DialogEvent("companionTaken", n), byWhom);
+                return;
+            }
+
+            foreach (var csmKv in this.StateMachine.CompanionManager.PossibleCompanions)
+            {
+                if (csmKv.Value.currentState.GetByWhom() != null && byWhom.uniqueMultiplayerID == csmKv.Value.currentState.GetByWhom().uniqueMultiplayerID && csmKv.Value.CurrentStateFlag == CompanionStateMachine.StateFlag.RECRUITED) // if the person is already taken by us
+                {
+                    this.StateMachine.CompanionManager.netEvents.FireEvent(new DialogEvent("companionYoureNotFree", n), byWhom);
+                    return;
+                } 
+                else if (csmKv.Value.currentState.GetByWhom() != null && byWhom.uniqueMultiplayerID == csmKv.Value.currentState.GetByWhom().uniqueMultiplayerID && csmKv.Value.CurrentStateFlag == CompanionStateMachine.StateFlag.RECRUITED) // TODO remove when we get rclick event syncing
+                {
+                    this.StateMachine.CompanionManager.netEvents.FireEvent(new DialogEvent("recruitedWant", n), byWhom);
+                    return;
+                }
+            }
+
+            if (byWhom.getFriendshipHeartLevelForNPC(n.Name) < this.StateMachine.CompanionManager.Config.HeartThreshold || Game1.timeOfDay >= 2200)
+            {
+                this.StateMachine.CompanionManager.netEvents.FireEvent(new DialogEvent(Game1.timeOfDay >= 2200 ? "companionRejectedNight" : "companionRejected", n), byWhom);
+                this.StateMachine.MakeUnavailable(byWhom);
             }
             else
             {
-                Dialogue acceptalDialogue = new Dialogue(DialogueHelper.GetSpecificDialogueText(n, leader, "companionAccepted"), n);
+                this.StateMachine.CompanionManager.netEvents.FireEvent(new DialogEvent("companionAccepted", n), byWhom);
 
-                this.acceptalDialogue = acceptalDialogue;
-                DialogueHelper.DrawDialogue(acceptalDialogue);
+                this.StateMachine.CompanionManager.Farmer.changeFriendship(40, this.StateMachine.Companion);
+                this.StateMachine.Recruit(byWhom);
             }
         }
 
         public bool PerformAction(Farmer who, GameLocation location)
         {
             NPC companion = this.StateMachine.Companion;
+
+            foreach (var csmKv in this.StateMachine.CompanionManager.PossibleCompanions)
+            {
+                if (csmKv.Value.currentState.GetByWhom() != null && who.uniqueMultiplayerID == csmKv.Value.currentState.GetByWhom().uniqueMultiplayerID && csmKv.Value.CurrentStateFlag == CompanionStateMachine.StateFlag.RECRUITED) // if the person is already taken by us
+                {
+                    return false;
+                }
+            }
+            
             string question = this.StateMachine.ContentLoader.LoadString("Strings/Strings:askToFollow", companion.displayName);
 
             if (companion.isMoving())
@@ -179,17 +214,9 @@ namespace NpcAdventure.StateMachine.State
             return true;
         }
 
-        public void OnDialogueSpeaked(Dialogue speakedDialogue)
+        public void OnDialogueSpeaked(string question, string answer)
         {
-            if (speakedDialogue == this.acceptalDialogue)
-            {
-                this.StateMachine.CompanionManager.Farmer.changeFriendship(40, this.StateMachine.Companion);
-                this.StateMachine.Recruit();
-            }
-            else if (speakedDialogue == this.rejectionDialogue)
-            {
-                this.StateMachine.MakeUnavailable();
-            }
+            
         }
     }
 }

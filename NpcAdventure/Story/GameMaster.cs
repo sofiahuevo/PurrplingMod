@@ -1,8 +1,10 @@
-﻿using NpcAdventure.Story.Messaging;
+﻿using NpcAdventure.NetCode;
+using NpcAdventure.Story.Messaging;
 using StardewModdingAPI;
 using StardewValley;
 using System;
 using System.Collections.Generic;
+using static NpcAdventure.NetCode.NetEvents;
 
 namespace NpcAdventure.Story
 {
@@ -21,12 +23,15 @@ namespace NpcAdventure.Story
         public GameMasterMode Mode { get; private set; }
         public StoryHelper StoryHelper { get; private set; }
 
-        public GameMaster(IModHelper helper, StoryHelper storyHelper, IMonitor monitor)
+        private NetEvents netEvents;
+
+        public GameMaster(IModHelper helper, StoryHelper storyHelper, IMonitor monitor, NetEvents netEvents)
         {
             this.dataHelper = helper.Data;
             this.StoryHelper = storyHelper;
             this.Monitor = monitor;
             this.Scenarios = new List<IScenario>();
+            this.netEvents = netEvents;
         }
 
         internal void Initialize()
@@ -35,7 +40,11 @@ namespace NpcAdventure.Story
             {
                 this.Data = this.dataHelper.ReadSaveData<GameMasterState>("story") ?? new GameMasterState();
             }
-            // TODO: Write logic for client. Must fetch GM data from server
+            else
+            {
+                this.Data = new GameMasterState();
+                this.netEvents.FireEvent(new GameMasterStateSyncRequest());
+            }
 
             foreach (var scenario in this.Scenarios)
             {
@@ -70,6 +79,8 @@ namespace NpcAdventure.Story
         {
             if (this.Mode == GameMasterMode.MASTER)
                 this.dataHelper.WriteSaveData("story", this.Data);
+            else
+                this.SyncData();
         }
 
         public void SyncData()
@@ -79,12 +90,15 @@ namespace NpcAdventure.Story
 
             if (this.Mode == GameMasterMode.MASTER)
             {
-                // TODO: Write broadcast sync logic Server -> Clients here
+                foreach(var kv in this.Data.EligiblePlayers)
+                {
+                    this.netEvents.FireEvent(new GameMasterStateSyncResponse(kv.Key, kv.Value), null, true);
+                }
             } 
 
             if (this.Mode == GameMasterMode.SLAVE)
             {
-                // TODO: Write sync logic Client -> Server here
+                this.netEvents.FireEvent(new GameMasterStateSyncResponse(Game1.player.UniqueMultiplayerID, this.Data.GetPlayerState()), null, true);
             }
         }
 
@@ -98,26 +112,15 @@ namespace NpcAdventure.Story
             if (this.Mode == GameMasterMode.OFFLINE)
                 return;
 
-            if (this.Mode == GameMasterMode.MASTER)
-            {
-                this.MessageReceived?.Invoke(this, new GameMasterEventArgs()
-                    {
-                        Message = message,
-                        Player = Game1.player,
-                        IsLocal = true,
-                    }
-                );
-
-                if (Context.IsMultiplayer)
+           this.MessageReceived?.Invoke(this, new GameMasterEventArgs()
                 {
-                    // TODO: Write logic to send message to clients through net
+                    Message = message,
+                    Player = Game1.player,
+                    IsLocal = true,
                 }
-            }
+            );
 
-            if (this.Mode == GameMasterMode.SLAVE)
-            {
-                // TODO: Write logic to send it to server through net
-            }
+            this.SyncData();
         }
 
         private class GameMasterEventArgs : IGameMasterEventArgs

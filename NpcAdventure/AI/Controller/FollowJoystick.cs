@@ -22,6 +22,7 @@ namespace NpcAdventure.AI.Controller
 
         #region events
         public event EventHandler<MoveEventArgs> Move;
+	    public event EventHandler<StuckEventArgs> Stuck;
         #endregion
 
         #region protected fields
@@ -84,6 +85,11 @@ namespace NpcAdventure.AI.Controller
             this.gatesInThisLocation = this.CheckForGatesInLocation(this.follower.currentLocation);
         }
 
+        public void ResetFollower(ref NPC follower)
+        {
+            this.follower = follower;
+        }
+
         /// <summary>
         /// Acquire a target tile to find path and follow it.
         /// </summary>
@@ -97,7 +103,11 @@ namespace NpcAdventure.AI.Controller
             {
                 this.currentFollowedPoint = this.pathToFollow.Dequeue();
                 return true;
-            }
+            } 
+	        else 
+	        {
+                this.Stuck?.Invoke(this, new StuckEventArgs());
+	        }
             
             this.currentFollowedPoint = this.negativeOne;
 
@@ -413,5 +423,9 @@ namespace NpcAdventure.AI.Controller
 
             public bool IsLastFrame { get; }
         }
+
+	    public class StuckEventArgs
+	    {
+	    }
     }
 }
