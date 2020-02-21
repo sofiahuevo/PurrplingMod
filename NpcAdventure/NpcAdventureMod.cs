@@ -5,10 +5,12 @@ using NpcAdventure.Driver;
 using Harmony;
 using NpcAdventure.Events;
 using NpcAdventure.Model;
+using NpcAdventure.NetCode;
 using NpcAdventure.HUD;
 using NpcAdventure.Compatibility;
 using NpcAdventure.Story;
 using NpcAdventure.Story.Scenario;
+using System;
 
 namespace NpcAdventure
 {
@@ -18,6 +20,7 @@ namespace NpcAdventure
         private DialogueDriver DialogueDriver { get; set; }
         private HintDriver HintDriver { get; set; }
         private StuffDriver StuffDriver { get; set; }
+        private NetEvents netEvents;
         private MailDriver MailDriver { get; set; }
         internal ISpecialModEvents SpecialEvents { get; private set; }
         internal CompanionManager CompanionManager { get; private set; }
@@ -26,10 +29,13 @@ namespace NpcAdventure
         internal GameMaster GameMaster { get; private set; }
         internal Config Config { get; private set; } = new Config();
 
+        public static IMonitor GameMonitor { get; private set; }
+
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            this.netEvents = new NetEvents(helper.Multiplayer);
             if (Constants.TargetPlatform == GamePlatform.Android)
             {
                 this.Monitor.Log("Android support is an experimental feature, may cause some problems. Before you report a bug please content me on my discord https://discord.gg/wnEDqKF Thank you.", LogLevel.Alert);
@@ -37,6 +43,7 @@ namespace NpcAdventure
 
             this.RegisterEvents(helper.Events);
             this.Config = helper.ReadConfig<Config>();
+            NpcAdventureMod.GameMonitor = this.Monitor;
             this.ContentLoader = new ContentLoader(this.Helper.Content, this.Helper.ContentPacks, this.ModManifest.UniqueID, "assets", this.Monitor);
             Commander.Register(this);
         }
@@ -50,8 +57,17 @@ namespace NpcAdventure
             events.GameLoop.DayEnding += this.GameLoop_DayEnding;
             events.GameLoop.DayStarted += this.GameLoop_DayStarted;
             events.GameLoop.GameLaunched += this.GameLoop_GameLaunched;
+            events.World.NpcListChanged += this.World_NpcListChanged;
+
+            this.netEvents.Register(events);
             events.GameLoop.UpdateTicked += this.GameLoop_UpdateTicked;
             events.Display.RenderingHud += this.Display_RenderingHud;
+        }
+
+        private void World_NpcListChanged(object sender, NpcListChangedEventArgs e)
+        {
+            if (!Context.IsMainPlayer)
+                this.CompanionManager.UpdateNPC(e);
         }
 
         private void GameLoop_Saving(object sender, SavingEventArgs e)
@@ -69,6 +85,9 @@ namespace NpcAdventure
         {
             if (Context.IsWorldReady && this.CompanionHud != null)
                 this.CompanionHud.Update(e);
+
+            if (!Context.IsMainPlayer && e.IsMultipleOf(60 * 10) && Context.IsWorldReady) // sync bag every 10 seconds if changed
+                this.CompanionManager.SyncLocalBags();
         }
 
         private void GameLoop_GameLaunched(object sender, GameLaunchedEventArgs e)
@@ -81,11 +100,13 @@ namespace NpcAdventure
             this.DialogueDriver = new DialogueDriver(this.Helper.Events);
             this.HintDriver = new HintDriver(this.Helper.Events);
             this.StuffDriver = new StuffDriver(this.Helper.Data, this.Monitor);
+
             this.MailDriver = new MailDriver(this.ContentLoader, this.Monitor);
-            this.GameMaster = new GameMaster(this.Helper, new StoryHelper(this.ContentLoader), this.Monitor);
+            this.GameMaster = new GameMaster(this.Helper, new StoryHelper(this.ContentLoader), this.Monitor, this.netEvents);
             this.CompanionHud = new CompanionDisplay(this.Config, this.ContentLoader);
-            this.CompanionManager = new CompanionManager(this.GameMaster, this.DialogueDriver, this.HintDriver, this.CompanionHud, this.Config, this.Monitor);
-            
+            this.CompanionManager = new CompanionManager(this.GameMaster, this.DialogueDriver, this.HintDriver, this.CompanionHud, this.Config, this.Monitor, this.netEvents);
+            this.netEvents.SetUp(this.ModManifest, this.CompanionManager, this.ContentLoader, this.GameMaster);
+
             this.StuffDriver.RegisterEvents(this.Helper.Events);
             this.MailDriver.RegisterEvents(this.SpecialEvents);
 
@@ -147,18 +168,16 @@ namespace NpcAdventure
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
         {
-            if (Context.IsMultiplayer)
-                return;
             this.CompanionManager.NewDaySetup();
         }
 
         private void GameLoop_DayEnding(object sender, DayEndingEventArgs e)
         {
-            if (Context.IsMultiplayer)
-                return;
-
-            this.CompanionManager.ResetStateMachines();
-            this.CompanionManager.DumpCompanionNonEmptyBags();
+            if (Context.IsMainPlayer)
+            {
+                this.CompanionManager.DumpCompanionNonEmptyBags();
+                this.CompanionManager.ResetStateMachines();
+            }
         }
 
         private void GameLoop_ReturnedToTitle(object sender, StardewModdingAPI.Events.ReturnedToTitleEventArgs e)
@@ -173,12 +192,6 @@ namespace NpcAdventure
 
         private void GameLoop_SaveLoaded(object sender, SaveLoadedEventArgs e)
         {
-            if (Context.IsMultiplayer)
-            {
-                this.Monitor.Log("Companions not initalized, because multiplayer currently unsupported by NPC Adventures.", LogLevel.Warn);
-                return;
-            }
-
             if (this.Config.AdventureMode)
                 this.GameMaster.Initialize();
             else

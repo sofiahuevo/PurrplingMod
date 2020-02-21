@@ -41,11 +41,31 @@ namespace NpcAdventure.Story.Scenario
 
         private void GameLoop_DayStarted(object sender, DayStartedEventArgs e)
         {
-            if (this.GameMaster.Mode != GameMasterMode.MASTER)
-                return; // Master only logic. Master will process all known players.
+            this.AddLettersIfNeeded();
+        }
 
+        public override void Initialize()
+        {
+            this.modEvents.MailboxOpen += this.Events_MailboxOpen;
+            this.modEvents.QuestCompleted += this.ModEvents_QuestCompleted;
+            this.gameEvents.Player.Warped += this.Player_Warped;
+            this.gameEvents.GameLoop.DayStarted += this.GameLoop_DayStarted;
+            this.gameEvents.GameLoop.SaveLoaded += this.GameLoop_SaveLoaded;
+        }
+
+        private void GameLoop_SaveLoaded(object sender, SaveLoadedEventArgs e)
+        {
+            if(Context.IsMultiplayer && !Context.IsMainPlayer)
+            {
+                this.AddLettersIfNeeded();
+            }
+        }
+
+        private void AddLettersIfNeeded()
+        {
             // We check all players if we can add Maron's invitation letter to their mailbox
-            foreach (Farmer player in Game1.getAllFarmers())
+            //foreach (Farmer player in Game1.getAllFarmers())
+            Farmer player = Game1.player;
             {
                 if (player.mailReceived.Contains("guildMember") && player.deepestMineLevel >= 20 && !player.mailReceived.Contains(LETTER_KEY) && this.PlayerHasRequiredFriendship(player))
                 {
@@ -56,15 +76,7 @@ namespace NpcAdventure.Story.Scenario
                     player.mailbox.Add(LETTER_KEY);
                     this.monitor.Log($"Adventure Begins: Marlon's mail added immediately for {player.Name} ({player.UniqueMultiplayerID})");
                 }
-            }            
-        }
-
-        public override void Initialize()
-        {
-            this.modEvents.MailboxOpen += this.Events_MailboxOpen;
-            this.modEvents.QuestCompleted += this.ModEvents_QuestCompleted;
-            this.gameEvents.Player.Warped += this.Player_Warped;
-            this.gameEvents.GameLoop.DayStarted += this.GameLoop_DayStarted;
+            }
         }
 
         private bool PlayerHasRequiredFriendship(Farmer farmer)

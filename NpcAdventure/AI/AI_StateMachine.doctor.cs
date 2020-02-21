@@ -6,6 +6,7 @@ using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static NpcAdventure.NetCode.NetEvents;
 
 namespace NpcAdventure.AI
 {
@@ -30,9 +31,10 @@ namespace NpcAdventure.AI
                 if (this.player.health > this.player.maxHealth)
                     this.player.health = this.player.maxHealth;
 
-                Game1.drawDialogue(this.npc, DialogueHelper.GetSpecificDialogueText(this.npc, this.player, "heal"));
-                Game1.addHUDMessage(new HUDMessage(this.Csm.ContentLoader.LoadString("Strings/Strings:healed", this.npc.displayName, health), HUDMessage.health_type));
-                this.hud.GlowSkill("doctor", Color.Lime, HEAL_COUNTDOWN / 60);
+                this.netEvents.FireEvent(new DialogEvent("heal", this.npc), this.player); // DialogueHelper.GetSpecificDialogueText(this.npc, this.player, "heal")
+
+                this.netEvents.FireEvent(new ShowHUDMessageHealed(this.npc, health), this.player);
+                this.hud.GlowSkill("doctor", Color.Lime, HEAL_COUNTDOWN / 60); // TODO move to the proper side
                 this.Monitor.Log($"{this.npc.Name} healed you! Remaining medkits: {this.medkits}", LogLevel.Info);
                 return true;
             }
@@ -40,7 +42,7 @@ namespace NpcAdventure.AI
             if (this.medkits == 0)
             {
                 this.Monitor.Log($"No medkits. {this.npc.Name} can't heal you!", LogLevel.Info);
-                Game1.drawDialogue(this.npc, DialogueHelper.GetSpecificDialogueText(this.npc, this.player, "nomedkits"));
+                this.netEvents.FireEvent(new DialogEvent("nomedkits", this.npc));
                 this.medkits = -1;
             }
 
