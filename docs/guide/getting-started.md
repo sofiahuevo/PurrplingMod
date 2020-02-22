@@ -17,7 +17,8 @@
 There is one big change. You can't recruit companions until you recive an invitation from Marlon and you don't see his event. You can get invitation when:
 
 - You have access to Adventurer's guild
-- Reached 10 level of mines
+- Reached 20 level of mines
+- You have a 66% of required hearts with any recruitable NPC
 
 If you already match all of this conditions, you will get invitation letter morning. 
 IMPORTANT: You must go out from your Farm house, otherwise you will not receive letter.
