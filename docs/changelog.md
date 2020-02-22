@@ -2,7 +2,8 @@
 
 ## 0.11.0 beta
 
-- Added special errors and warning log messages for known incompatabilities (#101 #102)
+- Android support (experimanal) (#103 #106)
+- Added special errors and warning log messages for known incompatabilities (#101)
 - Changed Marlon's invitaion letter conditions (#95)
 - Fixed invalid cast for quests and events assets (#89)
 - Added support for localizations in content packs (#83 #89)

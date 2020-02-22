@@ -32,8 +32,7 @@ namespace NpcAdventure
         {
             if (Constants.TargetPlatform == GamePlatform.Android)
             {
-                this.Monitor.Log("This mod can't be loaded because is not compatible with Android version of SMAPI and SDV! This is a known issue, don't report it.", LogLevel.Error);
-                return;
+                this.Monitor.Log("Android support is an experimental feature, may cause some problems. Before you report a bug please content me on my discord https://discord.gg/wnEDqKF Thank you.", LogLevel.Alert);
             }
 
             this.RegisterEvents(helper.Events);
