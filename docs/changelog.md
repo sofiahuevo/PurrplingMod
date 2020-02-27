@@ -1,5 +1,9 @@
 # Full changelog
 
+## Upcoming release
+
+- Changed a license
+
 ## 0.11.2 beta
 
 - Fixed crash on Linux/Mac when mod's quest was opened. (thx @kdau)
