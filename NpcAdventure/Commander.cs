@@ -18,16 +18,21 @@ namespace NpcAdventure
 
         internal void SetupCommands(ICommandHelper consoleCommands)
         {
+#if !DEBUG
             if (!this.npcAdventureMod.Config.EnableDebug)
                 return;
-
+#endif
             consoleCommands.Add("npcadventure_eligible", "Make player eligible to recruit a companion (server or singleplayer only)", this.Eligible);
             this.monitor.Log("Registered debug commands", LogLevel.Info);
         }
 
         private void Eligible(string command, string[] args)
         {
+#if DEBUG
+            if (Context.IsWorldReady)
+#else
             if (Context.IsWorldReady && Context.IsMainPlayer && this.npcAdventureMod.GameMaster.Mode == GameMasterMode.MASTER)
+#endif
             {
                 this.npcAdventureMod.GameMaster.Data.GetPlayerState(Game1.player).isEligible = true;
                 this.npcAdventureMod.GameMaster.SyncData();
