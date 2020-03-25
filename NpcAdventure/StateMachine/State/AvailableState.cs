@@ -167,7 +167,7 @@ namespace NpcAdventure.StateMachine.State
             if (byWhom.getFriendshipHeartLevelForNPC(n.Name) < this.StateMachine.CompanionManager.Config.HeartThreshold || Game1.timeOfDay >= 2200)
             {
                 this.StateMachine.CompanionManager.netEvents.FireEvent(new DialogEvent(Game1.timeOfDay >= 2200 ? "companionRejectedNight" : "companionRejected", n), byWhom);
-                this.StateMachine.MakeUnavailable(byWhom);
+                this.StateMachine.MakeLocalUnavailable(byWhom);
             }
             else
             {
