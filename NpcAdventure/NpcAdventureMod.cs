@@ -41,6 +41,9 @@ namespace NpcAdventure
                 this.Monitor.Log("Android support is an experimental feature, may cause some problems. Before you report a bug please content me on my discord https://discord.gg/wnEDqKF Thank you.", LogLevel.Alert);
             }
 
+            // Reminder about player plays experimental version of multiplayer
+            this.Monitor.Log("You are playing experimental version of multiplayer support! If you found a bug, please don't report it on Nexusmods, but on our Discord server https://discord.gg/wnEDqKF in channel #multiplayer-help. Thank you!", LogLevel.Alert);
+
             this.RegisterEvents(helper.Events);
             this.Config = helper.ReadConfig<Config>();
             NpcAdventureMod.GameMonitor = this.Monitor;

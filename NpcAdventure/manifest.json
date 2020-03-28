@@ -1,8 +1,8 @@
 {
-  "Name": "NpcAdventure",
+  "Name": "NpcAdventure (Multiplayer)",
   "Author": "PurrplingCat",
   "Version": "0.11.2+multiplayer.5",
-  "Description": "It's time to adventure! Go to an adventure with Pelican Town's villagers!",
+  "Description": "It's time to adventure! Go to an adventure with Pelican Town's villagers! Now with your friends!",
   "UniqueID": "purrplingcat.npcadventure",
   "EntryDll": "NpcAdventure.dll",
   "MinimumApiVersion": "3.2.0",
