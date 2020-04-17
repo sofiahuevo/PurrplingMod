@@ -39,6 +39,9 @@ namespace NpcAdventure.Patches
             try
             {
                 Instance.Events.FireQuestReloadObjective(__instance, new QuestReloadObjectiveArgs(__instance));
+                if (__instance._currentObjective == null)
+                    __instance._currentObjective = "";
+                __result = __instance._currentObjective;
             } catch(Exception ex)
             {
                 Instance.LogFailure(ex, nameof(After_get_currentObjective));
