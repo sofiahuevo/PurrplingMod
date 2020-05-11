@@ -1,5 +1,4 @@
-﻿using Harmony;
-using NpcAdventure.Internal;
+﻿using HarmonyLib;
 using StardewValley;
 using System;
 using System.Reflection;
@@ -45,7 +44,7 @@ namespace NpcAdventure.Patches
             return m.Name == nameof(Game1.getCharacterFromName) && m.ReturnType == typeof(NPC) && !m.IsGenericMethod;
         }
 
-        protected override void Apply(HarmonyInstance harmony)
+        protected override void Apply(Harmony harmony)
         {
             harmony.Patch(
                 original: AccessTools.GetDeclaredMethods(typeof(Game1)).Find(MatchGetCharacterFromNameMethod),

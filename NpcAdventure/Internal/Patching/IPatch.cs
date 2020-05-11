@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using StardewModdingAPI;
 
 namespace NpcAdventure.Internal.Patching
@@ -7,6 +7,6 @@ namespace NpcAdventure.Internal.Patching
     {
         string Name { get; }
         bool Applied { get; }
-        void Apply(HarmonyInstance harmony, IMonitor monitor);
+        void Apply(Harmony harmony, IMonitor monitor);
     }
 }

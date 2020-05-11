@@ -1,11 +1,7 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using NpcAdventure.Story;
 using StardewValley;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NpcAdventure.Patches
 {
@@ -35,7 +31,7 @@ namespace NpcAdventure.Patches
             }
         }
 
-        protected override void Apply(HarmonyInstance harmony)
+        protected override void Apply(Harmony harmony)
         {
             harmony.Patch(
                 original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.checkForEvents)),

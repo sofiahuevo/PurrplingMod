@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using NpcAdventure.Internal;
 using NpcAdventure.Internal.Patching;
 using StardewModdingAPI;
@@ -19,7 +19,7 @@ namespace NpcAdventure.Patches
         public abstract string Name { get; }
         public bool Applied { get; private set; }
 
-        protected abstract void Apply(HarmonyInstance harmony);
+        protected abstract void Apply(Harmony harmony);
 
         /// <summary>
         /// Setup and apply game patch
@@ -27,7 +27,7 @@ namespace NpcAdventure.Patches
         /// <param name="harmony"></param>
         /// <param name="monitor"></param>
         /// <exception cref="Exception">Any exception raised while appling game patch</exception>
-        public void Apply(HarmonyInstance harmony, IMonitor monitor)
+        public void Apply(Harmony harmony, IMonitor monitor)
         {
             if (Instance == null)
             {

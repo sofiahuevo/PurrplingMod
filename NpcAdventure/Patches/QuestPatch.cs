@@ -1,6 +1,5 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using NpcAdventure.Events;
-using NpcAdventure.Internal;
 using StardewValley.Quests;
 using System;
 
@@ -48,7 +47,7 @@ namespace NpcAdventure.Patches
             }
         }
 
-        protected override void Apply(HarmonyInstance harmony)
+        protected override void Apply(Harmony harmony)
         {
             harmony.Patch(
                 original: AccessTools.Method(typeof(Quest), nameof(Quest.questComplete)),

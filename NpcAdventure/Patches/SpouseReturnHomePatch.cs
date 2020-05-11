@@ -1,5 +1,4 @@
-﻿using Harmony;
-using NpcAdventure.Internal;
+﻿using HarmonyLib;
 using NpcAdventure.StateMachine;
 using StardewValley;
 using System;
@@ -31,7 +30,7 @@ namespace NpcAdventure.Patches
             }
         }
 
-        protected override void Apply(HarmonyInstance harmony)
+        protected override void Apply(Harmony harmony)
         {
             harmony.Patch(
                 original: AccessTools.Method(typeof(NPC), nameof(NPC.returnHomeFromFarmPosition)),

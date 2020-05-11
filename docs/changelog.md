@@ -1,5 +1,9 @@
 # Full changelog
 
+## Upcoming release
+
+- Updated compatibility with SMAPI 3.6 and Harmony 2.0
+
 ## 0.12.0 beta "Go out"
 
 Released **22nd May 2020**
