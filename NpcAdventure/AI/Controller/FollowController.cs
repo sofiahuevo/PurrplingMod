@@ -9,7 +9,7 @@ namespace NpcAdventure.AI.Controller
     internal class FollowController : IController
     {
         public const float MOVE_THRESHOLD_DISTANCE = 2.65f;
-        public const float DECELERATE_THRESHOLD = 1.35f;
+        public const float DECELERATE_THRESHOLD = 1.2f;
         public const float DECELERATION = 0.025f;
 
         private Vector2 negativeOne = new Vector2(-1, -1);
@@ -23,6 +23,7 @@ namespace NpcAdventure.AI.Controller
         protected readonly AI_StateMachine ai;
         public Vector2 leaderLastTileCheckPoint;
         private int idleTimer;
+        private bool isRunning;
 
         public virtual bool IsIdle => this.idleTimer == 0;
 
@@ -98,12 +99,19 @@ namespace NpcAdventure.AI.Controller
 
         protected virtual float GetMovementSpeedBasedOnDistance(float distanceFromFarmer)
         {
-            if (distanceFromFarmer > MOVE_THRESHOLD_DISTANCE * Game1.tileSize * 4)
+            if (this.isRunning && distanceFromFarmer < (MOVE_THRESHOLD_DISTANCE + 0.075) * Game1.tileSize)
             {
-                if (this.leader is Farmer farmer && farmer.getMovementSpeed() > 5.28f)
+                this.isRunning = false;
+            }
+
+            if (distanceFromFarmer > MOVE_THRESHOLD_DISTANCE * Game1.tileSize * 3 || this.isRunning)
+            {
+                this.isRunning = true;
+
+                if (this.leader is Farmer farmer && farmer.getMovementSpeed() > 6.28f)
                     return farmer.getMovementSpeed() + 2.65f;
 
-                return 5.28f;
+                return 6.28f;
             }
 
             if (distanceFromFarmer > MOVE_THRESHOLD_DISTANCE * Game1.tileSize)

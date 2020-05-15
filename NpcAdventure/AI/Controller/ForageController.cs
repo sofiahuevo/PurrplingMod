@@ -37,7 +37,7 @@ namespace NpcAdventure.AI.Controller
         public NPC Forager => this.ai.npc;
         public Farmer Leader => this.ai.player;
         public int ForagingLevel => Math.Max(this.Leader.ForagingLevel
-            - (this.Leader.professions.Contains(Farmer.gatherer) ? 0 : 2), 0);
+            - (this.Leader.professions.Contains(Farmer.gatherer) ? 0 : 1), 0);
 
         public ForageController(AI_StateMachine ai, IModEvents events)
         {
@@ -87,9 +87,20 @@ namespace NpcAdventure.AI.Controller
 
             double potentialChance = 0.02 + 1.0 / (this.foragedObjects.Count + 1) + this.Leader.LuckLevel / 100.0 + this.Leader.DailyLuck;
             double boost = this.Leader.professions.Contains(Farmer.gatherer) ? 2.0 : 1.0;
-            double realChance = potentialChance * 0.33 + this.Leader.ForagingLevel * 0.005 * boost;
+            double realChance = potentialChance * 0.33 + (this.ForagingLevel + 1) * 0.005 * boost;
+            double current = this.r.NextDouble();
 
-            if (this.r.NextDouble() < realChance)
+            if (this.ai.Monitor.IsVerbose)
+            {
+                this.ai.Monitor.VerboseLog($"(Pick forage) Companion foraging level: {this.ForagingLevel} " +
+                     $"| potential chance: {potentialChance} " +
+                     $"| boost: {boost} " +
+                     $"| real chance: {realChance} " +
+                     $"| current: {current} " +
+                     $"| passed: {(current < realChance ? "Yes" : "No")}");
+            }
+
+            if (current < realChance)
             {
                 this.PickForageObject(this.targetObject);
             }
@@ -236,11 +247,17 @@ namespace NpcAdventure.AI.Controller
             if (foragedObject == null)
                 return;
 
-            double shareChance = 0.42 + this.Leader.getFriendshipHeartLevelForNPC(this.Forager.Name) * 0.016;
+            double shareChance = 0.42 + this.Leader.getFriendshipHeartLevelForNPC(this.Forager.Name) * 0.032;
+            double current = this.r.NextDouble();
 
             this.Forager.doEmote(Game1.random.NextDouble() < .1f ? 20 : 16);
 
-            if (this.r.NextDouble() < shareChance)
+            if (this.ai.Monitor.IsVerbose)
+            {
+                this.ai.Monitor.VerboseLog($"(Forage share) chance: {shareChance} | current: {current} | passed: {(current < shareChance ? "Yes" : "No")}");
+            }
+
+            if (current < shareChance)
             {
                 this.foragedObjects.Push(foragedObject);
                 this.ai.Monitor.Log($"{this.Forager.Name} wants to share a foraged item with farmer");
