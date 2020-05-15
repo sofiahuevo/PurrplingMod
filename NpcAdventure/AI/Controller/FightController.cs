@@ -479,7 +479,7 @@ namespace NpcAdventure.AI.Controller
             }
 
             this.joystick.NoCharging = false;
-            return 5.28f;
+            return 6.11f;
         }
 
         protected override void PathfindingRemakeCheck()

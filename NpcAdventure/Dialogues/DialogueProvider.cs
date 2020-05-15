@@ -66,10 +66,11 @@ namespace NpcAdventure.Dialogues
         /// </summary>
         public void LoadDialogues()
         {
-            this.dialogueCache = this.contentLoader.LoadStrings($"{this.sourcePrefix}{this.npc.Name}");
+            this.dialogueCache = new Dictionary<string, string>().Concat(
+                this.contentLoader.LoadStrings($"{this.sourcePrefix}{this.npc.Name}"))
+                .ToDictionary(d => d.Key, d => d.Value);
 
             SetupCompanionDialogues(this.npc, this.dialogueCache);
-            Console.Write($"Dialogues for {this.npc.Name} loaded.");
         }
 
         /// <summary>
@@ -79,7 +80,7 @@ namespace NpcAdventure.Dialogues
         /// <param name="key">Probably missing key</param>
         private void ReloadIfLost(string key)
         {
-            if (this.dialogueCache.ContainsKey(key) && !this.npc.Dialogue.ContainsKey(key))
+            if (this.dialogueCache.Count <= 0 || this.dialogueCache.ContainsKey(key) && !this.npc.Dialogue.ContainsKey(key))
             {
                 // Reaload and refresh NPC dialogues only when 
                 // the key is missing in NPC dialogue registry but in pre-loaded cache this key exists.
