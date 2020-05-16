@@ -286,6 +286,13 @@ namespace NpcAdventure.AI.Controller
 
             this.CheckLeaderRadius();
 
+            if (e.IsOneSecond && !Helper.IsValidMonster(this.leader as Monster))
+            {
+                this.leader = null;
+                this.potentialIdle = true;
+                return;
+            }
+
             if (this.fightBubbleCooldown > 0)
                 --this.fightBubbleCooldown;
 
