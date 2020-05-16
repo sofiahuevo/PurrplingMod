@@ -2,6 +2,7 @@
 
 ## Upcoming release
 
+- Fighters don't fight with bones of mummy when mummy was "defeated"
 - Recruited companion run to farmer when they are too far.
 - Optimized companion dialogue fetching and avoid annoing lags while gameplay with recruited companion.
 - Redone events checking (added option to enable check NA's events by patched `GameLocation.checkForEvents()` method - EXPERIMENTAL, to enable switch on `Experimental.UseCheckForEventsPatch` in `config.json`) - this fixes re-enter location for trig NA event if more events in stack to play in location.

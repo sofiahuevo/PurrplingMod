@@ -207,6 +207,9 @@ namespace NpcAdventure.Utils
         /// <returns></returns>
         public static bool IsValidMonster(Monster monster)
         {
+            if (monster == null)
+                return false;
+
             // Invisible monsters are invalid
             if (monster.IsInvisible)
                 return false;
