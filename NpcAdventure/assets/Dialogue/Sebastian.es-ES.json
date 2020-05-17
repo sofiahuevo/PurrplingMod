@@ -1,7 +1,7 @@
 {
   "companionAccepted": "Si, seguro. ¿tienes idea de dónde quieres ir?",
   "companionRejected": "No, gracias.",
-  "companionRejectedNight": "No, lo siento, @. Es muy tarde, pronto voy a acostarme.",
+  "companionRejectedNight": "No, lo siento, @. Es muy tarde, voy a acostarme pronto.",
   "companionDismiss": "Entiendo. Todos tenemos que despedirnos en algún momento.",
   "companionDismissAuto": "Oye, @, me voy ahora. Gracias, esto fué agradable.$1",
   "companionRecruited": "Donde quiera que quieras ir está genial para mi, @.",
@@ -18,12 +18,12 @@
   "companion_Farm_Spouse~1": "Es genial tener todo este espacio para nosotros, a veces solo necesito alejarme de las personas.#$b#Bueno, sí, más que a veces. Me conoces bien.$1",
   "companion_Forest_spring": "Puedo escuchar las ranas desde aquí, les gusta toda esta humedad.#$b#Tal vez intentaré atrapar una...",
   "companion_Forest": "Este es uno de mis lugares favoritos en el valle, especialmente de noche.",
-  "companion_Forest_Dating": "Deberíamos venir aquí por la noche en algún momento, y simplemente pasar el rato, hablar, lo que sea.#$b#Es un sentimiento extraño querer estar cerca de alguien, pero estoy feliz contigo...$4",
+  "companion_Forest_Dating": "Deberíamos venir acá por la noche en algún momento, y simplemente pasar el rato, hablar, lo que sea.#$b#Es un sentimiento extraño querer estar cerca de alguien, pero estoy feliz contigo...$4",
   "companion_Forest_Spouse": "He cambiado desde que nos casamos.#$b#Estar aquí... al principio fue difícil, pero cuando pienso en cuántos años pasé solo en mi sótano, me deprime un poco.#$b#Te amo, @.$4",
   "companion_Mine": "Este lugar parece una mazmorra. Sería un buen escenario para una aventura de 'Crónicas del Solarion'.$7",
-  "companion_Mine~1": "¿Qué tan seguido vienes para acá, @?#$b#Estoy sorprendido, realmente no pensé que esta sería tu escenario.",
+  "companion_Mine~1": "¿Qué tan seguido vienes para acá, @?#$b#Estoy sorprendido, realmente no pensé que este sería tu escenario.",
   "companion_Mine_Dating": "Aquí siempre es agradable y fresco, incluso en verano.#$b#Además, está oscuro. Me gusta.$1",
-  "companion_Mine_Dating~1": "Me alegra que me hayas traído aquí contigo, @. Quiero que estés a salvo.$4",
+  "companion_Mine_Dating~1": "Me alegra que me hayas traido acá, @. Quiero que estés a salvo.$4",
   "companion_Mine_Spouse": "Me gusta aquí. Oscuro, húmedo, espeluznante. Perfecto para un chico como yo",
   "companion_Mine_Spouse~1": "Sé que puedes cuidarte, @, pero no sé qué haría si te pasara algo.#$b#Sin sonar sofocante, pero me encantaría que solo vengas acá cuando estoy contigo.",
   "companion_Mountain": "Ya que estamos acá, ¿por qué no vamos a ver el ferrocarril?",
@@ -32,6 +32,6 @@
   "companion_Town": "¿Quieres detenerte en el salón y jugar al billar? Pero una justa advertencia, te aplastaré.$1",
   "companion_Town~1": "Espero no encontrarnos con nadie que quiera hablar...",
   "companion_Town_Dating": "Realmente me gustaría tomar una taza de café fuerte en este momento. ¿Quieres pasar por el salón?",
-  "companion_Town_Dating~1": "Los pueblos pequeños tienen sus altibajos.#$b#Todos te conocen y hay más presión para socializar, pero también hay muchas áreas tranquilas para estar solo.#$b#Todavía me gustaría mudarme a la ciudad, pero a veces me pregunto si eso sería lo mejor para mí...$2",
+  "companion_Town_Dating~1": "Los pueblos pequeños tienen sus altibajos.#$b#Todos te conocen y hay más presión por socializar, pero también hay muchas áreas tranquilas para estar solo.#$b#Todavía me gustaría mudarme a la ciudad, pero a veces me pregunto si eso sería lo mejor para mí...$2",
   "companion_Town_Spouse": "Sabes que necesito mi espacio, pero me alegro de que aún pasemos tiempo así juntos. Espero que lo sepas.$4"
 }
