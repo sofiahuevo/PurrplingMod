@@ -23,8 +23,8 @@ namespace NpcAdventure.Model
         public bool FightThruCompanion { get; set; } = true;
         // from version 0.16.0 will be removed and enabled hard
         public bool UseCheckForEventsPatch { get; set; } = true;
-
         public bool AllowEntryLockedCompanionHouse { get; set; } = true;
+        public bool UseAsk2FollowCursor { get; set; } = true;
 
         public class ExperimentalFeatures
         {    

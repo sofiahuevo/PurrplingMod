@@ -2,6 +2,7 @@
 
 ## Upcoming release
 
+- Added new hint cursor (on NPC mouse hover) for ask to follow dialog
 - Fixed possible exception in Abigail's reaction on interaction with her wardrobe in bathroom.
 - Default swords for companions in CompanionDispositions are file are now defined by their name (This adds support for custom swords)
 - Player can entry companion's house any time when this companion is recruited.
