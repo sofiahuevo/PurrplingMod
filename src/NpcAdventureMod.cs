@@ -9,6 +9,7 @@ using NpcAdventure.HUD;
 using NpcAdventure.Compatibility;
 using NpcAdventure.Story;
 using NpcAdventure.Story.Scenario;
+using NpcAdventure.Internal.Assets;
 using PurrplingCore.Patching;
 using QuestFramework.Api;
 
@@ -46,14 +47,22 @@ namespace NpcAdventure
             {
                 this.Monitor.Log("Android support is an experimental feature, may cause some problems. Before you report a bug please content me on my discord https://discord.gg/wnEDqKF Thank you.", LogLevel.Alert);
             }
-
-            Commander.Register(this);
-
+            
+            this.RegisterAssetEditors(helper);
             this.ContentPackManager = new ContentPackManager(this.Monitor, this.Config.EnableDebug);
             this.ContentLoader = new ContentLoader(helper, this.ContentPackManager, this.Monitor);
             this.Patcher = new GamePatcher(this.ModManifest.UniqueID, this.Monitor, this.Config.EnableDebug);
             this.RegisterEvents(helper.Events);
             this.ContentPackManager.LoadContentPacks(helper.ContentPacks.GetOwned());
+            Commander.Register(this);
+        }
+
+        private void RegisterAssetEditors(IModHelper helper)
+        {
+            if (Constants.TargetPlatform != GamePlatform.Android && this.Config.UseAsk2FollowCursor)
+            {
+                helper.Content.AssetEditors.Add(new AskToFollowCursor(helper.Content));
+            }
         }
 
         private void RegisterEvents(IModEvents events)

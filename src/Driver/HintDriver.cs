@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using NpcAdventure.Internal.Assets;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -13,6 +14,7 @@ namespace NpcAdventure.Driver
             NONE,
             DIALOGUE,
             GIFT,
+            ASK2FOLLOW,
         }
 
         public event EventHandler<CheckHintArgs> CheckHint;
@@ -74,6 +76,9 @@ namespace NpcAdventure.Driver
                     break;
                 case Hint.GIFT:
                     Game1.mouseCursor = 3;
+                    break;
+                case Hint.ASK2FOLLOW:
+                    Game1.mouseCursor = AskToFollowCursor.TILE_POSITION;
                     break;
                 default:
                     Game1.mouseCursor = 0;
