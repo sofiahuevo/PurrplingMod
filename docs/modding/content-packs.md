@@ -65,7 +65,7 @@ Before load content pack assets all base mod's assets are loaded.
 
 | Field                | Required? | Means                                                                                                 |
 | -------------------- | --------- | ----------------------------------------------------------------------------------------------------- |
-| `Format`             | Yes       | The format version. You should always use the latest version (currently 1.2) to use the latest features and avoid obsolete behavior. Old formats could not be supported in current mod version.   |
+| `Format`             | Yes       | The format version. You should always use the latest version (currently 1.3) to use the latest features and avoid obsolete behavior. Old formats could not be supported in current mod version.   |
 | `Changes`            | Yes       | The changes you want to make. Each entry is called a patch, and describes a specific action to perform: Edit json file or load new  |
 
 Under key `Changes` we must define content definitions. It's a list of dicts with these keys:
