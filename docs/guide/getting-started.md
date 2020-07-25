@@ -43,7 +43,7 @@ You can enable this experimental feature be set `true` for `Experimental.UseSwim
 
 ## Upgrading to 0.14.0 and newer (from 0.13.x and older)
 
-NPC Adventures is now based on [Quest Framework](https://www.nexusmods.com/stardewvalley/mods/6414). From version 0.14.0 this framework is dependency and is required to run NPC Adventures. You must [Download & Install Quest Framework](https://www.nexusmods.com/stardewvalley/mods/6414).
+NPC Adventures is now based on [Quest Framework](https://www.nexusmods.com/stardewvalley/mods/6414). From version 0.14.0 this framework is dependency and is required to run NPC Adventures. You must [download and install Quest Framework](https://www.nexusmods.com/stardewvalley/mods/6414).
 
 ## Upgrading to 0.13.0 and newer (from 0.12.0 and older)
 
