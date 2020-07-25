@@ -1,5 +1,12 @@
 # Full changelog
 
+## Upcoming release
+
+- Movement controll was moved to PurrplingCore (this core part of NA is available for other SMAPI modders now without requiring NA)
+- Mod now is based on Quest Framework (Quest Framework mod is required)
+- For development project requires PurrplingCore shared VS project (for devs only)
+- Changed project structure (for devs only)
+
 ## 0.13.0 beta "Useless mod"
 
 - Removed lovely glowing when farmer recruit married spouse.
