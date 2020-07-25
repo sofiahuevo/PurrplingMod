@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PurrplingCore.Internal;
 
 namespace NpcAdventure.AI.Controller
 {
-    internal interface IController : Internal.IUpdateable
+    internal interface IController : IUpdateable
     {
         bool IsIdle { get; }
         void Activate();

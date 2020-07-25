@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace NpcAdventure.AI.Controller
 {
-    internal class FightController : FollowController, Internal.IDrawable
+    internal class FightController : FollowController, PurrplingCore.Internal.IDrawable
     {
         public const float DEFEND_TILE_RADIUS = 6f;
         public const float DEFEND_TILE_RADIUS_WARRIOR = 9f;

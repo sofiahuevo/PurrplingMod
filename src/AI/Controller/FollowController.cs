@@ -3,6 +3,7 @@ using StardewValley;
 using StardewModdingAPI.Events;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
+using PurrplingCore.Movement;
 
 namespace NpcAdventure.AI.Controller
 {
@@ -17,7 +18,7 @@ namespace NpcAdventure.AI.Controller
         public Character leader;
         public NPC follower;
         protected PathFinder pathFinder;
-        protected FollowJoystick joystick;
+        protected NpcMovementController joystick;
         public int followingLostTime = 0;
         public Queue<Vector2> pathToFollow;
         protected readonly AI_StateMachine ai;
@@ -34,13 +35,13 @@ namespace NpcAdventure.AI.Controller
             this.leader = ai.player;
             this.follower = ai.npc;
             this.pathFinder = new PathFinder(this.follower.currentLocation, this.follower, this.leader);
-            this.joystick = new FollowJoystick(this.follower, this.pathFinder);
+            this.joystick = new NpcMovementController(this.follower, this.pathFinder);
 
             this.ai.LocationChanged += this.Ai_LocationChanged;
             this.joystick.Move += this.OnMove;
         }
 
-        private void OnMove(object sender, FollowJoystick.MoveEventArgs e)
+        private void OnMove(object sender, NpcMovementController.MoveEventArgs e)
         {
             this.idleTimer = e.IsLastFrame ? Game1.random.Next(480, 840) : -1;
         }

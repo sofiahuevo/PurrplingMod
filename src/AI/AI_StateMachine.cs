@@ -1,10 +1,11 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using NpcAdventure.AI.Controller;
 using NpcAdventure.HUD;
-using NpcAdventure.Internal;
 using NpcAdventure.Loader;
 using NpcAdventure.StateMachine;
 using NpcAdventure.Utils;
+using PurrplingCore.Internal;
+using PurrplingCore.Timing;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -17,7 +18,7 @@ namespace NpcAdventure.AI
     /// <summary>
     /// State machine for companion AI
     /// </summary>
-    internal partial class  AI_StateMachine : Internal.IUpdateable, Internal.IDrawable
+    internal partial class  AI_StateMachine : IUpdateable, IDrawable
     {
         public enum State
         {
@@ -27,7 +28,6 @@ namespace NpcAdventure.AI
             FORAGE,
         }
 
-        private const float MONSTER_DISTANCE = 9f;
         private const string FORAGING_COOLDOWN = "foragingCooldown";
         private const string CHANGE_STATE_COOLDOWN = "changeStateCooldown";
         private const string SCARED_COOLDOWN = "scaredCooldown";
@@ -38,8 +38,8 @@ namespace NpcAdventure.AI
         internal IMonitor Monitor { get; private set; }
 
         private readonly IContentLoader loader;
+        private readonly Countdown cooldown = new Countdown();
         private Dictionary<State, IController> controllers;
-        private Countdown cooldown = new Countdown();
 
         internal AI_StateMachine(CompanionStateMachine csm, CompanionDisplay hud, IModEvents events, IMonitor monitor)
         {
@@ -290,7 +290,7 @@ namespace NpcAdventure.AI
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            if (Context.IsWorldReady && this.CurrentController is Internal.IDrawable drawableController)
+            if (Context.IsWorldReady && this.CurrentController is IDrawable drawableController)
             {
                 drawableController.Draw(spriteBatch);
             }
