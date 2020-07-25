@@ -5,7 +5,7 @@ using StardewValley;
 
 namespace NpcAdventure.HUD
 {
-    class CompanionSkill : Internal.IDrawable, Internal.IUpdateable
+    class CompanionSkill : PurrplingCore.Internal.IDrawable, PurrplingCore.Internal.IUpdateable
     {
         private Vector2 framePosition;
         private Vector2 iconPosition;

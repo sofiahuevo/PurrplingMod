@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace NpcAdventure.HUD
 {
-    class CompanionDisplay : Internal.IDrawable, Internal.IUpdateable
+    class CompanionDisplay : PurrplingCore.Internal.IDrawable, PurrplingCore.Internal.IUpdateable
     {
         public Dictionary<string, CompanionSkill> Skills { get; }
         public Dictionary<SButton, ClickableTextureComponent> Keys { get; }

@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
-using NpcAdventure.Internal;
 using NpcAdventure.Loader;
 using NpcAdventure.Utils;
 using StardewModdingAPI;
@@ -188,7 +184,7 @@ namespace NpcAdventure.AI.Controller
     /// </summary>
     partial class IdleController
     {
-        private class IdleBehavior : Internal.IUpdateable
+        private class IdleBehavior : PurrplingCore.Internal.IUpdateable
         {
             protected readonly IdleController controller;
             protected readonly NPC npc;

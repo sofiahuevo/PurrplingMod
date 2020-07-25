@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using StardewValley.Locations;
 using StardewModdingAPI.Utilities;
+using PurrplingCore.Movement;
 
 namespace NpcAdventure.AI.Controller
 {
@@ -17,7 +18,7 @@ namespace NpcAdventure.AI.Controller
     {
         private readonly AI_StateMachine ai;
         private readonly PathFinder pathFinder;
-        private readonly FollowJoystick joystick;
+        private readonly NpcMovementController joystick;
         private readonly List<TerrainFeature> ignoreList;
         private readonly Random r;
         private TerrainFeature targetObject;
@@ -34,7 +35,7 @@ namespace NpcAdventure.AI.Controller
             this.ai = ai;
             this.ignoreList = new List<TerrainFeature>();
             this.pathFinder = new PathFinder(this.Forager.currentLocation, this.Forager, this.ai.player);
-            this.joystick = new FollowJoystick(this.Forager, this.pathFinder);
+            this.joystick = new NpcMovementController(this.Forager, this.pathFinder);
             this.joystick.EndOfRouteReached += this.Joystick_EndOfRouteReached;
             this.ai.LocationChanged += this.Ai_LocationChanged;
             this.r = new Random((int)Game1.uniqueIDForThisGame + (int)Game1.stats.DaysPlayed);
@@ -74,7 +75,7 @@ namespace NpcAdventure.AI.Controller
             }
         }
 
-        private void Joystick_EndOfRouteReached(object sender, FollowJoystick.EndOfRouteReachedEventArgs e)
+        private void Joystick_EndOfRouteReached(object sender, NpcMovementController.EndOfRouteReachedEventArgs e)
         {
             if (this.ai.CurrentController != this)
                 return;

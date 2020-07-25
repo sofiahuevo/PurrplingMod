@@ -10,9 +10,7 @@ using NpcAdventure.Compatibility;
 using NpcAdventure.Story;
 using NpcAdventure.Story.Scenario;
 using PurrplingCore.Patching;
-using System.Collections.Generic;
 using QuestFramework.Api;
-using QuestFramework.Events;
 
 namespace NpcAdventure
 {
