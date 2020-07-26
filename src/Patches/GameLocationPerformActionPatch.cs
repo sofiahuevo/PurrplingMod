@@ -34,9 +34,9 @@ namespace NpcAdventure.Patches
                     string[] strArray = action.Split(' ');
                     string s = strArray[0];
 
-                    if (recruitedCsm != null && s == "Message")
+                    if (recruitedCsm != null && strArray.Length >= 2 && s == "Message")
                     {
-                        var key = action.Substring(action.IndexOf('"'))?.Replace("\"", "");
+                        var key = strArray[1].Replace("\"", "");
 
                         if (key != null && recruitedCsm.Dialogues.GetRawDialogue($"companionReaction_{key}", out var dialogue))
                         {
