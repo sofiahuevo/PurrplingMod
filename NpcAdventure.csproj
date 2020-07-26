@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>NpcAdventure</AssemblyName>
     <RootNamespace>NpcAdventure</RootNamespace>
-    <Version>0.13.0-dev</Version>
+    <Version>0.14.0</Version>
     <TargetFramework>net452</TargetFramework>
     <Platforms>x86</Platforms>
     <PlatformTarget>x86</PlatformTarget>

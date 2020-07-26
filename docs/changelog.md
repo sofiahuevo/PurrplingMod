@@ -1,6 +1,8 @@
 # Full changelog
 
-## Upcoming release
+## 0.14.0 "Major Minority"
+
+Released 26th July 2020
 
 - Added new hint cursor (on NPC mouse hover) for ask to follow dialog
 - Fixed possible exception in Abigail's reaction on interaction with her wardrobe in bathroom.
@@ -11,6 +13,8 @@
 - Internal changes: Changed project structure, move some common parts to PurrplingCore shared VS project (for NA devs only)
 
 ## 0.13.0 beta "Useless mod"
+
+Released 21st June 2020
 
 - Removed lovely glowing when farmer recruit married spouse.
 - Added random chance for quality forages
