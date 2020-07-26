@@ -2,6 +2,7 @@
 using PurrplingCore.Patching;
 using StardewValley;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NpcAdventure.Patches
@@ -11,10 +12,12 @@ namespace NpcAdventure.Patches
         public override string Name => nameof(GameLocationPerformActionPatch);
 
         private CompanionManager Manager { get; set; }
+        private bool OverriedDoorLock { get; }
 
-        public GameLocationPerformActionPatch(CompanionManager manager)
+        public GameLocationPerformActionPatch(CompanionManager manager, bool overrideDoorLock)
         {
             this.Manager = manager;
+            this.OverriedDoorLock = overrideDoorLock;
             Instance = this;
         }
 
@@ -22,7 +25,7 @@ namespace NpcAdventure.Patches
         {
             try
             {
-                if (action != null && who.IsLocalPlayer)
+                if (action != null && who.IsLocalPlayer && action.StartsWith("Message "))
                 {
                     var recruitedCsm = Instance.Manager
                         .PossibleCompanions
@@ -56,12 +59,59 @@ namespace NpcAdventure.Patches
             }
         }
 
+        private static bool Before_lockedDoorWarp(GameLocation __instance, string[] actionParams)
+        {
+            try
+            {
+                var recruitedCsm = Instance.Manager
+                    .PossibleCompanions
+                    .Values
+                    .FirstOrDefault(csm => csm.CurrentStateFlag == StateMachine.CompanionStateMachine.StateFlag.RECRUITED);
+
+                if (recruitedCsm != null)
+                {
+                    NPC npc = recruitedCsm.Companion;
+                    Dictionary<string, string> dictionary = Game1.content.Load<Dictionary<string, string>>("Data\\NPCDispositions");
+                    
+                    if (!dictionary.ContainsKey(npc.Name))
+                        return true;
+
+                    string pureDefaultMap = dictionary[npc.Name].Split('/')[10].Split(' ')[0];
+                    if (actionParams[3] == pureDefaultMap)
+                    {
+                        Rumble.rumble(0.15f, 200f);
+                        Game1.player.completelyStopAnimatingOrDoingAction();
+                        __instance.playSoundAt("doorClose", Game1.player.getTileLocation());
+                        Game1.warpFarmer(actionParams[3], Convert.ToInt32(actionParams[1]), Convert.ToInt32(actionParams[2]), false);
+
+                        return false;
+                    }
+                }
+
+                return true;
+
+            }
+            catch (Exception e)
+            {
+                Instance.LogFailure(e, nameof(Before_performAction));
+                return true;
+            }
+        }
+
         protected override void Apply(HarmonyInstance harmony)
         {
             harmony.Patch(
                 original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.performAction)),
                 prefix: new HarmonyMethod(typeof(GameLocationPerformActionPatch), nameof(GameLocationPerformActionPatch.Before_performAction))
             );
+
+            if (this.OverriedDoorLock)
+            {
+                harmony.Patch(
+                    original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.lockedDoorWarp)),
+                    prefix: new HarmonyMethod(typeof(GameLocationPerformActionPatch), nameof(GameLocationPerformActionPatch.Before_lockedDoorWarp))
+                );
+            }
         }
     }
 }

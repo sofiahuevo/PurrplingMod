@@ -24,6 +24,8 @@ namespace NpcAdventure.Model
         // from version 0.16.0 will be removed and enabled hard
         public bool UseCheckForEventsPatch { get; set; } = true;
 
+        public bool AllowEntryLockedCompanionHouse { get; set; } = true;
+
         public class ExperimentalFeatures
         {    
             // From version ??? as stable option (enabled by default)

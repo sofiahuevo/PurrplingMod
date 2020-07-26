@@ -2,10 +2,10 @@
 
 ## Upcoming release
 
-- Movement controll was moved to PurrplingCore (this core part of NA is available for other SMAPI modders now without requiring NA)
-- Mod now is based on Quest Framework (Quest Framework mod is required)
-- For development project requires PurrplingCore shared VS project (for devs only)
-- Changed project structure (for devs only)
+- Player can entry companion's house any time when this companion is recruited.
+- Prepare for upcoming features: Mod now is based on Quest Framework (Quest Framework mod is required)
+- Movement control was exposed in PurrplingCore for other SMAPI modders without requiring NA (for SMAPI mods devs)
+- Internal changes: Changed project structure, move some common parts to PurrplingCore shared VS project (for NA devs only)
 
 ## 0.13.0 beta "Useless mod"
 
