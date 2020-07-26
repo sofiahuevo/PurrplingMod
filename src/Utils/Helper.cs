@@ -116,6 +116,23 @@ namespace NpcAdventure.Utils
             return "Sunny";
         }
 
+        public static int GetSwordId(string swordIdName)
+        {
+            Dictionary<int, string> dictionary = Game1.content.Load<Dictionary<int, string>>("Data\\weapons");
+
+            if (int.TryParse(swordIdName, out int id))
+                return dictionary.Keys.Contains(id) && dictionary[id].Split('/')[8] != "4" ? id : -1;
+
+            var swordData = from s in dictionary
+                            where s.Value.StartsWith($"{swordIdName}/") && dictionary[id].Split('/')[8] != "4"
+                            select s.Key;
+
+            if (swordData.Any())
+                return swordData.First();
+
+            return -1;
+        }
+
         public static bool IsWalkableTile(GameLocation l, Vector2 tile)
         {
             StardewValley.Object o = l.getObjectAtTile((int)tile.X, (int)tile.Y);

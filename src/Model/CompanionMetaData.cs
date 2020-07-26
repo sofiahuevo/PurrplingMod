@@ -1,8 +1,6 @@
-﻿using System;
+﻿using NpcAdventure.Utils;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NpcAdventure.Model
 {
@@ -22,7 +20,7 @@ namespace NpcAdventure.Model
             this.Availability = parts[2];
             this.MinimumHearts = int.Parse(parts[3]);
             this.Price = int.Parse(parts[4]);
-            this.Sword = int.Parse(parts[5]);
+            this.Sword = Helper.GetSwordId(parts[5]);
         }
 
         public string Recruitable { get; private set; }
