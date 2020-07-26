@@ -2,6 +2,7 @@
 
 ## Upcoming release
 
+- Default swords for companions in CompanionDispositions are file are now defined by their name (This adds support for custom swords)
 - Player can entry companion's house any time when this companion is recruited.
 - Prepare for upcoming features: Mod now is based on Quest Framework (Quest Framework mod is required)
 - Movement control was exposed in PurrplingCore for other SMAPI modders without requiring NA (for SMAPI mods devs)
