@@ -1,5 +1,11 @@
 # Full changelog
 
+## 0.14.1 "Major Minority"
+
+Released 27th July 2020
+
+- Try to fix cursor fog in mines
+
 ## 0.14.0 "Major Minority"
 
 Released 26th July 2020
