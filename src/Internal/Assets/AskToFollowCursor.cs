@@ -6,7 +6,7 @@ namespace NpcAdventure.Internal.Assets
 {
     class AskToFollowCursor : IAssetEditor
     {
-        public const int TILE_POSITION = 131;
+        public const int TILE_POSITION = 50;
         private readonly Texture2D cursor;
 
         public AskToFollowCursor(IContentHelper helper)
