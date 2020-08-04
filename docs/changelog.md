@@ -1,5 +1,9 @@
 # Full changelog
 
+## Upcoming version
+
+- Fixed log name for lockedDoorWarp error case
+
 ## 0.14.1 "Major Minority"
 
 Released 27th July 2020

@@ -93,7 +93,7 @@ namespace NpcAdventure.Patches
             }
             catch (Exception e)
             {
-                Instance.LogFailure(e, nameof(Before_performAction));
+                Instance.LogFailure(e, nameof(Before_lockedDoorWarp));
                 return true;
             }
         }
